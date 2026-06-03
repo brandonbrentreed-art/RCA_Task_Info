@@ -1,0 +1,149 @@
+/* ===== Pivot Timeline ===== */
+
+.pivot-wrapper {
+  width: 100%;
+  height: 100%;
+  border: var(--table-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--color-white);
+}
+
+.pivot-scroll {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.pivot-grid {
+  display: grid;
+  min-width: max-content;
+}
+
+/* Cells */
+.pivot-cell {
+  padding: var(--spacing-2) var(--spacing-3);
+  border-bottom: var(--table-border);
+  border-right: var(--table-border);
+  font-size: var(--text-body2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  justify-content: center;
+}
+
+/* Header */
+.pivot-header {
+  background: var(--color-grey-100);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-grey);
+  text-align: center;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  border-bottom: var(--table-border);
+}
+
+.pivot-corner {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--color-grey-100);
+  color: var(--color-navy);
+  border-right: var(--table-border);
+}
+
+/* Row labels (Task info) */
+.pivot-row-label {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--color-white);
+  color: var(--color-navy);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-caption);
+  white-space: nowrap;
+  border-right: var(--table-border);
+}
+
+.pivot-row-id {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--text-caption);
+  color: var(--color-navy);
+}
+
+.pivot-row-meta {
+  font-size: 0.625rem;
+  color: var(--color-grey-light);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: 0.02em;
+}
+
+.pivot-corner-sub {
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-regular);
+  color: var(--color-grey-light);
+}
+
+/* Data cells */
+.pivot-data {
+  min-height: var(--spacing-10);
+  background: var(--color-white);
+  transition: background var(--transition-fast);
+}
+
+.pivot-data:hover {
+  background: var(--color-grey-100);
+}
+
+.pivot-data--changed {
+  background: rgba(237, 108, 2, 0.06);
+  border-left: var(--spacing-1) solid var(--color-warning);
+}
+
+/* Status badge */
+.pivot-status {
+  display: inline-block;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius);
+  color: var(--color-white);
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
+  width: fit-content;
+}
+
+/* Pin */
+.pivot-tech {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+  font-size: 0.6875rem;
+}
+
+/* Est Start */
+.pivot-wm {
+  color: var(--color-green);
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-medium);
+}
+
+/* SLA */
+.pivot-sla {
+  font-size: 0.625rem;
+  font-weight: var(--font-weight-medium);
+}
+
+/* Changes */
+.pivot-changes {
+  display: flex;
+  flex-direction: column;
+}
+
+.pivot-change {
+  font-size: 0.5625rem;
+  color: var(--color-warning);
+  font-weight: var(--font-weight-medium);
+}

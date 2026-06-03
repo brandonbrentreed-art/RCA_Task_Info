@@ -13,21 +13,120 @@
   box-sizing: border-box;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: var(--font-family);
   font-size: var(--text-body1);
+  font-weight: var(--font-weight-regular);
   line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
   color: var(--color-navy);
-  background: var(--color-grey-100);
-  min-height: 100vh;
+  background: var(--color-page-bg);
+  padding: var(--spacing-6);
+  padding-top: var(--spacing-20);
 }
 
+/* Main wrapper */
+.main-content {
+  height: 100%;
+}
+
+/* App panel — the white defined container */
 #app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: var(--spacing-8) var(--spacing-4);
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  border: 1px solid var(--color-grey-200);
+  padding: var(--spacing-6) var(--spacing-8);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
+/* Header area */
 header {
-  margin-bottom: var(--spacing-6);
+  flex-shrink: 0;
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--color-divider);
+  margin-bottom: var(--spacing-4);
+}
+
+/* Query bar */
+.query-bar {
+  flex-shrink: 0;
+  margin-bottom: var(--spacing-4);
+}
+
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+/* Results fills remaining space */
+.results-area {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  border-radius: var(--radius);
+  position: relative;
+}
+
+/* Icon buttons (MUI style) */
+.icon-btn {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--color-grey);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.icon-btn:hover {
+  background: rgba(20, 32, 50, 0.08);
+  color: var(--color-navy);
+}
+.icon-btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Expandable search (MUI style) */
+.search-expand {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.search-input {
+  width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  color: var(--color-navy);
+  background: transparent;
+  outline: none;
+  transition: width var(--transition-standard), padding var(--transition-standard), border-color var(--transition-standard);
+}
+
+.search-expand.active .search-input {
+  width: 200px;
+  padding: var(--spacing-2) var(--spacing-1);
+  border-bottom-color: var(--color-blue);
+}
+
+.search-input::placeholder {
+  color: var(--color-grey-light);
 }

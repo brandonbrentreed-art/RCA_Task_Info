@@ -16,6 +16,7 @@
   --color-grey-100: #f5f5f5;
   --color-grey-200: #e0e0e0;
   --color-grey-300: #bdbdbd;
+  --color-page-bg: #e8eaed;
   --color-divider: rgba(20, 32, 50, 0.12);
   --color-error: #d32f2f;
   --color-warning: #ed6c02;
@@ -49,6 +50,7 @@
   --spacing-6: 24px;
   --spacing-8: 32px;
   --spacing-10: 40px;
+  --spacing-20: 80px;
 
   /* ===== Shape ===== */
   --radius: 2px;
@@ -61,4 +63,7 @@
   /* ===== Transitions ===== */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== Table border ===== */
+  --table-border: 1px solid var(--color-grey-300);
 }

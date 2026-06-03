@@ -2,10 +2,10 @@
 
 .table-wrapper {
   width: 100%;
-  overflow-x: auto;
+  overflow: hidden;
   background: var(--color-white);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-1);
+  border: var(--table-border);
 }
 
 .table {
@@ -18,7 +18,9 @@
 .table td {
   padding: var(--spacing-3) var(--spacing-4);
   text-align: left;
-  border-bottom: 1px solid var(--color-divider);
+  border: var(--table-border);
+  border-top: none;
+  border-left: none;
 }
 
 .table th {

@@ -6,21 +6,24 @@
   top: var(--spacing-4);
   left: var(--spacing-4);
   z-index: 150;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-navy);
-  color: var(--color-white);
+  background: transparent;
+  color: var(--color-navy);
   border: none;
-  border-radius: var(--radius);
-  font-size: 20px;
-  line-height: 1;
+  border-radius: 50%;
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.nav-trigger:hover { background: var(--color-navy-light); }
+.nav-trigger:hover { background: rgba(20, 32, 50, 0.08); }
+
+.nav-trigger svg {
+  width: 28px;
+  height: 28px;
+}
 
 /* Backdrop overlay when nav is open */
 .nav-overlay {
@@ -70,18 +73,21 @@
   background: none;
   border: none;
   color: var(--color-white);
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  line-height: 1;
   cursor: pointer;
-  border-radius: var(--radius);
+  border-radius: 50%;
   transition: background var(--transition-fast);
 }
-.nav-close:hover { background: rgba(255, 255, 255, 0.1); }
+.nav-close:hover { background: rgba(255, 255, 255, 0.12); }
+
+.nav-close svg {
+  width: 24px;
+  height: 24px;
+}
 
 .nav-brand-logo {
   width: 100%;
@@ -139,12 +145,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: var(--text-body1);
   line-height: 1;
   text-align: center;
 }
 
-/* Main content - full width, pad top for trigger */
-.main-content {
-  padding-top: 72px;
-}

@@ -1,0 +1,117 @@
+/* ===== Tooltip Component ===== */
+
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  bottom: auto;
+  top: 100%;
+  background: var(--color-navy);
+  color: var(--color-white);
+  font-family: var(--font-family);
+  font-size: 11px;
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  padding: 4px 8px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  z-index: 300;
+}
+
+.tooltip::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 100%;
+  border: 5px solid transparent;
+  border-bottom-color: var(--color-navy);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+  z-index: 300;
+}
+
+.tooltip:hover::after,
+.tooltip:hover::before {
+  opacity: 1;
+}
+
+.tooltip:hover::after {
+  transform: translateX(-50%) translateY(8px);
+}
+
+/* -- Placement: top -- */
+.tooltip-top::after {
+  top: auto;
+  bottom: 100%;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+.tooltip-top::before {
+  top: auto;
+  bottom: 100%;
+  border: 5px solid transparent;
+  border-top-color: var(--color-navy);
+  border-bottom-color: transparent;
+}
+
+.tooltip-top:hover::after {
+  transform: translateX(-50%) translateY(-8px);
+}
+
+/* -- Placement: left -- */
+.tooltip-left::after {
+  top: 50%;
+  left: auto;
+  right: 100%;
+  bottom: auto;
+  transform: translateY(-50%) translateX(-4px);
+}
+
+.tooltip-left::before {
+  top: 50%;
+  left: auto;
+  right: 100%;
+  bottom: auto;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-left-color: var(--color-navy);
+  border-bottom-color: transparent;
+}
+
+.tooltip-left:hover::after {
+  transform: translateY(-50%) translateX(-8px);
+}
+
+/* -- Placement: right -- */
+.tooltip-right::after {
+  top: 50%;
+  left: 100%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%) translateX(4px);
+}
+
+.tooltip-right::before {
+  top: 50%;
+  left: 100%;
+  right: auto;
+  bottom: auto;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--color-navy);
+  border-bottom-color: transparent;
+}
+
+.tooltip-right:hover::after {
+  transform: translateY(-50%) translateX(8px);
+}
