@@ -11,22 +11,30 @@
 </head>
 <body>
 
-  <!-- Sidebar -->
+  <!-- Hamburger trigger - always visible -->
+  <button class="nav-trigger" aria-label="Open menu">☰</button>
+
+  <!-- Overlay -->
+  <div class="nav-overlay"></div>
+
+  <!-- Sidebar (off-canvas) -->
   <nav class="nav-sidebar">
     <div class="nav-brand">
-      <span class="nav-icon">◆</span>
-      <span class="nav-label">RCA Task Info</span>
-      <button class="nav-toggle" aria-label="Toggle sidebar">☰</button>
+      <button class="nav-close" aria-label="Close menu">✕</button>
+      <img class="nav-brand-logo" src="assets/Brand_Logo.png" alt="Brand Logo">
+    </div>
+    <div class="nav-header">
+      <span class="nav-brand-label">RCA Task Info</span>
     </div>
     <ul class="nav-items">
-      <li class="nav-item"><a href="#" class="active"><span class="nav-icon">▣</span><span class="nav-label">Dashboard</span></a></li>
-      <li class="nav-item"><a href="#"><span class="nav-icon">◎</span><span class="nav-label">Tasks</span></a></li>
-      <li class="nav-item"><a href="#"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></a></li>
+      <li class="nav-item"><a href="#" class="active"><span class="nav-icon">▣</span>Dashboard</a></li>
+      <li class="nav-item"><a href="#"><span class="nav-icon">◎</span>Tasks</a></li>
+      <li class="nav-item"><a href="#"><span class="nav-icon">⚙</span>Settings</a></li>
     </ul>
   </nav>
 
   <!-- Main Content -->
-  <div class="main-with-sidebar">
+  <div class="main-content">
     <div id="app">
       <header class="flex justify-between items-center">
         <h1>Dashboard</h1>

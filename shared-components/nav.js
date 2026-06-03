@@ -1,15 +1,29 @@
 "use strict";
 
 function initNav() {
+  const trigger = document.querySelector(".nav-trigger");
   const sidebar = document.querySelector(".nav-sidebar");
-  const toggle = document.querySelector(".nav-toggle");
-  const main = document.querySelector(".main-with-sidebar");
+  const overlay = document.querySelector(".nav-overlay");
+  const close = document.querySelector(".nav-close");
 
-  if (!sidebar || !toggle) return;
+  if (!trigger || !sidebar) return;
 
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("collapsed");
-    if (main) main.classList.toggle("sidebar-collapsed");
+  function openNav() {
+    sidebar.classList.add("open");
+    if (overlay) overlay.classList.add("open");
+  }
+
+  function closeNav() {
+    sidebar.classList.remove("open");
+    if (overlay) overlay.classList.remove("open");
+  }
+
+  trigger.addEventListener("click", openNav);
+  if (close) close.addEventListener("click", closeNav);
+  if (overlay) overlay.addEventListener("click", closeNav);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && sidebar.classList.contains("open")) closeNav();
   });
 }
 
