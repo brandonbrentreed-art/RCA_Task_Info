@@ -1,0 +1,98 @@
+/* ===== Base Components ===== */
+
+/* -- Button -- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  line-height: 1.75;
+}
+
+.btn-primary {
+  background: var(--color-blue);
+  color: var(--color-white);
+}
+.btn-primary:hover { background: var(--color-blue-dark); box-shadow: var(--shadow-1); }
+
+.btn-success {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+.btn-success:hover { background: var(--color-green-dark); box-shadow: var(--shadow-1); }
+
+.btn-outlined {
+  background: transparent;
+  border: 1px solid var(--color-blue);
+  color: var(--color-blue);
+}
+.btn-outlined:hover { background: rgba(84, 136, 199, 0.08); }
+
+.btn-text {
+  background: transparent;
+  color: var(--color-blue);
+}
+.btn-text:hover { background: rgba(84, 136, 199, 0.08); }
+
+.btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* -- Card -- */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-1);
+  padding: var(--spacing-4);
+  transition: box-shadow var(--transition-standard);
+}
+.card:hover { box-shadow: var(--shadow-2); }
+
+/* -- Input -- */
+.input {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-family: var(--font-family);
+  font-size: var(--text-body1);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  color: var(--color-navy);
+  transition: border-color var(--transition-fast);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px rgba(84, 136, 199, 0.2);
+}
+.input::placeholder { color: var(--color-grey-light); }
+
+/* -- Chip -- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-1) var(--spacing-3);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  border-radius: var(--radius);
+  background: var(--color-grey-200);
+  color: var(--color-navy);
+}
+
+/* -- Divider -- */
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-divider);
+  margin: var(--spacing-4) 0;
+}

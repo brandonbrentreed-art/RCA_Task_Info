@@ -5,16 +5,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RCA Task Info</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="shared-components/nav.css">
+  <link rel="stylesheet" href="shared-components/table.css">
+  <link rel="stylesheet" href="shared-components/modal.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>RCA Task Info</h1>
-    </header>
-    <main>
-      <p>App is ready.</p>
-    </main>
+
+  <!-- Sidebar -->
+  <nav class="nav-sidebar">
+    <div class="nav-brand">
+      <span class="nav-icon">◆</span>
+      <span class="nav-label">RCA Task Info</span>
+      <button class="nav-toggle" aria-label="Toggle sidebar">☰</button>
+    </div>
+    <ul class="nav-items">
+      <li class="nav-item"><a href="#" class="active"><span class="nav-icon">▣</span><span class="nav-label">Dashboard</span></a></li>
+      <li class="nav-item"><a href="#"><span class="nav-icon">◎</span><span class="nav-label">Tasks</span></a></li>
+      <li class="nav-item"><a href="#"><span class="nav-icon">⚙</span><span class="nav-label">Settings</span></a></li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-with-sidebar">
+    <div id="app">
+      <header class="flex justify-between items-center">
+        <h1>Dashboard</h1>
+        <button class="btn btn-primary" onclick="openModal('exampleModal')">New Task</button>
+      </header>
+
+      <!-- Table -->
+      <div class="table-wrapper mt-6">
+        <div class="table-toolbar">
+          <span class="text-h4">Tasks</span>
+        </div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th class="sortable">ID</th>
+              <th class="sortable">Title</th>
+              <th class="sortable">Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>001</td>
+              <td>Sample task</td>
+              <td><span class="chip">Open</span></td>
+              <td>Edit</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="table-pagination">
+          <span>1–1 of 1</span>
+          <button disabled>←</button>
+          <button disabled>→</button>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="exampleModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>New Task</h3>
+        <button class="modal-close">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="flex flex-col gap-4">
+          <div class="field">
+            <label class="label label-required">Title</label>
+            <input class="input" type="text" placeholder="Task title">
+          </div>
+          <div class="field">
+            <label class="label">Description</label>
+            <textarea class="textarea" placeholder="Details..."></textarea>
+          </div>
+          <div class="field">
+            <label class="label">Status</label>
+            <select class="select">
+              <option>Open</option>
+              <option>In Progress</option>
+              <option>Closed</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outlined" onclick="closeModal('exampleModal')">Cancel</button>
+        <button class="btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared-components/nav.js"></script>
+  <script src="shared-components/table.js"></script>
+  <script src="shared-components/modal.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

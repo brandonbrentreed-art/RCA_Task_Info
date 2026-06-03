@@ -1,0 +1,98 @@
+/* ===== Navigation / Sidebar ===== */
+
+.nav-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: var(--color-navy);
+  color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-standard);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.nav-sidebar.collapsed { width: 60px; }
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  font-size: var(--text-body1);
+  font-weight: var(--font-weight-medium);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+.nav-toggle {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  cursor: pointer;
+  padding: var(--spacing-2);
+  margin-left: auto;
+  border-radius: var(--radius);
+  transition: background var(--transition-fast);
+}
+.nav-toggle:hover { background: rgba(255, 255, 255, 0.1); }
+
+.nav-items {
+  list-style: none;
+  flex: 1;
+  padding: var(--spacing-2) 0;
+  overflow-y: auto;
+}
+
+.nav-item a {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: var(--text-body2);
+  white-space: nowrap;
+  border-radius: var(--radius);
+  margin: 0 var(--spacing-2);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.nav-item a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+}
+.nav-item a.active {
+  background: rgba(84, 136, 199, 0.2);
+  color: var(--color-white);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-label {
+  opacity: 1;
+  transition: opacity var(--transition-fast);
+}
+.nav-sidebar.collapsed .nav-label { opacity: 0; }
+
+/* -- Main content offset -- */
+.main-with-sidebar {
+  margin-left: 240px;
+  transition: margin-left var(--transition-standard);
+}
+.main-with-sidebar.sidebar-collapsed { margin-left: 60px; }
+
+@media (max-width: 768px) {
+  .nav-sidebar { width: 60px; }
+  .nav-sidebar .nav-label { opacity: 0; }
+  .main-with-sidebar { margin-left: 60px; }
+}

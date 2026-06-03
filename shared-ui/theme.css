@@ -1,0 +1,64 @@
+:root {
+  /* ===== Brand Palette ===== */
+  --color-white: #FFFFFF;
+  --color-navy: #142032;
+  --color-green: #43B072;
+  --color-blue: #5488C7;
+  --color-grey: #50535A;
+
+  /* ===== Nuance / Extended ===== */
+  --color-navy-light: #1e3350;
+  --color-green-light: #6bc994;
+  --color-green-dark: #2e8a55;
+  --color-blue-light: #7da8d9;
+  --color-blue-dark: #3a6aa3;
+  --color-grey-light: #8a8d93;
+  --color-grey-100: #f5f5f5;
+  --color-grey-200: #e0e0e0;
+  --color-grey-300: #bdbdbd;
+  --color-divider: rgba(20, 32, 50, 0.12);
+  --color-error: #d32f2f;
+  --color-warning: #ed6c02;
+  --color-info: #0288d1;
+  --color-success: #43B072;
+
+  /* ===== Typography (MUI scale) ===== */
+  --font-family: "Roboto", system-ui, -apple-system, sans-serif;
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  --text-h1: 2.125rem;    /* 34px */
+  --text-h2: 1.5rem;      /* 24px */
+  --text-h3: 1.25rem;     /* 20px */
+  --text-h4: 1.125rem;    /* 18px */
+  --text-body1: 1rem;     /* 16px */
+  --text-body2: 0.875rem; /* 14px */
+  --text-caption: 0.75rem;/* 12px */
+
+  --line-height: 1.5;
+  --letter-spacing: 0.00938em;
+
+  /* ===== Spacing (4px base) ===== */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+
+  /* ===== Shape ===== */
+  --radius: 2px;
+
+  /* ===== Shadows (MUI elevation) ===== */
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.14);
+  --shadow-2: 0 3px 6px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.10);
+  --shadow-3: 0 10px 20px rgba(0,0,0,0.10), 0 3px 6px rgba(0,0,0,0.08);
+
+  /* ===== Transitions ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}

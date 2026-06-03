@@ -1,0 +1,64 @@
+/* ===== Typography System ===== */
+
+h1, .text-h1 {
+  font-size: var(--text-h1);
+  font-weight: var(--font-weight-light);
+  line-height: 1.235;
+  letter-spacing: -0.00833em;
+  color: var(--color-navy);
+}
+
+h2, .text-h2 {
+  font-size: var(--text-h2);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.334;
+  letter-spacing: 0;
+  color: var(--color-navy);
+}
+
+h3, .text-h3 {
+  font-size: var(--text-h3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.6;
+  letter-spacing: 0.0075em;
+  color: var(--color-navy);
+}
+
+h4, .text-h4 {
+  font-size: var(--text-h4);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  color: var(--color-navy);
+}
+
+p, .text-body1 {
+  font-size: var(--text-body1);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
+  color: var(--color-grey);
+}
+
+.text-body2 {
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.43;
+  letter-spacing: 0.01071em;
+  color: var(--color-grey);
+}
+
+.text-caption {
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.66;
+  letter-spacing: 0.03333em;
+  color: var(--color-grey-light);
+}
+
+.text-overline {
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.08333em;
+  color: var(--color-grey);
+}
