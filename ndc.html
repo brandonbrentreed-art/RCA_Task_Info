@@ -182,7 +182,7 @@
     let pageSize = 30;
     const pageSizeOptions = [30, 60, 90];
 
-    function showDefault() { location.reload(); }
+    function showDefault() { setTimeout(() => location.reload(), 1500); }
 
     function enableSearch() {
       const btn = document.querySelector('.search-toggle');
