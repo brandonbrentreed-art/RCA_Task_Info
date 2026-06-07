@@ -2,33 +2,34 @@
 
 const TimelineEngine = (() => {
   const INTERVAL_MS = 15 * 60 * 1000;
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   function bucketKey(date) {
-    const floored = new Date(Math.floor(date.getTime() / INTERVAL_MS) * INTERVAL_MS);
-    return floored.toISOString();
+    return Math.floor(date.getTime() / INTERVAL_MS) * INTERVAL_MS;
   }
 
+  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
+
   function formatTime(date) {
-    return date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    return pad2(date.getHours()) + ":" + pad2(date.getMinutes());
   }
 
   function formatDate(date) {
-    return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    return pad2(date.getDate()) + " " + MONTHS[date.getMonth()] + " " + date.getFullYear();
   }
 
   function buildTimeline(rows) {
+    // Bucket by 15-min key (numeric timestamp)
     const buckets = new Map();
-
-    rows.forEach((row) => {
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
       const dt = DataLoader.parseDate(row.RECORD_TIME_BT || row.RECORD_TIME);
-      if (!dt) return;
+      if (!dt) continue;
       const key = bucketKey(dt);
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key).push(row);
-    });
-
-    const intervals = [];
-    let prev = null;
+      let arr = buckets.get(key);
+      if (!arr) { arr = []; buckets.set(key, arr); }
+      arr.push(row);
+    }
 
     const first = rows[0] || {};
     const taskInfo = {
@@ -44,8 +45,13 @@ const TimelineEngine = (() => {
       cugId: first.CUG_ID || ""
     };
 
-    const sortedKeys = Array.from(buckets.keys()).sort();
-    sortedKeys.forEach((key) => {
+    // Sort bucket keys numerically
+    const sortedKeys = Array.from(buckets.keys()).sort((a, b) => a - b);
+    const intervals = new Array(sortedKeys.length);
+    let prev = null;
+
+    for (let k = 0; k < sortedKeys.length; k++) {
+      const key = sortedKeys[k];
       const records = buckets.get(key);
       const latest = records[records.length - 1];
       const dt = new Date(key);
@@ -90,19 +96,20 @@ const TimelineEngine = (() => {
         entry.slaBreached = diff <= 0;
       }
 
-      intervals.push(entry);
+      intervals[k] = entry;
       prev = entry;
-    });
+    }
 
     return { intervals, taskInfo };
   }
 
   function buildMultipleTimelines(jinIds) {
     const results = {};
-    jinIds.forEach((id) => {
+    for (let i = 0; i < jinIds.length; i++) {
+      const id = jinIds[i];
       const rows = DataLoader.queryByJinIds([id]);
       if (rows.length) results[id] = buildTimeline(rows);
-    });
+    }
     return results;
   }
 

@@ -181,8 +181,30 @@
     let page = 0;
     let pageSize = 30;
     const pageSizeOptions = [30, 60, 90];
+    const defaultHTML = content.innerHTML;
+    const defaultClass = content.className;
 
-    function showDefault() { setTimeout(() => location.reload(), 1500); }
+    function showDefault() {
+      content.className = defaultClass;
+      content.innerHTML = defaultHTML;
+      // Re-bind the action buttons
+      document.getElementById('btnUpload').addEventListener('click', () => fileInput.click());
+      document.getElementById('btnCurrent').addEventListener('click', () => { tablePage = 0; showTable('Current Requests', sampleCurrent); });
+      document.getElementById('btnCompleted').addEventListener('click', () => { tablePage = 0; showTable('Completed Requests', sampleCompleted); });
+      document.getElementById('downloadTemplate').addEventListener('click', (e) => {
+        e.preventDefault();
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID','Tech ID']]), 'Template');
+        XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
+      });
+      // Reset search state
+      const btn = document.querySelector('.search-toggle');
+      btn.disabled = true;
+      btn.style.opacity = '0.38';
+      btn.style.pointerEvents = 'none';
+      searchExpand.classList.remove('active','has-value');
+      searchFilter.value = '';
+    }
 
     function enableSearch() {
       const btn = document.querySelector('.search-toggle');

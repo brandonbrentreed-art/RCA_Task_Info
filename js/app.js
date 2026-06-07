@@ -312,20 +312,16 @@ document.addEventListener("DOMContentLoaded", () => {
     showLoader();
 
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
+      const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
+      const offscreen = document.createElement("div");
+      TimelineRenderer.renderAll(timelines, offscreen);
 
-        // Build offscreen then swap in
-        const offscreen = document.createElement("div");
-        TimelineRenderer.renderAll(timelines, offscreen);
-
-        resultsContainer.innerHTML = "";
-        while (offscreen.firstChild) {
-          resultsContainer.appendChild(offscreen.firstChild);
-        }
-        resultsContainer.classList.add("results-ready");
-        filterRows();
-      }, 100);
+      resultsContainer.innerHTML = "";
+      while (offscreen.firstChild) {
+        resultsContainer.appendChild(offscreen.firstChild);
+      }
+      resultsContainer.classList.add("results-ready");
+      filterRows();
     });
   }
 
