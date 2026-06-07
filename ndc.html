@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
+  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');
+  (function(){var h=new Date().getHours(),m=new Date().getMinutes();if(h>19||(h===19&&m>=30)||h<8)document.documentElement.classList.add('ndc-locked');})()</script>
   <link rel="stylesheet" href="shared-ui/theme.css?v=5">
   <link rel="stylesheet" href="shared-ui/typography.css?v=5">
   <link rel="stylesheet" href="shared-ui/components.css?v=5">
@@ -71,6 +72,10 @@
     .ndc-status-item--cutoff svg { color:var(--color-error) !important; }
     .ndc-status-item--cutoff .ndc-status-label { color:var(--color-error); }
     .ndc-action:disabled,.ndc-action[disabled] { opacity:0.38; pointer-events:none; cursor:not-allowed; }
+    .ndc-locked #btnUpload { opacity:0.38; pointer-events:none; cursor:not-allowed; }
+    .ndc-locked .ndc-status-item:last-child { color:var(--color-error); }
+    .ndc-locked .ndc-status-item:last-child svg { color:var(--color-error) !important; }
+    .ndc-locked .ndc-status-item:last-child .ndc-status-label { color:var(--color-error); }
     .ndc-empty { text-align:center; padding:var(--spacing-10); color:var(--color-grey-light); font-size:var(--text-body2); cursor:default; }
   </style>
 </head>
@@ -147,9 +152,9 @@
   </div>
 
   <script src="shared-components/tooltip.js?v=5"></script>
+  <script src="shared-components/notify.js?v=5"></script>
   <script src="shared-components/nav.js?v=5"></script>
   <script src="shared-components/pagination.js?v=5"></script>
-  <script src="shared-components/notify.js?v=5"></script>
   <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js" defer></script>
   <script>
   (function() {
@@ -435,6 +440,7 @@
       const uploadBtn = document.getElementById('btnUpload');
       clockEl.textContent = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
       const locked = isCutoff();
+      document.documentElement.classList.toggle('ndc-locked', locked);
       clockItem.classList.toggle('ndc-status-item--cutoff', locked);
       if (uploadBtn) {
         uploadBtn.disabled = locked;
