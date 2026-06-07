@@ -48,15 +48,38 @@ function initNav() {
   });
 }
 
-// Fade in on page load
-document.addEventListener("DOMContentLoaded", () => {
+function initThemeToggle() {
+  const btn = document.getElementById("themeToggle");
+  if (!btn) return;
+  function updateTooltip() {
+    const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    btn.setAttribute("data-tooltip", isDark ? "Light mode" : "Dark mode");
+  }
+  updateTooltip();
+  btn.addEventListener("click", () => {
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    updateTooltip();
+  });
+}
+
+// Init when ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
+
+function init() {
   document.body.style.opacity = "0";
   requestAnimationFrame(() => {
     document.body.style.transition = "opacity 200ms ease";
     document.body.style.opacity = "1";
   });
   initNav();
-});
+  initThemeToggle();
+}
 
 // Delegated mailto toast — works regardless of load order or dynamic content
 document.addEventListener("click", (e) => {

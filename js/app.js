@@ -11,18 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchFilter = document.getElementById("searchFilter");
   const searchClear = document.getElementById("searchClear");
   const exportBtn = document.getElementById("exportBtn");
-  const themeToggle = document.getElementById("themeToggle");
-
-  // Theme init
-  const savedTheme = localStorage.getItem("theme") || "light";
-  document.documentElement.setAttribute("data-theme", savedTheme);
-
-  themeToggle.addEventListener("click", () => {
-    const current = document.documentElement.getAttribute("data-theme");
-    const next = current === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("theme", next);
-  });
 
   let dataLoaded = false;
   let activeIds = [];
