@@ -26,14 +26,24 @@ function initNav() {
     if (e.key === "Escape" && sidebar.classList.contains("open")) closeNav();
   });
 
-  // Smooth page transitions on nav links
-  document.querySelectorAll(".nav-item a, .home-card").forEach((link) => {
+  // Suppress URL preview on all links and handle navigation via JS
+  document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
-    if (!href || href === "#" || link.classList.contains("active")) return;
+    if (!href) return;
+    if (link.classList.contains("active") || href === "#") { link.removeAttribute("href"); link.style.cursor = href === "#" ? "pointer" : "default"; return; }
+    const isExternal = link.getAttribute("target") === "_blank" || href.startsWith("mailto:") || href.startsWith("http");
+    link.dataset.href = href;
+    link.removeAttribute("href");
+    link.style.cursor = "pointer";
     link.addEventListener("click", (e) => {
       e.preventDefault();
-      document.body.classList.add("page-exit");
-      setTimeout(() => { window.location.href = href; }, 200);
+      if (isExternal) {
+        if (href.startsWith("mailto:")) { window.location.href = href; }
+        else { window.open(href, "_blank"); }
+      } else {
+        document.body.classList.add("page-exit");
+        setTimeout(() => { window.location.href = href; }, 200);
+      }
     });
   });
 }

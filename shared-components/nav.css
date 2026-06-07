@@ -131,6 +131,7 @@
   margin: 0 var(--spacing-2);
   min-height: 40px;
   transition: background var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
 }
 .nav-item a:hover {
   background: var(--nav-hover);
