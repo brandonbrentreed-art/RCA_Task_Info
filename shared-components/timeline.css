@@ -2,17 +2,20 @@
 
 .pivot-wrapper {
   width: 100%;
-  height: 100%;
+  display: flex;
+  flex-direction: column;
   border: var(--table-border);
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--color-white);
+  height: 100%;
 }
 
 .pivot-scroll {
   width: 100%;
-  height: 100%;
+  flex: 1;
   overflow: auto;
+  min-height: 0;
 }
 
 .pivot-grid {
@@ -143,7 +146,6 @@
 
 .pivot-data--changed {
   background: var(--highlight-change);
-  border-left: var(--spacing-1) solid var(--color-warning);
 }
 
 /* Status badge */
@@ -160,11 +162,18 @@
   width: fit-content;
 }
 
-/* Pin */
+/* Tech */
 .pivot-tech {
   font-weight: var(--font-weight-medium);
   color: var(--color-navy);
   font-size: 0.6875rem;
+}
+
+/* Pin Status */
+.pivot-pin {
+  font-size: 0.625rem;
+  color: var(--color-grey);
+  font-style: italic;
 }
 
 /* Est Start */
@@ -190,4 +199,147 @@
   font-size: 0.5625rem;
   color: var(--color-warning);
   font-weight: var(--font-weight-medium);
+}
+
+/* Task ID link */
+.pivot-row-link {
+  color: var(--color-blue);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.pivot-row-link:hover {
+  color: var(--color-navy);
+  text-decoration: underline;
+}
+
+/* Detail Modal */
+.detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+  margin-bottom: var(--content-inset);
+  font-size: var(--text-body2);
+  color: var(--color-grey);
+}
+
+.detail-table-wrapper {
+  border: var(--table-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-caption);
+}
+
+.detail-table th {
+  background: var(--color-grey-100);
+  color: var(--color-navy);
+  font-weight: var(--font-weight-medium);
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: left;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  border: var(--table-border);
+  border-top: none;
+  border-left: none;
+}
+
+.detail-table td {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: var(--table-border);
+  border-top: none;
+  border-left: none;
+  white-space: nowrap;
+}
+
+.detail-row--changed {
+  background: var(--highlight-change);
+}
+
+/* Pagination (MUI style) */
+.pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) var(--content-inset);
+  font-size: var(--text-body2);
+  color: var(--color-grey);
+  border-top: 1px solid var(--color-divider);
+}
+
+.pagination-footer select {
+  padding: var(--spacing-1) var(--spacing-3);
+  padding-right: var(--spacing-6);
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-navy);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2350535A'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-1) center;
+  background-size: 18px;
+}
+
+.pagination-footer select:hover {
+  background-color: var(--hover-overlay);
+}
+
+.pagination-footer select:focus {
+  background-color: var(--hover-primary);
+}
+
+.pagination-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.pagination-footer button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-grey);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.pagination-footer button:hover {
+  background: var(--hover-overlay);
+  color: var(--color-navy);
+}
+
+.pagination-footer button:disabled {
+  opacity: 0.38;
+  cursor: default;
+  background: transparent;
+}
+
+.pagination-footer button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pagination-info {
+  font-size: var(--text-body2);
+  color: var(--color-grey);
 }

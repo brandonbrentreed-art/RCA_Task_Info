@@ -43,8 +43,8 @@ const DataLoader = (() => {
     return snapshots
       .filter((row) => ids.has(row.JIN_ID?.toUpperCase()))
       .sort((a, b) => {
-        const da = parseDate(a.RECORD_TIME);
-        const db = parseDate(b.RECORD_TIME);
+        const da = parseDate(a.RECORD_TIME_BT || a.RECORD_TIME);
+        const db = parseDate(b.RECORD_TIME_BT || b.RECORD_TIME);
         if (!da || !db) return 0;
         return da - db;
       });

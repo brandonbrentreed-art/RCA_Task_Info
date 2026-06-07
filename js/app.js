@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   lockInput();
   setToolbarState(false);
+  renderEmptyTable();
 
   // Search expand toggle
   searchToggle.addEventListener("click", () => {
@@ -106,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dataLoaded || !activeIds.length) return;
 
     const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
-    const headers = ["Task ID", "Skill", "Appt Slot", "Commitment", "Current Status", "Current Pin", "Est Start", "Status Changes", "Tech Changes", "WM Changes"];
+    const headers = ["Task ID", "Skill", "Task Type", "Exchange", "Appt Slot", "Commitment", "Care Level", "CUG", "Current Status", "Pin Status", "Task State", "Current Tech", "Est Start", "Status Changes", "Tech Changes", "WM Changes", "Pin Changes"];
     const rows = [];
 
     Object.keys(timelines).forEach((id) => {
@@ -116,26 +117,35 @@ document.addEventListener("DOMContentLoaded", () => {
       let statusChanges = 0;
       let techChanges = 0;
       let wmChanges = 0;
+      let pinChanges = 0;
 
       intervals.forEach((entry) => {
         entry.changes.forEach((c) => {
           if (c.field === "Status") statusChanges++;
           if (c.field === "Tech") techChanges++;
           if (c.field === "WM") wmChanges++;
+          if (c.field === "Pin") pinChanges++;
         });
       });
 
       rows.push([
         id,
         taskInfo.skillCode,
+        taskInfo.taskType,
+        taskInfo.exchangeGroup,
         taskInfo.appointmentSlot,
         taskInfo.commitmentTime,
+        taskInfo.careLevel,
+        taskInfo.cugId,
         last ? last.status : "",
+        last ? last.pinStatus : "",
+        last ? last.taskState : "",
         last ? (last.techId || "NONE") : "",
         last && last.estimatedStart !== "31/12/9999 00:00" ? last.estimatedStart : "",
         statusChanges,
         techChanges,
-        wmChanges
+        wmChanges,
+        pinChanges
       ]);
     });
 
@@ -187,27 +197,25 @@ document.addEventListener("DOMContentLoaded", () => {
     searchExpand.classList.remove("active");
     activeIds = [];
     renderChips();
-    resultsContainer.innerHTML = "";
+    renderEmptyTable();
   });
 
-  // Parse on input
-  jinInput.addEventListener("input", debounce(handleInput, 300));
-
-  function handleInput() {
-    const raw = jinInput.value.trim();
-    if (!raw) return;
-
-    const ids = parseJinIds(raw);
-    if (!ids.length) return;
-
-    ids.forEach((id) => {
-      if (!activeIds.includes(id)) activeIds.push(id);
-    });
-
-    jinInput.value = "";
-    renderChips();
-    runSearch();
-  }
+  // Render on Enter only
+  jinInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const raw = jinInput.value.trim();
+      if (raw) {
+        const ids = parseJinIds(raw);
+        ids.forEach((id) => {
+          if (!activeIds.includes(id)) activeIds.push(id);
+        });
+        jinInput.value = "";
+        renderChips();
+      }
+      runSearch();
+    }
+  });
 
   function parseJinIds(raw) {
     const pattern = /(?:B[16]-[A-Z0-9]+|C5-[A-Z0-9]+|F1-[A-Z0-9]+|RG-[A-Z0-9]+|OS-[A-Z0-9]+|OZ-[A-Z0-9]+)/gi;
@@ -243,7 +251,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function renderEmptyTable() {
+    resultsContainer.innerHTML = "";
+    resultsContainer.classList.add("results-ready");
+    const wrapper = document.createElement("div");
+    wrapper.className = "pivot-wrapper";
+
+    const scroll = document.createElement("div");
+    scroll.className = "pivot-scroll";
+
+    const table = document.createElement("div");
+    table.className = "pivot-grid";
+    table.style.gridTemplateColumns = "260px repeat(16, minmax(120px, 1fr))";
+
+    const cornerCell = document.createElement("div");
+    cornerCell.className = "pivot-cell pivot-header pivot-corner";
+    cornerCell.innerHTML = `<span>Task ID</span><span class="pivot-corner-sub">Skill \u2022 Appt \u2022 Commitment</span>`;
+    table.appendChild(cornerCell);
+
+    const baseTime = new Date("2026-06-07T05:00:00");
+    for (let i = 0; i < 16; i++) {
+      const dt = new Date(baseTime.getTime() + i * 15 * 60 * 1000);
+      const headerCell = document.createElement("div");
+      headerCell.className = "pivot-cell pivot-header";
+      headerCell.innerHTML = `<span>${dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span><span>${dt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>`;
+      table.appendChild(headerCell);
+    }
+
+    scroll.appendChild(table);
+    wrapper.appendChild(scroll);
+    wrapper.appendChild(Pagination.createEmpty());
+
+    resultsContainer.appendChild(wrapper);
+  }
+
   function showLoader() {
+    resultsContainer.classList.remove("results-ready");
     resultsContainer.innerHTML = `
       <div class="loader-overlay">
         <div class="loader-spinner"></div>
@@ -262,7 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function runSearch() {
     if (!dataLoaded || !activeIds.length) {
-      resultsContainer.innerHTML = "";
+      renderEmptyTable();
       return;
     }
 
@@ -271,9 +314,18 @@ document.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(() => {
       setTimeout(() => {
         const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
-        TimelineRenderer.renderAll(timelines, resultsContainer);
+
+        // Build offscreen then swap in
+        const offscreen = document.createElement("div");
+        TimelineRenderer.renderAll(timelines, offscreen);
+
+        resultsContainer.innerHTML = "";
+        while (offscreen.firstChild) {
+          resultsContainer.appendChild(offscreen.firstChild);
+        }
+        resultsContainer.classList.add("results-ready");
         filterRows();
-      }, 300);
+      }, 100);
     });
   }
 

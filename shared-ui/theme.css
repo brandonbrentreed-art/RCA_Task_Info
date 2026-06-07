@@ -82,6 +82,9 @@
   /* ===== Table border ===== */
   --table-border: 1px solid var(--color-grey-300);
 
+  /* ===== Content spacing (internal padding for panels/components) ===== */
+  --content-inset: var(--spacing-4);
+
   /* ===== Nav (fixed dark panel) ===== */
   --nav-bg: #142032;
   --nav-text: #FFFFFF;

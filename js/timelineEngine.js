@@ -20,7 +20,7 @@ const TimelineEngine = (() => {
     const buckets = new Map();
 
     rows.forEach((row) => {
-      const dt = DataLoader.parseDate(row.RECORD_TIME);
+      const dt = DataLoader.parseDate(row.RECORD_TIME_BT || row.RECORD_TIME);
       if (!dt) return;
       const key = bucketKey(dt);
       if (!buckets.has(key)) buckets.set(key, []);
@@ -30,13 +30,18 @@ const TimelineEngine = (() => {
     const intervals = [];
     let prev = null;
 
-    // Task-level info from first record
     const first = rows[0] || {};
     const taskInfo = {
       jinId: first.JIN_ID || "",
       skillCode: first.SKILL_CODE || "",
       appointmentSlot: first.APPOINTMENT_SLOT || "",
-      commitmentTime: first.COMMITMENT_TIME || ""
+      commitmentTime: first.COMMITMENT_TIME_BT || first.COMMITMENT_TIME || "",
+      taskType: first.TASK_TYPE || "",
+      exchangeGroup: first.EXCHANGE_GROUP || "",
+      zoneCode: first.ZONE_CODE || "",
+      careLevel: first.CARE_LEVEL || "",
+      customerType: first.CUSTOMER_TYPE || "",
+      cugId: first.CUG_ID || ""
     };
 
     const sortedKeys = Array.from(buckets.keys()).sort();
@@ -52,11 +57,20 @@ const TimelineEngine = (() => {
         status: latest.TASK_STATUS,
         techId: latest.TECH_ID,
         workManager: latest.WORK_MANAGER_ID,
-        commitmentTime: latest.COMMITMENT_TIME,
-        estimatedStart: latest.ESTIMATED_START_TIME,
+        commitmentTime: latest.COMMITMENT_TIME_BT || latest.COMMITMENT_TIME,
+        estimatedStart: latest.ESTIMATED_START_TIME_BT || latest.ESTIMATED_START_TIME,
+        earliestCompletion: latest.EARLIEST_COMPLETION_TIME_BT || "",
+        latestCompletion: latest.LATEST_COMPLETION_TIME_BT || "",
         skillCode: latest.SKILL_CODE,
         priority: latest.PRIORITY_SCORE,
+        importance: latest.IMPORTANCE_SCORE,
         appointmentSlot: latest.APPOINTMENT_SLOT,
+        pinStatus: latest.PIN_STATUS || "",
+        taskState: latest.TASK_STATE || "",
+        colocated: latest.COLOCATED_INDICATOR || "",
+        prePinned: latest.PRE_PINNED || "",
+        tourStatus: latest.TOUR_STATUS || "",
+        cugId: latest.CUG_ID || "",
         changes: []
       };
 
@@ -64,10 +78,12 @@ const TimelineEngine = (() => {
         if (prev.status !== entry.status) entry.changes.push({ field: "Status", from: prev.status, to: entry.status });
         if (prev.techId !== entry.techId) entry.changes.push({ field: "Tech", from: prev.techId, to: entry.techId });
         if (prev.workManager !== entry.workManager) entry.changes.push({ field: "WM", from: prev.workManager, to: entry.workManager });
+        if (prev.pinStatus !== entry.pinStatus) entry.changes.push({ field: "Pin", from: prev.pinStatus, to: entry.pinStatus });
+        if (prev.taskState !== entry.taskState) entry.changes.push({ field: "State", from: prev.taskState, to: entry.taskState });
       }
 
       // SLA check
-      const slaDate = DataLoader.parseDate(latest.COMMITMENT_TIME);
+      const slaDate = DataLoader.parseDate(latest.COMMITMENT_TIME_BT || latest.COMMITMENT_TIME);
       if (slaDate) {
         const diff = slaDate - dt;
         entry.slaMins = Math.round(diff / 60000);
