@@ -407,6 +407,13 @@
       XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID','Tech ID']]), 'Template');
       XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
     });
+
+    // Email link feedback
+    document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
+      link.addEventListener('click', () => {
+        Notify.info('Opening email client...', 2000);
+      });
+    });
   })();
   </script>
 </body>
