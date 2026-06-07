@@ -10,10 +10,10 @@ const TimelineRenderer = (() => {
     ISS: "var(--color-navy)",
   };
 
-  const PIVOT_PAGE_SIZE_OPTIONS = [10, 25, 50];
-  const DETAIL_PAGE_SIZE_OPTIONS = [20, 50, 100];
+  const PIVOT_PAGE_SIZE_OPTIONS = [30, 60, 90];
+  const DETAIL_PAGE_SIZE_OPTIONS = [30, 60, 90];
 
-  let pivotState = { page: 0, pageSize: 10, timelinesMap: null, container: null };
+  let pivotState = { page: 0, pageSize: 30, timelinesMap: null, container: null };
 
   function statusColour(status) {
     return STATUS_COLOURS[status] || "var(--color-grey-300)";
@@ -172,7 +172,7 @@ const TimelineRenderer = (() => {
       return text;
     }
 
-    let detailState = { page: 0, pageSize: 20 };
+    let detailState = { page: 0, pageSize: 30 };
 
     function renderDetailPage() {
       const { page, pageSize } = detailState;

@@ -25,6 +25,25 @@ function initNav() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && sidebar.classList.contains("open")) closeNav();
   });
+
+  // Smooth page transitions on nav links
+  document.querySelectorAll(".nav-item a, .home-card").forEach((link) => {
+    const href = link.getAttribute("href");
+    if (!href || href === "#" || link.classList.contains("active")) return;
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      document.body.classList.add("page-exit");
+      setTimeout(() => { window.location.href = href; }, 200);
+    });
+  });
 }
 
-document.addEventListener("DOMContentLoaded", initNav);
+// Fade in on page load
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.style.opacity = "0";
+  requestAnimationFrame(() => {
+    document.body.style.transition = "opacity 200ms ease";
+    document.body.style.opacity = "1";
+  });
+  initNav();
+});

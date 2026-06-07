@@ -56,6 +56,15 @@ body {
   height: 100%;
 }
 
+/* Page transition */
+body {
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+body.page-exit {
+  opacity: 0;
+}
+
 /* App panel — the white defined container */
 #app {
   background: var(--color-white);
@@ -66,7 +75,7 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Header area */
@@ -75,6 +84,9 @@ header {
   padding-bottom: var(--spacing-4);
   border-bottom: 1px solid var(--color-divider);
   margin-bottom: var(--spacing-4);
+  overflow: visible;
+  position: relative;
+  z-index: 10;
 }
 
 /* Query bar */

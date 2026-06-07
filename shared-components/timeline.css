@@ -141,7 +141,7 @@
 }
 
 .pivot-data:hover {
-  background: var(--color-grey-100);
+  background: var(--hover-row);
 }
 
 .pivot-data--changed {

@@ -16,217 +16,63 @@
   <link rel="stylesheet" href="css/styles.css?v=5">
   <link rel="stylesheet" href="shared-components/nav.css?v=5">
   <link rel="stylesheet" href="shared-components/table.css?v=5">
+  <link rel="stylesheet" href="shared-components/timeline.css?v=5">
+  <link rel="stylesheet" href="shared-components/tooltip.css?v=5">
+  <link rel="stylesheet" href="shared-components/notify.css?v=5">
   <style>
-    .ndc-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: var(--spacing-6);
-      flex: 1;
-      overflow-y: auto;
-      min-height: 0;
-    }
-    .ndc-content.ndc-content--table {
-      grid-template-columns: 1fr;
-    }
-    @media (max-width: 1024px) {
-      .ndc-content { grid-template-columns: 1fr; }
-    }
-
-    .ndc-section {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-4);
-    }
-    .ndc-section h3 {
-      font-size: var(--text-body1);
-      font-weight: var(--font-weight-medium);
-      margin: 0;
-      padding-bottom: var(--spacing-2);
-      border-bottom: 1px solid var(--color-divider);
-    }
-    .ndc-section p {
-      font-size: var(--text-body2);
-      color: var(--color-grey);
-      line-height: var(--line-height);
-      margin: 0;
-    }
-
-    .ndc-link {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-2);
-      color: var(--color-blue);
-      font-size: var(--text-body2);
-      font-weight: var(--font-weight-medium);
-      text-decoration: none;
-    }
-    .ndc-link:hover { text-decoration: underline; }
-    .ndc-link svg { width: 18px; height: 18px; }
-
-    .ndc-action {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-3);
-      padding: var(--spacing-3);
-      border-radius: var(--radius);
-      border: 1px solid var(--color-grey-200);
-      cursor: pointer;
-      transition: background var(--transition-fast);
-      background: none;
-      width: 100%;
-      text-align: left;
-      font-family: var(--font-family);
-    }
-    .ndc-action:hover { background: var(--hover-primary); }
-    .ndc-action-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: rgba(84, 136, 199, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .ndc-action-icon svg { width: 18px; height: 18px; fill: var(--color-blue); }
-    .ndc-action-text h4 {
-      font-size: var(--text-body2);
-      font-weight: var(--font-weight-medium);
-      margin: 0;
-    }
-    .ndc-action-text p {
-      font-size: var(--text-caption);
-      color: var(--color-grey-light);
-      margin: 0;
-    }
-
-    .ndc-callout {
-      background: rgba(84, 136, 199, 0.06);
-      border-left: 3px solid var(--color-blue);
-      padding: var(--spacing-3);
-      border-radius: 0 var(--radius) var(--radius) 0;
-    }
-    .ndc-callout p {
-      font-size: var(--text-body2);
-      color: var(--color-navy);
-      margin: 0;
-    }
-
-    .ndc-desc dt {
-      font-size: var(--text-caption);
-      font-weight: var(--font-weight-medium);
-      color: var(--color-grey-light);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-top: var(--spacing-3);
-    }
-    .ndc-desc dt:first-child { margin-top: 0; }
-    .ndc-desc dd {
-      font-size: var(--text-body2);
-      margin: var(--spacing-1) 0 0 0;
-    }
-
-    .ndc-back {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--spacing-2);
-      background: none;
-      border: none;
-      color: var(--color-blue);
-      font-family: var(--font-family);
-      font-size: var(--text-body2);
-      font-weight: var(--font-weight-medium);
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: var(--spacing-4);
-    }
-    .ndc-back:hover { text-decoration: underline; }
-    .ndc-back svg { width: 18px; height: 18px; }
-
-    .ndc-table-scroll {
-      overflow-x: auto;
-      flex: 1;
-      min-height: 0;
-    }
-
-    .ndc-upload-preview {
-      border: 2px dashed var(--color-grey-300);
-      border-radius: var(--radius);
-      padding: var(--spacing-4);
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-3);
-    }
-    .ndc-upload-preview .ndc-upload-file {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--spacing-2) var(--spacing-3);
-      background: var(--color-grey-100);
-      border-radius: var(--radius);
-      font-size: var(--text-body2);
-    }
-    .ndc-upload-file span {
-      color: var(--color-grey-light);
-      font-size: var(--text-caption);
-    }
-    .ndc-upload-actions {
-      display: flex;
-      gap: var(--spacing-3);
-      align-items: center;
-    }
-
-    .ndc-status-bar {
-      display: flex;
-      gap: var(--spacing-6);
-      padding-top: var(--spacing-4);
-      border-top: 1px solid var(--color-divider);
-      margin-top: auto;
-      flex-shrink: 0;
-    }
-    .ndc-status-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-2);
-      font-size: var(--text-body2);
-    }
-    .ndc-status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    .ndc-status-dot--pending { background: var(--color-warning); }
-    .ndc-status-dot--processing { background: var(--color-blue); }
-    .ndc-status-dot--complete { background: var(--color-success); }
-    .ndc-status-count {
-      font-weight: var(--font-weight-medium);
-    }
-    .ndc-status-label {
-      color: var(--color-grey-light);
-    }
-      text-align: center;
-      padding: var(--spacing-10);
-      color: var(--color-grey-light);
-      font-size: var(--text-body2);
-    }
+    .ndc-content { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--spacing-6); flex:1; overflow-y:auto; min-height:0; }
+    .ndc-content.ndc-content--table { grid-template-columns:1fr; display:flex; flex-direction:column; overflow:hidden; }
+    .ndc-content.ndc-content--table .ndc-section { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .ndc-content.ndc-content--table .ndc-upload-preview { flex:1; min-height:0; display:flex; flex-direction:column; }
+    @media(max-width:1024px){ .ndc-content{grid-template-columns:1fr;} }
+    .ndc-section { display:flex; flex-direction:column; gap:var(--spacing-4); }
+    .ndc-section h3 { font-size:var(--text-body1); font-weight:var(--font-weight-medium); margin:0; padding-bottom:var(--spacing-2); flex-shrink:0; }
+    .ndc-section p { font-size:var(--text-body2); color:var(--color-grey); line-height:var(--line-height); margin:0; }
+    .ndc-link { display:inline-flex; align-items:center; gap:var(--spacing-2); color:var(--color-blue); font-size:var(--text-body2); font-weight:var(--font-weight-medium); text-decoration:none; }
+    .ndc-link:hover { text-decoration:underline; }
+    .ndc-link svg { width:18px; height:18px; }
+    .ndc-action { display:flex; align-items:center; gap:var(--spacing-3); padding:var(--spacing-3); border-radius:var(--radius); border:1px solid var(--color-grey-200); cursor:pointer; transition:background var(--transition-fast); background:none; width:100%; text-align:left; font-family:var(--font-family); }
+    .ndc-action:hover { background:var(--hover-primary); }
+    .ndc-action-icon { width:36px; height:36px; border-radius:50%; background:rgba(84,136,199,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ndc-action-icon svg { width:18px; height:18px; fill:var(--color-blue); }
+    .ndc-action-text h4 { font-size:var(--text-body2); font-weight:var(--font-weight-medium); margin:0; }
+    .ndc-action-text p { font-size:var(--text-caption); color:var(--color-grey-light); margin:0; }
+    .ndc-callout { background:rgba(84,136,199,0.06); border-left:3px solid var(--color-blue); padding:var(--spacing-3); border-radius:0 var(--radius) var(--radius) 0; }
+    .ndc-callout p { font-size:var(--text-body2); color:var(--color-navy); margin:0; }
+    .ndc-desc dt { font-size:var(--text-caption); font-weight:var(--font-weight-medium); color:var(--color-grey-light); text-transform:uppercase; letter-spacing:0.05em; margin-top:var(--spacing-3); }
+    .ndc-desc dt:first-child { margin-top:0; }
+    .ndc-desc dd { font-size:var(--text-body2); margin:var(--spacing-1) 0 0 0; }
+    .ndc-back { display:inline-flex; align-items:center; gap:var(--spacing-2); background:none; border:none; color:var(--color-blue); font-family:var(--font-family); font-size:var(--text-body2); font-weight:var(--font-weight-medium); cursor:pointer; padding:0; margin-bottom:var(--spacing-4); flex-shrink:0; }
+    .ndc-back:hover { text-decoration:underline; }
+    .ndc-back svg { width:18px; height:18px; }
+    .ndc-table-scroll { flex:1; min-height:0; display:flex; flex-direction:column; }
+    .ndc-upload-preview { border:2px dashed var(--color-grey-300); border-radius:var(--radius); padding:var(--spacing-4); display:flex; flex-direction:column; gap:var(--spacing-3); }
+    .ndc-upload-preview .ndc-upload-file { display:flex; align-items:center; justify-content:space-between; padding:var(--spacing-2) var(--spacing-3); background:var(--color-grey-100); border-radius:var(--radius); font-size:var(--text-body2); flex-shrink:0; }
+    .ndc-upload-file span { color:var(--color-grey-light); font-size:var(--text-caption); }
+    .ndc-upload-actions { display:flex; gap:var(--spacing-3); align-items:center; flex-shrink:0; }
+    .ndc-row-remove { background:none; border:none; color:var(--color-error); cursor:pointer; padding:var(--spacing-1); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background var(--transition-fast); }
+    .ndc-row-remove:hover { background:rgba(211,47,47,0.08); }
+    .ndc-row-remove svg { width:16px; height:16px; }
+    .table-wrapper--flex .table tbody tr:hover .pivot-copy { opacity:1; }
+    .ndc-edit-input { width:100%; padding:var(--spacing-1) var(--spacing-2); border:1px solid var(--color-grey-300); border-radius:var(--radius); font-family:var(--font-family); font-size:var(--text-body2); background:var(--color-white); color:var(--color-navy); text-transform:uppercase; }
+    .ndc-edit-input:focus { outline:none; border-color:var(--color-blue); box-shadow:0 0 0 2px var(--focus-ring); }
+    .ndc-status-bar { display:flex; gap:var(--spacing-6); padding-top:var(--spacing-4); border-top:1px solid var(--color-divider); margin-top:auto; flex-shrink:0; }
+    .ndc-status-item { display:flex; align-items:center; gap:var(--spacing-2); font-size:var(--text-body2); }
+    .ndc-status-dot { width:10px; height:10px; border-radius:50%; }
+    .ndc-status-dot--pending { background:var(--color-warning); }
+    .ndc-status-dot--processing { background:var(--color-blue); }
+    .ndc-status-dot--complete { background:var(--color-success); }
+    .ndc-status-count { font-weight:var(--font-weight-medium); }
+    .ndc-status-label { color:var(--color-grey-light); }
+    .ndc-empty { text-align:center; padding:var(--spacing-10); color:var(--color-grey-light); font-size:var(--text-body2); }
   </style>
 </head>
 <body>
-
-  <!-- Hamburger trigger -->
-  <button class="nav-trigger" aria-label="Open menu">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-  </button>
-
-  <!-- Overlay -->
+  <button class="nav-trigger" aria-label="Open menu"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
   <div class="nav-overlay"></div>
-
-  <!-- Sidebar -->
   <nav class="nav-sidebar">
     <div class="nav-brand">
-      <button class="nav-close" aria-label="Close menu">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      </button>
+      <button class="nav-close" aria-label="Close menu"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
       <img class="nav-brand-logo" src="assets/Brand_Logo.png" alt="Brand Logo">
     </div>
     <ul class="nav-items">
@@ -246,264 +92,300 @@
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="main-content">
     <div id="app">
-
-      <!-- Top bar: title + controls -->
       <header class="flex justify-between items-center">
         <div>
           <h2>NDC Task Allocation</h2>
           <p class="text-body2 mt-1" style="color:var(--color-grey-light)">Interface between Sporticus Services and Taskforce — auto-allocate submitted tasks to specified identifiers.</p>
         </div>
         <div class="flex gap-2 items-center">
-          <a href="#" class="icon-btn tooltip" data-tooltip="Download Template">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-          </a>
+          <div class="search-expand">
+            <button class="icon-btn search-toggle tooltip" data-tooltip="Search requests" disabled style="opacity:0.38;pointer-events:none"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button>
+            <input class="search-input" type="text" id="searchFilter" placeholder="Filter requests...">
+            <button class="search-clear" id="searchClear" aria-label="Clear search"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+          </div>
         </div>
       </header>
 
-      <!-- Default: 3-column content -->
       <div id="ndcContent" class="ndc-content">
-
-        <!-- Left: Description -->
         <div class="ndc-section">
           <h3>About</h3>
           <p>NDC Task Allocation enables Auto Allocation of submitted Tasks to the specified Taskforce Identifiers. For successful allocation please ensure the submitted data is correct prior to submission.</p>
           <dl class="ndc-desc">
-            <dt>Taskforce JIN</dt>
-            <dd>e.g. B1-26636097A</dd>
-            <dt>Taskforce ID (WM Pin)</dt>
-            <dd>e.g. SWBXR36</dd>
+            <dt>Taskforce JIN</dt><dd>e.g. B1-26636097A</dd>
+            <dt>Taskforce ID (WM Pin)</dt><dd>e.g. SWBXR36</dd>
           </dl>
-          <a href="#" class="ndc-link" id="downloadTemplate">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-            Download Template
-          </a>
-          <a href="https://orshinyserver1.nat.bt.com/shiny-apps/sporticus-skill-checker/" target="_blank" class="ndc-link">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
-            Skill &amp; Absence Checker
-          </a>
+          <a href="#" class="ndc-link" id="downloadTemplate"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> Download Template</a>
+          <a href="https://orshinyserver1.nat.bt.com/shiny-apps/sporticus-skill-checker/" target="_blank" class="ndc-link"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg> Skill &amp; Absence Checker</a>
         </div>
-
-        <!-- Middle: Requests -->
         <div class="ndc-section">
           <h3>Requests</h3>
-          <button class="ndc-action" id="btnUpload">
-            <div class="ndc-action-icon">
-              <svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
-            </div>
-            <div class="ndc-action-text">
-              <h4>Upload Requests</h4>
-              <p>Submit new task allocation requests via CSV</p>
-            </div>
-          </button>
-          <button class="ndc-action" id="btnCurrent">
-            <div class="ndc-action-icon">
-              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-            </div>
-            <div class="ndc-action-text">
-              <h4>Current Requests</h4>
-              <p>View in-progress allocation requests</p>
-            </div>
-          </button>
-          <button class="ndc-action" id="btnCompleted">
-            <div class="ndc-action-icon">
-              <svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
-            </div>
-            <div class="ndc-action-text">
-              <h4>Completed Requests</h4>
-              <p>Review previously completed allocations</p>
-            </div>
-          </button>
+          <button class="ndc-action" id="btnUpload"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg></div><div class="ndc-action-text"><h4>Upload Requests</h4><p>Submit new task allocation requests via CSV</p></div></button>
+          <button class="ndc-action" id="btnCurrent"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="ndc-action-text"><h4>Current Requests</h4><p>View in-progress allocation requests</p></div></button>
+          <button class="ndc-action" id="btnCompleted"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div><div class="ndc-action-text"><h4>Completed Requests</h4><p>Review previously completed allocations</p></div></button>
         </div>
-
-        <!-- Right: System Info -->
         <div class="ndc-section">
           <h3>System Information</h3>
           <p>For support queries or access requests, contact the NDC Operations team.</p>
-          <a href="#" class="ndc-link">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
-            NDC Support Portal
-          </a>
-          <div class="ndc-callout">
-            <p><strong>Allocation Cut-off:</strong> All requests must be submitted before <strong>19:30</strong> for same-day processing.</p>
-          </div>
+          <a href="mailto:tf.config@openreach.co.uk?subject=NDC%20Allocation%20Support%20Request&body=Hi%20NDC%20Operations%20Team%2C%0A%0AI%20require%20support%20with%20the%20following%3A%0A%0A%5BPlease%20describe%20your%20issue%5D%0A%0AThank%20you." class="ndc-link"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg> NDC Support Email</a>
+          <div class="ndc-callout"><p><strong>Allocation Cut-off:</strong> All requests must be submitted before <strong>19:30</strong> for same-day processing.</p></div>
         </div>
-
       </div>
 
-      <!-- Status bar -->
       <div class="ndc-status-bar">
-        <div class="ndc-status-item">
-          <span class="ndc-status-dot ndc-status-dot--pending"></span>
-          <span class="ndc-status-count">2</span>
-          <span class="ndc-status-label">Pending</span>
-        </div>
-        <div class="ndc-status-item">
-          <span class="ndc-status-dot ndc-status-dot--processing"></span>
-          <span class="ndc-status-count">1</span>
-          <span class="ndc-status-label">Processing</span>
-        </div>
-        <div class="ndc-status-item">
-          <span class="ndc-status-dot ndc-status-dot--complete"></span>
-          <span class="ndc-status-count">5</span>
-          <span class="ndc-status-label">Complete</span>
-        </div>
+        <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--pending"></span><span class="ndc-status-count">2</span><span class="ndc-status-label">Pending</span></div>
+        <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--processing"></span><span class="ndc-status-count">1</span><span class="ndc-status-label">Processing</span></div>
+        <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--complete"></span><span class="ndc-status-count">5</span><span class="ndc-status-label">Complete</span></div>
+        <div class="ndc-status-item" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--color-grey-light)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg><span class="ndc-status-count" id="ndcClock"></span><span class="ndc-status-label">| Cut-off 19:30</span></div>
       </div>
-
     </div>
   </div>
 
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <script src="shared-components/pagination.js?v=5"></script>
+  <script src="shared-components/notify.js?v=5"></script>
   <script src="shared-components/nav.js?v=5"></script>
   <script>
-    (function() {
-      const saved = localStorage.getItem('theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      const btn = document.getElementById('themeToggle');
-      if (btn) btn.addEventListener('click', () => {
-        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
+  (function() {
+    const saved = localStorage.getItem('theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+
+    const content = document.getElementById('ndcContent');
+    const columns = [
+      { key: 'OrderRef', label: 'Order Reference' },
+      { key: 'EngId', label: 'Engineer ID' },
+      { key: 'Status', label: 'Status' },
+      { key: 'SubmittedBy', label: 'Submitted By' },
+      { key: 'NdcStatus', label: 'NDC Status' },
+      { key: 'TfStatus', label: 'Taskforce Status' },
+      { key: 'Matched', label: 'Matched' },
+      { key: 'TfEngId', label: 'Taskforce Engineer' },
+      { key: 'DateProcessed', label: 'Date Processed' }
+    ];
+    const sampleCurrent = [
+      { OrderRef:'B1-26636097A', EngId:'abc1234', Status:'Pending', SubmittedBy:'System', NdcStatus:'Queued', TfStatus:'Awaiting', Matched:'No', TfEngId:'\u2014', DateProcessed:'\u2014' },
+      { OrderRef:'B6-27209822A', EngId:'def5678', Status:'Processing', SubmittedBy:'System', NdcStatus:'Sent', TfStatus:'Pending', Matched:'No', TfEngId:'\u2014', DateProcessed:'\u2014' }
+    ];
+    const sampleCompleted = [
+      { OrderRef:'B1-26500001A', EngId:'ghi9012', Status:'Complete', SubmittedBy:'System', NdcStatus:'Allocated', TfStatus:'Matched', Matched:'Yes', TfEngId:'jkl3456', DateProcessed:'2025-01-15 14:32' },
+      { OrderRef:'B6-26500002A', EngId:'mno7890', Status:'Complete', SubmittedBy:'System', NdcStatus:'Allocated', TfStatus:'Matched', Matched:'Yes', TfEngId:'pqr1234', DateProcessed:'2025-01-15 16:45' }
+    ];
+
+    let uploadedRows = [];
+    let page = 0;
+    let pageSize = 30;
+    const pageSizeOptions = [30, 60, 90];
+
+    function showDefault() { location.reload(); }
+
+    function enableSearch() {
+      const btn = document.querySelector('.search-toggle');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+    }
+
+    let tableData = [];
+    let tablePage = 0;
+    let tableTitle = '';
+
+    function showTable(title, data) {
+      tableData = data;
+      tableTitle = title;
+      renderTable();
+    }
+
+    function renderTable() {
+      enableSearch();
+      const data = tableData;
+      const title = tableTitle;
+      const isCurrent = title === 'Current Requests';
+      const start = tablePage * pageSize;
+      const pageRows = data.slice(start, start + pageSize);
+
+      const backBtn = `<button class="ndc-back" id="ndcBack"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</button>`;
+      let h = `<div class="table-wrapper--flex"><div class="table-scroll"><table class="table"><thead><tr>`;
+      if (isCurrent) h += `<th style="text-align:center;width:60px">Remove Record</th>`;
+      columns.forEach(c => { h += `<th>${c.label}</th>`; });
+      h += `</tr></thead><tbody>`;
+      if (!pageRows.length) { h += `<tr><td colspan="${columns.length + (isCurrent?1:0)}" class="ndc-empty">No records found</td></tr>`; }
+      else { pageRows.forEach((r,idx) => { h += '<tr>'; if (isCurrent) { h += `<td style="text-align:center;width:60px"><button class="ndc-row-remove" data-idx="${start+idx}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></td>`; } columns.forEach((c,i) => { if (i===0) { h += `<td><span class="pivot-row-id"><span>${r[c.key]||'\u2014'}</span><button class="pivot-copy" aria-label="Copy" data-copy="${r[c.key]}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button></span></td>`; } else { h += `<td>${r[c.key]||'\u2014'}</td>`; } }); h += '</tr>'; }); }
+      h += `</tbody></table></div><div id="tablePaginationSlot"></div></div>`;
+      content.classList.add('ndc-content--table');
+      content.innerHTML = `<div class="ndc-section"><h3>${title}</h3>${backBtn}${h}</div>`;
+
+      document.getElementById('tablePaginationSlot').appendChild(
+        Pagination.create(data.length, tablePage, pageSize, pageSizeOptions,
+          (p) => { tablePage = p; renderTable(); },
+          (s) => { pageSize = s; tablePage = 0; renderTable(); }
+        )
+      );
+
+      document.getElementById('ndcBack').addEventListener('click', showDefault);
+      content.querySelectorAll('.pivot-copy').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+            btn.classList.add('pivot-copy--done');
+            setTimeout(() => { btn.classList.add('pivot-copy--fade'); setTimeout(() => { btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`; btn.classList.remove('pivot-copy--done','pivot-copy--fade'); }, 200); }, 600);
+          });
+        });
       });
+      if (isCurrent) {
+        content.querySelectorAll('.ndc-row-remove').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const idx = parseInt(btn.dataset.idx);
+            const ref = tableData[idx].OrderRef;
+            const confirmed = await Dialog.confirm({ title: 'Remove Record', message: `Cancel request ${ref}?`, confirmText: 'Remove', type: 'primary' });
+            if (confirmed) {
+              tableData.splice(idx, 1);
+              if (tablePage >= Math.ceil(tableData.length / pageSize)) tablePage = Math.max(0, Math.ceil(tableData.length / pageSize) - 1);
+              renderTable();
+              Notify.success(`Request ${ref} cancelled.`);
+            }
+          });
+        });
+      }
+      filterRows();
+    }
 
-      const content = document.getElementById('ndcContent');
-      const btnCurrent = document.getElementById('btnCurrent');
-      const btnCompleted = document.getElementById('btnCompleted');
+    function showUploadPreview(filename) {
+      const start = page * pageSize;
+      const rows = uploadedRows.slice(start, start + pageSize);
+      const cols = Object.keys(uploadedRows[0] || {}).filter(k => k !== '_id');
+      const backBtn = `<button class="ndc-back" id="ndcBack"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</button>`;
+      let h = `<div class="ndc-upload-preview">`;
+      h += `<div class="ndc-upload-file"><strong>${filename}</strong><span>${uploadedRows.length} row${uploadedRows.length!==1?'s':''}</span></div>`;
+      h += `<div class="table-wrapper--flex"><div class="table-scroll"><table class="table"><thead><tr>`;
+      h += `<th style="text-align:center;width:60px">Remove Record</th>`;
+      cols.forEach(c => { h += `<th>${c}</th>`; });
+      h += `</tr></thead><tbody>`;
+      rows.forEach(r => {
+        h += `<tr data-row-id="${r._id}">`;
+        h += `<td style="text-align:center;width:60px"><button class="ndc-row-remove" data-row-id="${r._id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button></td>`;
+        cols.forEach(c => {
+          if (c === 'WM Pin' || c === 'Tech ID') { h += `<td><input class="ndc-edit-input" type="text" value="${r[c]||''}" data-row-id="${r._id}" data-col="${c}"></td>`; }
+          else if (c === 'Task ID' || c === 'JIN ID') { h += `<td><span class="pivot-row-id"><span>${r[c]||'\u2014'}</span><button class="pivot-copy" aria-label="Copy" data-copy="${r[c]}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button></span></td>`; }
+          else { h += `<td>${r[c]||'\u2014'}</td>`; }
+        });
+        h += `</tr>`;
+      });
+      h += `</tbody></table></div><div id="paginationSlot"></div></div>`;
+      h += `<div class="ndc-upload-actions"><button class="btn btn-primary" id="ndcSubmit">Submit Allocation</button><button class="btn btn-outlined" id="ndcCancel">Cancel</button></div>`;
+      h += `</div>`;
+      content.classList.add('ndc-content--table');
+      content.innerHTML = `<div class="ndc-section"><h3>Upload Preview</h3>${backBtn}${h}</div>`;
+      enableSearch();
 
-      const columns = [
-        { key: 'OrderRef', label: 'Order Reference' },
-        { key: 'EngId', label: 'Engineer ID' },
-        { key: 'Status', label: 'Status' },
-        { key: 'SubmittedBy', label: 'Submitted By' },
-        { key: 'NdcStatus', label: 'NDC Status' },
-        { key: 'TfStatus', label: 'Taskforce Status' },
-        { key: 'Matched', label: 'Matched' },
-        { key: 'TfEngId', label: 'Taskforce Engineer' },
-        { key: 'DateProcessed', label: 'Date Processed' }
-      ];
+      document.getElementById('paginationSlot').appendChild(
+        Pagination.create(uploadedRows.length, page, pageSize, pageSizeOptions,
+          (p2) => { page = p2; showUploadPreview(filename); },
+          (s) => { pageSize = s; page = 0; showUploadPreview(filename); }
+        )
+      );
+      document.getElementById('ndcBack').addEventListener('click', showDefault);
+      document.getElementById('ndcCancel').addEventListener('click', showDefault);
+      document.getElementById('ndcSubmit').addEventListener('click', async () => {
+        const confirmed = await Dialog.confirm({ title: 'Submit Allocation', message: `Submit ${uploadedRows.length} record${uploadedRows.length!==1?'s':''} for allocation?`, confirmText: 'Submit', type: 'primary' });
+        if (confirmed) { Notify.success('Allocation submitted successfully.'); showDefault(); }
+      });
+      content.querySelectorAll('.ndc-row-remove').forEach(btn => {
+        btn.addEventListener('click', () => {
+          uploadedRows = uploadedRows.filter(r => r._id !== parseInt(btn.dataset.rowId));
+          if (!uploadedRows.length) { showDefault(); return; }
+          if (page >= Math.ceil(uploadedRows.length / pageSize)) page = Math.ceil(uploadedRows.length / pageSize) - 1;
+          showUploadPreview(filename);
+        });
+      });
+      content.querySelectorAll('.ndc-edit-input').forEach(input => {
+        input.addEventListener('input', () => {
+          input.value = input.value.toUpperCase();
+          const row = uploadedRows.find(r => r._id === parseInt(input.dataset.rowId));
+          if (row) row[input.dataset.col] = input.value;
+        });
+      });
+      content.querySelectorAll('.pivot-copy').forEach(btn => {
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+            btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>`;
+            btn.classList.add('pivot-copy--done');
+            setTimeout(() => { btn.classList.add('pivot-copy--fade'); setTimeout(() => { btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>`; btn.classList.remove('pivot-copy--done','pivot-copy--fade'); }, 200); }, 600);
+          });
+        });
+      });
+      filterRows();
+    }
 
-      // Sample data for demo
-      const sampleCurrent = [
-        { OrderRef: 'B1-26636097A', EngId: 'abc1234', Status: 'Pending', SubmittedBy: 'System', NdcStatus: 'Queued', TfStatus: 'Awaiting', Matched: 'No', TfEngId: '—', DateProcessed: '—' },
-        { OrderRef: 'B6-27209822A', EngId: 'def5678', Status: 'Processing', SubmittedBy: 'System', NdcStatus: 'Sent', TfStatus: 'Pending', Matched: 'No', TfEngId: '—', DateProcessed: '—' }
-      ];
-
-      const sampleCompleted = [
-        { OrderRef: 'B1-26500001A', EngId: 'ghi9012', Status: 'Complete', SubmittedBy: 'System', NdcStatus: 'Allocated', TfStatus: 'Matched', Matched: 'Yes', TfEngId: 'jkl3456', DateProcessed: '2025-01-15 14:32' },
-        { OrderRef: 'B6-26500002A', EngId: 'mno7890', Status: 'Complete', SubmittedBy: 'System', NdcStatus: 'Allocated', TfStatus: 'Matched', Matched: 'Yes', TfEngId: 'pqr1234', DateProcessed: '2025-01-15 16:45' }
-      ];
-
-      function showTable(title, data) {
-        const backBtn = `<button class="ndc-back" id="ndcBack"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</button>`;
-
-        let tableHtml = `<div class="ndc-table-scroll"><div class="table-wrapper"><table class="table table-striped"><thead><tr>`;
-        columns.forEach(col => { tableHtml += `<th>${col.label}</th>`; });
-        tableHtml += `</tr></thead><tbody>`;
-
-        if (data.length === 0) {
-          tableHtml += `<tr><td colspan="${columns.length}" class="ndc-empty">No records found</td></tr>`;
+    // File upload
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file'; fileInput.accept = '.csv,.xls,.xlsx'; fileInput.hidden = true;
+    document.body.appendChild(fileInput);
+    document.getElementById('btnUpload').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        let dataRows;
+        if (file.name.endsWith('.csv')) {
+          const lines = e.target.result.trim().split('\n');
+          const headers = lines[0].split(',').map(h => h.trim());
+          dataRows = lines.slice(1).map(l => { const v = l.split(','); const o = {}; headers.forEach((h,i) => { o[h] = (v[i]||'').trim(); }); return o; });
         } else {
-          data.forEach(row => {
-            tableHtml += '<tr>';
-            columns.forEach(col => { tableHtml += `<td>${row[col.key] || '—'}</td>`; });
-            tableHtml += '</tr>';
-          });
+          const wb = XLSX.read(new Uint8Array(e.target.result), { type:'array' });
+          dataRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval:'' });
         }
+        uploadedRows = dataRows.map((r, i) => { const o = { _id:i, ...r }; if (o['WM Pin']) o['WM Pin'] = o['WM Pin'].toUpperCase(); return o; });
+        page = 0;
+        showUploadPreview(file.name);
+      };
+      if (file.name.endsWith('.csv')) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+      fileInput.value = '';
+    });
 
-        tableHtml += `</tbody></table></div></div>`;
+    document.getElementById('btnCurrent').addEventListener('click', () => { tablePage = 0; showTable('Current Requests', sampleCurrent); });
+    document.getElementById('btnCompleted').addEventListener('click', () => { tablePage = 0; showTable('Completed Requests', sampleCompleted); });
 
-        content.classList.add('ndc-content--table');
-        content.innerHTML = `<div class="ndc-section"><h3>${title}</h3>${backBtn}${tableHtml}</div>`;
+    // Search (same as timeline)
+    const searchToggle = document.querySelector('.search-toggle');
+    const searchExpand = document.querySelector('.search-expand');
+    const searchFilter = document.getElementById('searchFilter');
+    const searchClear = document.getElementById('searchClear');
+    searchToggle.addEventListener('click', () => {
+      searchExpand.classList.toggle('active');
+      if (searchExpand.classList.contains('active')) searchFilter.focus();
+      else { searchFilter.value = ''; filterRows(); }
+    });
+    searchFilter.addEventListener('input', () => { searchExpand.classList.toggle('has-value', searchFilter.value.length > 0); filterRows(); });
+    searchFilter.addEventListener('keydown', (e) => { if (e.key === 'Escape') { searchExpand.classList.remove('active','has-value'); searchFilter.value = ''; filterRows(); } });
+    document.addEventListener('click', (e) => { if (!searchExpand.contains(e.target) && searchExpand.classList.contains('active') && !searchFilter.value.trim()) { searchExpand.classList.remove('active'); filterRows(); } });
+    searchClear.addEventListener('click', () => { searchFilter.value = ''; searchFilter.focus(); searchExpand.classList.remove('has-value'); filterRows(); });
 
-        document.getElementById('ndcBack').addEventListener('click', showDefault);
-      }
+    function filterRows() {
+      const f = searchFilter.value.trim().toUpperCase();
+      content.querySelectorAll('tbody tr').forEach(row => { row.style.display = (!f || row.textContent.toUpperCase().includes(f)) ? '' : 'none'; });
+    }
 
-      function showDefault() {
-        location.reload();
-      }
+    // Live clock
+    function updateClock() {
+      document.getElementById('ndcClock').textContent = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
 
-      const btnUpload = document.getElementById('btnUpload');
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = '.csv,.xls,.xlsx';
-      fileInput.hidden = true;
-      document.body.appendChild(fileInput);
-
-      btnUpload.addEventListener('click', () => fileInput.click());
-
-      fileInput.addEventListener('change', () => {
-        const file = fileInput.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const text = e.target.result;
-          const lines = text.trim().split('\n');
-          const headers = lines[0].split(',');
-          const rows = lines.slice(1).map(line => {
-            const vals = line.split(',');
-            const obj = {};
-            headers.forEach((h, i) => { obj[h.trim()] = (vals[i] || '').trim(); });
-            return obj;
-          });
-
-          showUploadPreview(file.name, rows);
-        };
-        reader.readAsText(file);
-        fileInput.value = '';
-      });
-
-      function showUploadPreview(filename, rows) {
-        const backBtn = `<button class="ndc-back" id="ndcBack"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> Back</button>`;
-
-        let previewHtml = `<div class="ndc-upload-preview">`;
-        previewHtml += `<div class="ndc-upload-file"><strong>${filename}</strong><span>${rows.length} row${rows.length !== 1 ? 's' : ''} found</span></div>`;
-
-        // Show preview table
-        const previewCols = Object.keys(rows[0] || {});
-        previewHtml += `<div class="ndc-table-scroll"><div class="table-wrapper"><table class="table table-striped"><thead><tr>`;
-        previewCols.forEach(col => { previewHtml += `<th>${col}</th>`; });
-        previewHtml += `</tr></thead><tbody>`;
-        rows.forEach(row => {
-          previewHtml += '<tr>';
-          previewCols.forEach(col => { previewHtml += `<td>${row[col] || '\u2014'}</td>`; });
-          previewHtml += '</tr>';
-        });
-        previewHtml += `</tbody></table></div></div>`;
-
-        previewHtml += `<div class="ndc-upload-actions"><button class="btn btn-primary" id="ndcSubmit">Submit Allocation</button><button class="btn btn-outlined" id="ndcCancel">Cancel</button></div>`;
-        previewHtml += `</div>`;
-
-        content.classList.add('ndc-content--table');
-        content.innerHTML = `<div class="ndc-section"><h3>Upload Preview</h3>${backBtn}${previewHtml}</div>`;
-
-        document.getElementById('ndcBack').addEventListener('click', showDefault);
-        document.getElementById('ndcCancel').addEventListener('click', showDefault);
-        document.getElementById('ndcSubmit').addEventListener('click', () => {
-          alert('Allocation submitted successfully.');
-          showDefault();
-        });
-      }
-
-      btnCurrent.addEventListener('click', () => showTable('Current Requests', sampleCurrent));
-      btnCompleted.addEventListener('click', () => showTable('Completed Requests', sampleCompleted));
-
-      // Download template
-      document.getElementById('downloadTemplate').addEventListener('click', (e) => {
-        e.preventDefault();
-        const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-        <head><meta charset="UTF-8"><style>th{background:#142032;color:#fff;font-weight:bold;padding:8px 12px;}td{padding:6px 12px;border-bottom:1px solid #e0e0e0;}</style></head>
-        <body><table><tr><th>JIN ID</th><th>WM Pin</th></tr><tr><td></td><td></td></tr></table></body></html>`;
-        const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'NDC_Allocation_Template.xls';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-    })();
+    // Download template
+    document.getElementById('downloadTemplate').addEventListener('click', (e) => {
+      e.preventDefault();
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID','Tech ID']]), 'Template');
+      XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
+    });
+  })();
   </script>
 </body>
 </html>

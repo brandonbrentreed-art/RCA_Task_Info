@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   lockInput();
   setToolbarState(false);
-  renderEmptyTable();
+  setTimeout(() => renderEmptyTable(), 250);
 
   // Search expand toggle
   searchToggle.addEventListener("click", () => {

@@ -23,7 +23,7 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
-  z-index: 300;
+  z-index: 9999;
 }
 
 .tooltip::before {
@@ -37,7 +37,7 @@
   pointer-events: none;
   opacity: 0;
   transition: opacity var(--transition-fast);
-  z-index: 300;
+  z-index: 9999;
 }
 
 .tooltip:hover::after,
