@@ -36,7 +36,7 @@
 html, body {
   height: 100%;
   overflow: hidden;
-  transition: background 400ms cubic-bezier(0.4, 0, 0.2, 1), color 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 400ms cubic-bezier(0.4, 0, 0.2, 1), color 400ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease;
 }
 
 body {
@@ -49,20 +49,16 @@ body {
   background: var(--color-page-bg);
   padding: var(--spacing-6);
   padding-top: var(--spacing-20);
+  opacity: 1;
+}
+
+body.page-exit {
+  opacity: 0;
 }
 
 /* Main wrapper */
 .main-content {
   height: 100%;
-}
-
-/* Page transition */
-body {
-  opacity: 1;
-  transition: opacity 200ms ease;
-}
-body.page-exit {
-  opacity: 0;
 }
 
 /* App panel — the white defined container */
