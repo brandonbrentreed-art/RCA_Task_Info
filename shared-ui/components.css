@@ -92,6 +92,8 @@
   color: var(--color-navy);
   line-height: 1.5;
   white-space: nowrap;
+  cursor: default;
+  user-select: none;
 }
 
 .chip-dismiss {
