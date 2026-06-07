@@ -269,8 +269,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-
-
   function showLoader() {
     resultsContainer.classList.remove("results-ready");
     resultsContainer.innerHTML = `

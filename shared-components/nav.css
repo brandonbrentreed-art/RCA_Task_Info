@@ -143,6 +143,17 @@
   text-align: center;
 }
 
+/* Nav build info */
+.nav-build {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--nav-border);
+  margin-top: auto;
+  font-size: var(--text-caption);
+  color: var(--nav-text-muted);
+  cursor: default;
+  text-align: center;
+}
+
 /* Theme toggle — fixed top-right (MUI AppBar pattern) */
 .theme-toggle {
   position: fixed;
@@ -194,4 +205,3 @@
   opacity: 1;
   transform: translate(-50%, -50%) rotate(0deg) scale(1);
 }
-

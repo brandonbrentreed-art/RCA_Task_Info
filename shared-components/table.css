@@ -21,6 +21,7 @@
   border: var(--table-border);
   border-top: none;
   border-left: none;
+  cursor: default;
 }
 
 .table th {

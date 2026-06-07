@@ -27,8 +27,8 @@
     .ndc-content.ndc-content--table .ndc-upload-preview { flex:1; min-height:0; display:flex; flex-direction:column; }
     @media(max-width:1024px){ .ndc-content{grid-template-columns:1fr;} }
     .ndc-section { display:flex; flex-direction:column; gap:var(--spacing-4); }
-    .ndc-section h3 { font-size:var(--text-body1); font-weight:var(--font-weight-medium); margin:0; padding-bottom:var(--spacing-2); flex-shrink:0; }
-    .ndc-section p { font-size:var(--text-body2); color:var(--color-grey); line-height:var(--line-height); margin:0; }
+    .ndc-section h3 { font-size:var(--text-body1); font-weight:var(--font-weight-medium); margin:0; padding-bottom:var(--spacing-2); flex-shrink:0; cursor:default; }
+    .ndc-section p { font-size:var(--text-body2); color:var(--color-grey); line-height:var(--line-height); margin:0; cursor:default; }
     .ndc-link { display:inline-flex; align-items:center; gap:var(--spacing-2); color:var(--color-blue); font-size:var(--text-body2); font-weight:var(--font-weight-medium); text-decoration:none; }
     .ndc-link:hover { text-decoration:underline; }
     .ndc-link svg { width:20px; height:20px; }
@@ -36,20 +36,20 @@
     .ndc-action:hover { background:var(--hover-primary); }
     .ndc-action-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
     .ndc-action-icon svg { width:24px; height:24px; fill:var(--color-blue); }
-    .ndc-action-text h4 { font-size:var(--text-body2); font-weight:var(--font-weight-medium); margin:0; }
-    .ndc-action-text p { font-size:var(--text-caption); color:var(--color-grey-light); margin:0; }
+    .ndc-action-text h4 { font-size:var(--text-body2); font-weight:var(--font-weight-medium); margin:0; cursor:default; }
+    .ndc-action-text p { font-size:var(--text-caption); color:var(--color-grey-light); margin:0; cursor:default; }
     .ndc-callout { background:rgba(84,136,199,0.06); border-left:3px solid var(--color-blue); padding:var(--spacing-3); border-radius:0 var(--radius) var(--radius) 0; }
-    .ndc-callout p { font-size:var(--text-body2); color:var(--color-navy); margin:0; }
-    .ndc-desc dt { font-size:var(--text-caption); font-weight:var(--font-weight-medium); color:var(--color-grey-light); text-transform:uppercase; letter-spacing:0.05em; margin-top:var(--spacing-3); }
+    .ndc-callout p { font-size:var(--text-body2); color:var(--color-navy); margin:0; cursor:default; }
+    .ndc-desc dt { font-size:var(--text-caption); font-weight:var(--font-weight-medium); color:var(--color-grey-light); text-transform:uppercase; letter-spacing:0.05em; margin-top:var(--spacing-3); cursor:default; }
     .ndc-desc dt:first-child { margin-top:0; }
-    .ndc-desc dd { font-size:var(--text-body2); margin:var(--spacing-1) 0 0 0; }
+    .ndc-desc dd { font-size:var(--text-body2); margin:var(--spacing-1) 0 0 0; cursor:default; }
     .ndc-back { display:inline-flex; align-items:center; gap:var(--spacing-2); background:none; border:none; color:var(--color-blue); font-family:var(--font-family); font-size:var(--text-body2); font-weight:var(--font-weight-medium); cursor:pointer; padding:0; margin-bottom:var(--spacing-4); flex-shrink:0; }
     .ndc-back:hover { text-decoration:underline; }
     .ndc-back svg { width:20px; height:20px; }
     .ndc-table-scroll { flex:1; min-height:0; display:flex; flex-direction:column; }
     .ndc-upload-preview { border:2px dashed var(--color-grey-300); border-radius:var(--radius); padding:var(--spacing-4); display:flex; flex-direction:column; gap:var(--spacing-3); }
-    .ndc-upload-preview .ndc-upload-file { display:flex; align-items:center; justify-content:space-between; padding:var(--spacing-2) var(--spacing-3); background:var(--color-grey-100); border-radius:var(--radius); font-size:var(--text-body2); flex-shrink:0; }
-    .ndc-upload-file span { color:var(--color-grey-light); font-size:var(--text-caption); }
+    .ndc-upload-preview .ndc-upload-file { display:flex; align-items:center; justify-content:space-between; padding:var(--spacing-2) var(--spacing-3); background:var(--color-grey-100); border-radius:var(--radius); font-size:var(--text-body2); flex-shrink:0; cursor:default; }
+    .ndc-upload-file span { color:var(--color-grey-light); font-size:var(--text-caption); cursor:default; }
     .ndc-upload-actions { display:flex; gap:var(--spacing-3); align-items:center; flex-shrink:0; }
     .ndc-row-remove { background:none; border:none; color:var(--color-error); cursor:pointer; padding:var(--spacing-1); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background var(--transition-fast); }
     .ndc-row-remove:hover { background:rgba(211,47,47,0.08); }
@@ -66,8 +66,12 @@
     .ndc-status-dot--processing { background:var(--color-blue); }
     .ndc-status-dot--complete { background:var(--color-success); }
     .ndc-status-count { font-weight:var(--font-weight-medium); }
-    .ndc-status-label { color:var(--color-grey-light); }
-    .ndc-empty { text-align:center; padding:var(--spacing-10); color:var(--color-grey-light); font-size:var(--text-body2); }
+    .ndc-status-label { color:var(--color-grey-light); cursor:default; }
+    .ndc-status-item--cutoff { color:var(--color-error); }
+    .ndc-status-item--cutoff svg { color:var(--color-error) !important; }
+    .ndc-status-item--cutoff .ndc-status-label { color:var(--color-error); }
+    .ndc-action:disabled,.ndc-action[disabled] { opacity:0.38; pointer-events:none; cursor:not-allowed; }
+    .ndc-empty { text-align:center; padding:var(--spacing-10); color:var(--color-grey-light); font-size:var(--text-body2); cursor:default; }
   </style>
 </head>
 <body>
@@ -83,6 +87,7 @@
       <li class="nav-item"><a href="timeline.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg></span>Timeline</a></li>
       <li class="nav-item"><a href="ndc.html" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>NDC Allocation</a></li>
     </ul>
+    <div class="nav-build">Task Diagnostics Hub &middot; V5</div>
   </nav>
 
   <!-- Theme toggle (top-right) -->
@@ -94,7 +99,7 @@
   <div class="main-content">
     <div id="app">
       <header class="flex justify-between items-center">
-        <div>
+        <div style="cursor:default">
           <h2>NDC Task Allocation</h2>
           <p class="text-body2 mt-1" style="color:var(--color-grey-light)">Interface between Sporticus Services and Taskforce — auto-allocate submitted tasks to specified identifiers.</p>
         </div>
@@ -136,7 +141,7 @@
         <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--pending"></span><span class="ndc-status-count">2</span><span class="ndc-status-label">Pending</span></div>
         <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--processing"></span><span class="ndc-status-count">1</span><span class="ndc-status-label">Processing</span></div>
         <div class="ndc-status-item"><span class="ndc-status-dot ndc-status-dot--complete"></span><span class="ndc-status-count">5</span><span class="ndc-status-label">Complete</span></div>
-        <div class="ndc-status-item" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--color-grey-light)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg><span class="ndc-status-count" id="ndcClock"></span><span class="ndc-status-label">| Cut-off 19:30</span></div>
+        <div class="ndc-status-item" style="margin-left:auto"><svg viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--color-grey-light)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg><span class="ndc-status-count" id="ndcClock"></span><span class="ndc-status-label">| Cut-off 19:30</span></div>
       </div>
     </div>
   </div>
@@ -204,7 +209,7 @@
       content.className = defaultClass;
       content.innerHTML = defaultHTML;
       // Re-bind the action buttons
-      document.getElementById('btnUpload').addEventListener('click', () => fileInput.click());
+      document.getElementById('btnUpload').addEventListener('click', () => { if (!isCutoff()) fileInput.click(); });
       document.getElementById('btnCurrent').addEventListener('click', () => { tablePage = 0; showTable('Current Requests', sampleCurrent); });
       document.getElementById('btnCompleted').addEventListener('click', () => { tablePage = 0; showTable('Completed Requests', sampleCompleted); });
       document.getElementById('downloadTemplate').addEventListener('click', (e) => {
@@ -221,6 +226,8 @@
       btn.style.pointerEvents = 'none';
       searchExpand.classList.remove('active','has-value');
       searchFilter.value = '';
+      // Apply cutoff state to upload button
+      updateClock();
     }
 
     function enableSearch() {
@@ -278,6 +285,7 @@
       });
       if (isCurrent) {
         content.querySelectorAll('.ndc-row-remove').forEach(btn => {
+          if (isCutoff()) { btn.disabled = true; btn.style.opacity = '0.38'; btn.style.cursor = 'not-allowed'; return; }
           btn.addEventListener('click', async () => {
             const idx = parseInt(btn.dataset.idx);
             const ref = tableData[idx].OrderRef;
@@ -368,7 +376,7 @@
     const fileInput = document.createElement('input');
     fileInput.type = 'file'; fileInput.accept = '.csv,.xls,.xlsx'; fileInput.hidden = true;
     document.body.appendChild(fileInput);
-    document.getElementById('btnUpload').addEventListener('click', () => fileInput.click());
+    document.getElementById('btnUpload').addEventListener('click', () => { if (!isCutoff()) fileInput.click(); });
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0]; if (!file) return;
       if (typeof XLSX === 'undefined' && !file.name.endsWith('.csv')) { Notify.warning('Excel library still loading, try again in a moment.', 2000); fileInput.value = ''; return; }
@@ -414,9 +422,26 @@
       content.querySelectorAll('tbody tr').forEach(row => { row.style.display = (!f || row.textContent.toUpperCase().includes(f)) ? '' : 'none'; });
     }
 
-    // Live clock
+    // Live clock + cutoff logic (19:30–08:00 = locked)
+    const CUTOFF_HOUR = 19, CUTOFF_MIN = 30, OPEN_HOUR = 8;
+    function isCutoff() {
+      const now = new Date();
+      const h = now.getHours(), m = now.getMinutes();
+      return (h > CUTOFF_HOUR || (h === CUTOFF_HOUR && m >= CUTOFF_MIN) || h < OPEN_HOUR);
+    }
     function updateClock() {
-      document.getElementById('ndcClock').textContent = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      const clockEl = document.getElementById('ndcClock');
+      const clockItem = clockEl.closest('.ndc-status-item');
+      const uploadBtn = document.getElementById('btnUpload');
+      clockEl.textContent = new Date().toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      const locked = isCutoff();
+      clockItem.classList.toggle('ndc-status-item--cutoff', locked);
+      if (uploadBtn) {
+        uploadBtn.disabled = locked;
+        uploadBtn.setAttribute('data-tooltip', locked ? 'Submissions closed — reopens 08:00' : '');
+        if (locked) uploadBtn.classList.add('tooltip');
+        else { uploadBtn.classList.remove('tooltip'); uploadBtn.removeAttribute('data-tooltip'); }
+      }
     }
     updateClock();
     setInterval(updateClock, 1000);
