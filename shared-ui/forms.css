@@ -30,10 +30,10 @@
 .input-lg { padding: var(--spacing-3) var(--spacing-4); font-size: var(--text-body1); }
 
 .input-error { border-color: var(--color-error); }
-.input-error:focus { box-shadow: 0 0 0 2px rgba(211, 47, 47, 0.2); }
+.input-error:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-error) 20%, transparent); }
 
 .input-success { border-color: var(--color-green); }
-.input-success:focus { box-shadow: 0 0 0 2px rgba(67, 176, 114, 0.2); }
+.input-success:focus { box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-green) 20%, transparent); }
 
 /* -- Helper text -- */
 .helper {
@@ -63,7 +63,7 @@
 .select:focus {
   outline: none;
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 2px rgba(84, 136, 199, 0.2);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 /* -- Textarea -- */
@@ -83,7 +83,7 @@
 .textarea:focus {
   outline: none;
   border-color: var(--color-blue);
-  box-shadow: 0 0 0 2px rgba(84, 136, 199, 0.2);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 /* -- Checkbox & Radio -- */

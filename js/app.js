@@ -9,7 +9,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchToggle = document.querySelector(".search-toggle");
   const searchExpand = document.querySelector(".search-expand");
   const searchFilter = document.getElementById("searchFilter");
+  const searchClear = document.getElementById("searchClear");
   const exportBtn = document.getElementById("exportBtn");
+  const themeToggle = document.getElementById("themeToggle");
+
+  // Theme init
+  const savedTheme = localStorage.getItem("theme") || "light";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.getAttribute("data-theme");
+    const next = current === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+  });
 
   let dataLoaded = false;
   let activeIds = [];
@@ -50,26 +63,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  searchFilter.addEventListener("input", debounce(runSearch, 300));
+  searchFilter.addEventListener("input", debounce(() => {
+    updateSearchState();
+    filterRows();
+  }, 300));
 
   searchFilter.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       searchExpand.classList.remove("active");
       searchFilter.value = "";
-      runSearch();
+      updateSearchState();
+      filterRows();
     }
   });
 
   // Close search on click outside
   document.addEventListener("click", (e) => {
     if (!searchExpand.contains(e.target) && searchExpand.classList.contains("active")) {
-      searchExpand.classList.remove("active");
-      searchFilter.value = "";
-      runSearch();
+      if (!searchFilter.value.trim()) {
+        searchExpand.classList.remove("active");
+        filterRows();
+      }
     }
   });
 
-  // Export summary report
+  // Search clear dismiss
+  searchClear.addEventListener("click", () => {
+    searchFilter.value = "";
+    searchFilter.focus();
+    updateSearchState();
+    filterRows();
+  });
+
+  function updateSearchState() {
+    searchExpand.classList.toggle("has-value", searchFilter.value.length > 0);
+  }
+
   // Export summary report
   exportBtn.addEventListener("click", exportReport);
 
@@ -77,7 +106,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dataLoaded || !activeIds.length) return;
 
     const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
-    const rows = [["Task ID", "Skill", "Appt Slot", "Commitment", "Current Status", "Current Pin", "Est Start", "Status Changes", "Tech Changes", "WM Changes"]];
+    const headers = ["Task ID", "Skill", "Appt Slot", "Commitment", "Current Status", "Current Pin", "Est Start", "Status Changes", "Tech Changes", "WM Changes"];
+    const rows = [];
 
     Object.keys(timelines).forEach((id) => {
       const { intervals, taskInfo } = timelines[id];
@@ -109,12 +139,25 @@ document.addEventListener("DOMContentLoaded", () => {
       ]);
     });
 
-    const csv = rows.map((r) => r.map((v) => `"${v}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head><meta charset="UTF-8">
+      <style>
+        table { border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 11pt; }
+        th { background: #142032; color: #FFFFFF; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
+        td { padding: 6px 12px; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+        tr:nth-child(even) td { background: #f5f5f5; }
+      </style>
+      </head>
+      <body>
+      <table>${"<tr>" + headers.map((h) => `<th>${h}</th>`).join("") + "</tr>"}${rows.map((r) => "<tr>" + r.map((v) => `<td>${v}</td>`).join("") + "</tr>").join("")}</table>
+      </body></html>`;
+
+    const blob = new Blob([html], { type: "application/vnd.ms-excel" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `RCA_Summary_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `RCA_Summary_${new Date().toISOString().slice(0, 10)}.xls`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -145,11 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     activeIds = [];
     renderChips();
     resultsContainer.innerHTML = "";
-    DataLoader.clear();
-    dataLoaded = false;
-    fileInput.value = "";
-    lockInput();
-    setToolbarState(false);
   });
 
   // Parse on input
@@ -213,18 +251,17 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
   }
 
+  function filterRows() {
+    const filter = searchFilter.value.trim().toUpperCase();
+    const rows = resultsContainer.querySelectorAll("[data-task-id]");
+    rows.forEach((row) => {
+      const id = row.getAttribute("data-task-id");
+      row.style.display = (!filter || id.includes(filter)) ? "" : "none";
+    });
+  }
+
   function runSearch() {
     if (!dataLoaded || !activeIds.length) {
-      resultsContainer.innerHTML = "";
-      return;
-    }
-
-    const filter = searchFilter.value.trim().toUpperCase();
-    const idsToRender = filter
-      ? activeIds.filter((id) => id.includes(filter))
-      : activeIds;
-
-    if (!idsToRender.length) {
       resultsContainer.innerHTML = "";
       return;
     }
@@ -233,8 +270,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     requestAnimationFrame(() => {
       setTimeout(() => {
-        const timelines = TimelineEngine.buildMultipleTimelines(idsToRender);
+        const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
         TimelineRenderer.renderAll(timelines, resultsContainer);
+        filterRows();
       }, 300);
     });
   }

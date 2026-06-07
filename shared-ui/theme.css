@@ -64,6 +64,53 @@
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-standard: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
+  /* ===== Scrollbar ===== */
+  --scrollbar-size: 8px;
+  --scrollbar-track: var(--color-grey-100);
+  --scrollbar-thumb: var(--color-grey-300);
+  --scrollbar-thumb-hover: var(--color-grey);
+
+  /* ===== Interaction States ===== */
+  --hover-overlay: rgba(20, 32, 50, 0.08);
+  --overlay-backdrop: rgba(20, 32, 50, 0.4);
+  --focus-ring: rgba(84, 136, 199, 0.2);
+  --hover-primary: rgba(84, 136, 199, 0.08);
+  --hover-row: rgba(84, 136, 199, 0.04);
+  --hover-row-alt: rgba(84, 136, 199, 0.06);
+  --highlight-change: rgba(237, 108, 2, 0.06);
+
   /* ===== Table border ===== */
   --table-border: 1px solid var(--color-grey-300);
+
+  /* ===== Nav (fixed dark panel) ===== */
+  --nav-bg: #142032;
+  --nav-text: #FFFFFF;
+  --nav-text-muted: rgba(255, 255, 255, 0.7);
+  --nav-hover: rgba(255, 255, 255, 0.08);
+  --nav-active: rgba(84, 136, 199, 0.2);
+  --nav-border: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Dark Theme ===== */
+[data-theme="dark"] {
+  --color-white: #1e1e1e;
+  --color-navy: #e8eaed;
+  --color-grey: #b0b3b8;
+  --color-grey-light: #8a8d93;
+  --color-grey-100: #2a2a2a;
+  --color-grey-200: #3a3a3a;
+  --color-grey-300: #4a4a4a;
+  --color-page-bg: #121212;
+  --color-divider: rgba(255, 255, 255, 0.12);
+  --shadow-1: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-2: 0 3px 6px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-3: 0 10px 20px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.3);
+  --table-border: 1px solid var(--color-grey-300);
+  --hover-overlay: rgba(255, 255, 255, 0.08);
+  --overlay-backdrop: rgba(0, 0, 0, 0.6);
+  --focus-ring: rgba(125, 168, 217, 0.3);
+  --hover-primary: rgba(125, 168, 217, 0.12);
+  --hover-row: rgba(125, 168, 217, 0.06);
+  --hover-row-alt: rgba(125, 168, 217, 0.08);
+  --highlight-change: rgba(237, 108, 2, 0.1);
 }

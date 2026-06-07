@@ -48,9 +48,9 @@
 .table tbody tr {
   transition: background var(--transition-fast);
 }
-.table tbody tr:hover { background: rgba(84, 136, 199, 0.04); }
+.table tbody tr:hover { background: var(--hover-row); }
 .table-striped tbody tr:nth-child(even) { background: var(--color-grey-100); }
-.table-striped tbody tr:nth-child(even):hover { background: rgba(84, 136, 199, 0.06); }
+.table-striped tbody tr:nth-child(even):hover { background: var(--hover-row-alt); }
 
 .table td:last-child,
 .table th:last-child { text-align: right; }

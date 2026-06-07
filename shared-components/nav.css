@@ -18,7 +18,7 @@
   cursor: pointer;
   transition: background var(--transition-fast);
 }
-.nav-trigger:hover { background: rgba(20, 32, 50, 0.08); }
+.nav-trigger:hover { background: var(--hover-overlay); }
 
 .nav-trigger svg {
   width: 28px;
@@ -29,7 +29,7 @@
 .nav-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(20, 32, 50, 0.4);
+  background: var(--overlay-backdrop);
   z-index: 199;
   opacity: 0;
   pointer-events: none;
@@ -47,8 +47,8 @@
   left: 0;
   width: 260px;
   height: 100vh;
-  background: var(--color-navy);
-  color: var(--color-white);
+  background: var(--nav-bg);
+  color: var(--nav-text);
   display: flex;
   flex-direction: column;
   z-index: 200;
@@ -62,7 +62,7 @@
   flex-direction: column;
   align-items: flex-start;
   padding: var(--spacing-3) var(--spacing-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--nav-border);
   position: relative;
 }
 
@@ -72,7 +72,7 @@
   right: var(--spacing-3);
   background: none;
   border: none;
-  color: var(--color-white);
+  color: var(--nav-text);
   width: 40px;
   height: 40px;
   display: flex;
@@ -81,8 +81,9 @@
   cursor: pointer;
   border-radius: 50%;
   transition: background var(--transition-fast);
+  z-index: 1;
 }
-.nav-close:hover { background: rgba(255, 255, 255, 0.12); }
+.nav-close:hover { background: var(--nav-hover); }
 
 .nav-close svg {
   width: 24px;
@@ -90,16 +91,18 @@
 }
 
 .nav-brand-logo {
-  width: 100%;
+  max-width: 100%;
   height: auto;
   flex-shrink: 0;
   margin-top: var(--spacing-4);
   padding-bottom: var(--spacing-2);
+  display: block;
+  clip-path: inset(0 2px 0 0);
 }
 
 .nav-header {
   padding: var(--spacing-3) var(--spacing-4);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--nav-border);
 }
 
 .nav-brand-label {
@@ -120,7 +123,7 @@
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-4);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--nav-text-muted);
   text-decoration: none;
   font-size: var(--text-body2);
   white-space: nowrap;
@@ -130,12 +133,12 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .nav-item a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--color-white);
+  background: var(--nav-hover);
+  color: var(--nav-text);
 }
 .nav-item a.active {
-  background: rgba(84, 136, 199, 0.2);
-  color: var(--color-white);
+  background: var(--nav-active);
+  color: var(--nav-text);
 }
 
 .nav-icon {
@@ -148,5 +151,67 @@
   font-size: var(--text-body1);
   line-height: 1;
   text-align: center;
+}
+
+/* Nav footer */
+.nav-footer {
+  padding: var(--spacing-3) var(--spacing-4);
+  border-top: 1px solid var(--nav-border);
+  margin-top: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: none;
+  border: none;
+  border-radius: var(--radius);
+  color: var(--nav-text-muted);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-theme-toggle:hover {
+  background: var(--nav-hover);
+  color: var(--nav-text);
+}
+
+.nav-theme-toggle svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.nav-theme-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-theme-label {
+  white-space: nowrap;
+}
+
+.nav-theme-label--dark {
+  display: none;
+}
+
+[data-theme="dark"] .nav-theme-label--light {
+  display: none;
+}
+
+[data-theme="dark"] .nav-theme-label--dark {
+  display: inline;
 }
 

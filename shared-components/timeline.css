@@ -30,6 +30,8 @@
   flex-direction: column;
   gap: var(--spacing-1);
   justify-content: center;
+  cursor: default;
+  user-select: none;
 }
 
 /* Header */
@@ -68,9 +70,51 @@
 }
 
 .pivot-row-id {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
   font-weight: var(--font-weight-medium);
   font-size: var(--text-caption);
   color: var(--color-navy);
+}
+
+.pivot-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--color-grey-light);
+  border-radius: var(--radius);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.pivot-copy svg {
+  width: 14px;
+  height: 14px;
+}
+
+.pivot-row-label:hover .pivot-copy {
+  opacity: 1;
+}
+
+.pivot-copy:hover {
+  color: var(--color-blue);
+  background: var(--hover-primary);
+}
+
+.pivot-copy--done {
+  opacity: 1;
+  color: var(--color-green);
+}
+
+.pivot-copy--fade {
+  opacity: 0;
+  transition: opacity 200ms ease;
 }
 
 .pivot-row-meta {
@@ -98,7 +142,7 @@
 }
 
 .pivot-data--changed {
-  background: rgba(237, 108, 2, 0.06);
+  background: var(--highlight-change);
   border-left: var(--spacing-1) solid var(--color-warning);
 }
 
