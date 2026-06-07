@@ -52,6 +52,26 @@ document.addEventListener("DOMContentLoaded", () => {
   lockInput();
   setToolbarState(false);
 
+  // Restore data from sessionStorage if available
+  try {
+    const stored = sessionStorage.getItem("rca_csv_data");
+    if (stored) {
+      const texts = JSON.parse(stored);
+      DataLoader.clear();
+      texts.forEach(t => DataLoader.loadFromText(t));
+      dataLoaded = true;
+      unlockInput();
+      setToolbarState(true);
+
+      const storedIds = sessionStorage.getItem("rca_active_ids");
+      if (storedIds) {
+        activeIds = JSON.parse(storedIds);
+        renderChips();
+        runSearch();
+      }
+    }
+  } catch (e) {}
+
   // Search expand toggle
   searchToggle.addEventListener("click", () => {
     searchExpand.classList.toggle("active");
@@ -177,11 +197,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!files.length) return;
 
     DataLoader.clear();
+    const texts = [];
     let total = 0;
     for (const file of files) {
       const text = await file.text();
+      texts.push(text);
       total += DataLoader.loadFromText(text);
     }
+
+    // Persist to sessionStorage so data survives navigation
+    try { sessionStorage.setItem("rca_csv_data", JSON.stringify(texts)); } catch (e) { /* quota exceeded — silently skip */ }
 
     dataLoaded = true;
     unlockInput();
@@ -198,6 +223,11 @@ document.addEventListener("DOMContentLoaded", () => {
     renderChips();
     resultsContainer.innerHTML = "";
     resultsContainer.classList.remove("results-ready");
+    DataLoader.clear();
+    dataLoaded = false;
+    lockInput();
+    setToolbarState(false);
+    try { sessionStorage.removeItem("rca_csv_data"); sessionStorage.removeItem("rca_active_ids"); } catch (e) {}
   });
 
   // Render on Enter only
@@ -275,8 +305,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!dataLoaded || !activeIds.length) {
       resultsContainer.innerHTML = "";
       resultsContainer.classList.remove("results-ready");
+      // Persist active IDs
+      try { sessionStorage.setItem("rca_active_ids", JSON.stringify(activeIds)); } catch (e) {}
       return;
     }
+
+    // Persist active IDs
+    try { sessionStorage.setItem("rca_active_ids", JSON.stringify(activeIds)); } catch (e) {}
 
     showLoader();
 
