@@ -224,6 +224,18 @@
         XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID','Tech ID']]), 'Template');
         XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
       });
+      // Suppress URL previews on links
+      content.querySelectorAll('a[href]').forEach(link => {
+        const href = link.getAttribute('href');
+        link.dataset.href = href;
+        link.removeAttribute('href');
+        link.style.cursor = 'pointer';
+        if (href.startsWith('mailto:')) {
+          link.addEventListener('click', (e) => { e.preventDefault(); if (typeof Notify !== 'undefined') Notify.info('Opening email client...', 2000); window.location.href = href; });
+        } else if (link.getAttribute('target') === '_blank' || href.startsWith('http')) {
+          link.addEventListener('click', (e) => { e.preventDefault(); window.open(href, '_blank'); });
+        }
+      });
       // Reset search state
       const btn = document.querySelector('.search-toggle');
       btn.disabled = true;
