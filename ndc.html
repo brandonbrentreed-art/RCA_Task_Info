@@ -57,6 +57,8 @@
     .table-wrapper--flex .table tbody tr:hover .pivot-copy { opacity:1; }
     .ndc-edit-input { width:100%; padding:var(--spacing-1) var(--spacing-2); border:1px solid var(--color-grey-300); border-radius:var(--radius); font-family:var(--font-family); font-size:var(--text-body2); background:var(--color-white); color:var(--color-navy); text-transform:uppercase; }
     .ndc-edit-input:focus { outline:none; border-color:var(--color-blue); box-shadow:0 0 0 2px var(--focus-ring); }
+    .ndc-edit-input--invalid { border-color:var(--color-error); }
+    .ndc-edit-input--invalid:focus { box-shadow:0 0 0 2px rgba(211,47,47,0.2); }
     .ndc-status-bar { display:flex; gap:var(--spacing-6); padding-top:var(--spacing-4); border-top:1px solid var(--color-divider); margin-top:auto; flex-shrink:0; cursor:default; }
     .ndc-status-item { display:flex; align-items:center; gap:var(--spacing-2); font-size:var(--text-body2); }
     .ndc-status-dot { width:10px; height:10px; border-radius:50%; }
@@ -143,6 +145,7 @@
     </div>
   </div>
 
+  <script src="shared-components/tooltip.js?v=5"></script>
   <script src="shared-components/nav.js?v=5"></script>
   <script src="shared-components/pagination.js?v=5"></script>
   <script src="shared-components/notify.js?v=5"></script>
@@ -182,6 +185,30 @@
     const pageSizeOptions = [30, 60, 90];
     const defaultHTML = content.innerHTML;
     const defaultClass = content.className;
+    const PIN_REGEX = /^[A-Za-z0-9]{5,8}$/;
+
+    function validatePins() {
+      const inputs = content.querySelectorAll('.ndc-edit-input');
+      const submitBtn = document.getElementById('ndcSubmit');
+      if (!submitBtn) return;
+      let allValid = true;
+      inputs.forEach(input => {
+        const valid = PIN_REGEX.test(input.value.trim());
+        input.classList.toggle('ndc-edit-input--invalid', !valid);
+        if (!valid) allValid = false;
+      });
+      submitBtn.disabled = !allValid;
+      submitBtn.style.opacity = allValid ? '1' : '0.5';
+      submitBtn.style.cursor = allValid ? 'pointer' : 'not-allowed';
+      submitBtn.style.pointerEvents = 'auto';
+      if (!allValid) {
+        submitBtn.classList.add('tooltip-top');
+        submitBtn.setAttribute('data-tooltip', 'Each task must have a valid WM Pin');
+      } else {
+        submitBtn.classList.remove('tooltip-top');
+        submitBtn.removeAttribute('data-tooltip');
+      }
+    }
 
     function showDefault() {
       content.className = defaultClass;
@@ -313,7 +340,9 @@
       );
       document.getElementById('ndcBack').addEventListener('click', showDefault);
       document.getElementById('ndcCancel').addEventListener('click', showDefault);
-      document.getElementById('ndcSubmit').addEventListener('click', async () => {
+      const submitBtn = document.getElementById('ndcSubmit');
+      validatePins();
+      submitBtn.addEventListener('click', async () => {
         const confirmed = await Dialog.confirm({ title: 'Submit Allocation', message: `Submit ${uploadedRows.length} record${uploadedRows.length!==1?'s':''} for allocation?`, confirmText: 'Submit', type: 'primary' });
         if (confirmed) { Notify.success('Allocation submitted successfully.'); showDefault(); }
       });
@@ -330,6 +359,7 @@
           input.value = input.value.toUpperCase();
           const row = uploadedRows.find(r => r._id === parseInt(input.dataset.rowId));
           if (row) row[input.dataset.col] = input.value;
+          validatePins();
         });
       });
       content.querySelectorAll('.pivot-copy').forEach(btn => {
