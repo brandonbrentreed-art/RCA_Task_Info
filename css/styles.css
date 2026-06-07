@@ -1,9 +1,3 @@
-@import "../shared-ui/theme.css";
-@import "../shared-ui/typography.css";
-@import "../shared-ui/components.css";
-@import "../shared-ui/layout.css";
-@import "../shared-ui/forms.css";
-
 /* ===== Global Reset ===== */
 *,
 *::before,
