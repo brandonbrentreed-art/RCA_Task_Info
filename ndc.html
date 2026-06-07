@@ -31,11 +31,11 @@
     .ndc-section p { font-size:var(--text-body2); color:var(--color-grey); line-height:var(--line-height); margin:0; }
     .ndc-link { display:inline-flex; align-items:center; gap:var(--spacing-2); color:var(--color-blue); font-size:var(--text-body2); font-weight:var(--font-weight-medium); text-decoration:none; }
     .ndc-link:hover { text-decoration:underline; }
-    .ndc-link svg { width:18px; height:18px; }
+    .ndc-link svg { width:20px; height:20px; }
     .ndc-action { display:flex; align-items:center; gap:var(--spacing-3); padding:var(--spacing-3); border-radius:var(--radius); border:1px solid var(--color-grey-200); cursor:pointer; transition:background var(--transition-fast); background:none; width:100%; text-align:left; font-family:var(--font-family); }
     .ndc-action:hover { background:var(--hover-primary); }
-    .ndc-action-icon { width:36px; height:36px; border-radius:50%; background:rgba(84,136,199,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .ndc-action-icon svg { width:18px; height:18px; fill:var(--color-blue); }
+    .ndc-action-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ndc-action-icon svg { width:24px; height:24px; fill:var(--color-blue); }
     .ndc-action-text h4 { font-size:var(--text-body2); font-weight:var(--font-weight-medium); margin:0; }
     .ndc-action-text p { font-size:var(--text-caption); color:var(--color-grey-light); margin:0; }
     .ndc-callout { background:rgba(84,136,199,0.06); border-left:3px solid var(--color-blue); padding:var(--spacing-3); border-radius:0 var(--radius) var(--radius) 0; }
@@ -45,7 +45,7 @@
     .ndc-desc dd { font-size:var(--text-body2); margin:var(--spacing-1) 0 0 0; }
     .ndc-back { display:inline-flex; align-items:center; gap:var(--spacing-2); background:none; border:none; color:var(--color-blue); font-family:var(--font-family); font-size:var(--text-body2); font-weight:var(--font-weight-medium); cursor:pointer; padding:0; margin-bottom:var(--spacing-4); flex-shrink:0; }
     .ndc-back:hover { text-decoration:underline; }
-    .ndc-back svg { width:18px; height:18px; }
+    .ndc-back svg { width:20px; height:20px; }
     .ndc-table-scroll { flex:1; min-height:0; display:flex; flex-direction:column; }
     .ndc-upload-preview { border:2px dashed var(--color-grey-300); border-radius:var(--radius); padding:var(--spacing-4); display:flex; flex-direction:column; gap:var(--spacing-3); }
     .ndc-upload-preview .ndc-upload-file { display:flex; align-items:center; justify-content:space-between; padding:var(--spacing-2) var(--spacing-3); background:var(--color-grey-100); border-radius:var(--radius); font-size:var(--text-body2); flex-shrink:0; }
@@ -79,7 +79,7 @@
       <img class="nav-brand-logo" src="assets/Brand_Logo.png" alt="Brand Logo">
     </div>
     <ul class="nav-items">
-      <li class="nav-item"><a href="index.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></span>Home</a></li>
+      <li class="nav-item"><a href="index.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3l10 9h-3v8H5v-8H2l10-9z"/></svg></span>Home</a></li>
       <li class="nav-item"><a href="timeline.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg></span>Timeline</a></li>
       <li class="nav-item"><a href="ndc.html" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>NDC Allocation</a></li>
     </ul>
@@ -124,9 +124,9 @@
         </div>
         <div class="ndc-section">
           <h3>Requests</h3>
-          <button class="ndc-action" id="btnUpload"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg></div><div class="ndc-action-text"><h4>Upload Requests</h4><p>Submit new task allocation requests via CSV</p></div></button>
-          <button class="ndc-action" id="btnCurrent"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div><div class="ndc-action-text"><h4>Current Requests</h4><p>View in-progress allocation requests</p></div></button>
-          <button class="ndc-action" id="btnCompleted"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg></div><div class="ndc-action-text"><h4>Completed Requests</h4><p>Review previously completed allocations</p></div></button>
+          <button class="ndc-action" id="btnUpload"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg></div><div class="ndc-action-text"><h4>Upload Requests</h4><p>Submit new task allocation requests via CSV</p></div></button>
+          <button class="ndc-action" id="btnCurrent"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M18 22l-.01-6L14 12l3.99-4.01L18 2H6v6l4 4-4 3.99V22h12zM8 7.5V4h8v3.5l-4 4-4-4z"/></svg></div><div class="ndc-action-text"><h4>Current Requests</h4><p>View in-progress allocation requests</p></div></button>
+          <button class="ndc-action" id="btnCompleted"><div class="ndc-action-icon"><svg viewBox="0 0 24 24"><path d="M6 2v6l4 4-4 4v6h12v-6l-4-4 4-4V2H6z"/></svg></div><div class="ndc-action-text"><h4>Completed Requests</h4><p>Review previously completed allocations</p></div></button>
         </div>
         <div class="ndc-section">
           <h3>System Information</h3>

@@ -68,8 +68,8 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .modal-close svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 .modal-close:hover {
   background: var(--hover-overlay);

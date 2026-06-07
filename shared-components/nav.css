@@ -21,8 +21,8 @@
 .nav-trigger:hover { background: var(--hover-overlay); }
 
 .nav-trigger svg {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Backdrop overlay when nav is open */
