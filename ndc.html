@@ -410,12 +410,6 @@
       XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
     });
 
-    // Email link feedback
-    document.querySelectorAll('a[href^="mailto:"]').forEach(link => {
-      link.addEventListener('click', () => {
-        Notify.info('Opening email client...', 2000);
-      });
-    });
   })();
   </script>
 </body>

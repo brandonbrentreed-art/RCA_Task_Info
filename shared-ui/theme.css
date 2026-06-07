@@ -92,6 +92,14 @@
   --nav-hover: rgba(255, 255, 255, 0.08);
   --nav-active: rgba(84, 136, 199, 0.2);
   --nav-border: rgba(255, 255, 255, 0.1);
+
+  /* ===== Toast / Dialog ===== */
+  --toast-bg: #142032;
+  --toast-text: #FFFFFF;
+  --toast-dismiss: rgba(255, 255, 255, 0.6);
+  --dialog-bg: #FFFFFF;
+  --dialog-title: #142032;
+  --dialog-text: #50535A;
 }
 
 /* ===== Dark Theme ===== */
@@ -116,4 +124,12 @@
   --hover-row: rgba(125, 168, 217, 0.06);
   --hover-row-alt: rgba(125, 168, 217, 0.08);
   --highlight-change: rgba(237, 108, 2, 0.1);
+
+  /* ===== Toast / Dialog (dark) ===== */
+  --toast-bg: #2a2a2a;
+  --toast-text: #e8eaed;
+  --toast-dismiss: rgba(232, 234, 237, 0.6);
+  --dialog-bg: #2a2a2a;
+  --dialog-title: #e8eaed;
+  --dialog-text: #b0b3b8;
 }

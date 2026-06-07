@@ -16,8 +16,8 @@
   align-items: center;
   gap: var(--spacing-3);
   padding: var(--spacing-3) var(--spacing-4);
-  background: var(--color-navy);
-  color: #FFFFFF;
+  background: var(--toast-bg);
+  color: var(--toast-text);
   font-family: var(--font-family);
   font-size: var(--text-body2);
   border-radius: var(--radius);
@@ -55,7 +55,7 @@
   height: 20px;
   background: none;
   border: none;
-  color: rgba(255,255,255,0.6);
+  color: var(--toast-dismiss);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -63,7 +63,7 @@
   border-radius: 50%;
   transition: color var(--transition-fast);
 }
-.toast-dismiss:hover { color: #FFFFFF; }
+.toast-dismiss:hover { color: var(--toast-text); }
 .toast-dismiss svg { width: 16px; height: 16px; }
 
 /* ===== Confirm Dialog ===== */
@@ -87,7 +87,7 @@
 }
 
 .dialog {
-  background: var(--color-white);
+  background: var(--dialog-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow-3);
   padding: var(--spacing-6);
@@ -108,12 +108,12 @@
   font-size: var(--text-h4);
   font-weight: var(--font-weight-medium);
   margin: 0;
-  color: var(--color-navy);
+  color: var(--dialog-title);
 }
 
 .dialog-message {
   font-size: var(--text-body2);
-  color: var(--color-grey);
+  color: var(--dialog-text);
   line-height: var(--line-height);
   margin: 0;
 }

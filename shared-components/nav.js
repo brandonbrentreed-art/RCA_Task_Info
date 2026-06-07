@@ -38,7 +38,10 @@ function initNav() {
     link.addEventListener("click", (e) => {
       e.preventDefault();
       if (isExternal) {
-        if (href.startsWith("mailto:")) { window.location.href = href; }
+        if (href.startsWith("mailto:")) {
+          if (typeof Notify !== 'undefined') Notify.info('Opening email client...', 2000);
+          window.location.href = href;
+        }
         else { window.open(href, "_blank"); }
       } else {
         document.body.classList.add("page-exit");
