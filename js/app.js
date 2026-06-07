@@ -51,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   lockInput();
   setToolbarState(false);
-  setTimeout(() => renderEmptyTable(), 250);
 
   // Search expand toggle
   searchToggle.addEventListener("click", () => {
@@ -197,7 +196,8 @@ document.addEventListener("DOMContentLoaded", () => {
     searchExpand.classList.remove("active");
     activeIds = [];
     renderChips();
-    renderEmptyTable();
+    resultsContainer.innerHTML = "";
+    resultsContainer.classList.remove("results-ready");
   });
 
   // Render on Enter only
@@ -251,39 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function renderEmptyTable() {
-    resultsContainer.innerHTML = "";
-    resultsContainer.classList.add("results-ready");
-    const wrapper = document.createElement("div");
-    wrapper.className = "pivot-wrapper";
 
-    const scroll = document.createElement("div");
-    scroll.className = "pivot-scroll";
-
-    const table = document.createElement("div");
-    table.className = "pivot-grid";
-    table.style.gridTemplateColumns = "260px repeat(16, minmax(120px, 1fr))";
-
-    const cornerCell = document.createElement("div");
-    cornerCell.className = "pivot-cell pivot-header pivot-corner";
-    cornerCell.innerHTML = `<span>Task ID</span><span class="pivot-corner-sub">Skill \u2022 Appt \u2022 Commitment</span>`;
-    table.appendChild(cornerCell);
-
-    const baseTime = new Date("2026-06-07T05:00:00");
-    for (let i = 0; i < 16; i++) {
-      const dt = new Date(baseTime.getTime() + i * 15 * 60 * 1000);
-      const headerCell = document.createElement("div");
-      headerCell.className = "pivot-cell pivot-header";
-      headerCell.innerHTML = `<span>${dt.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</span><span>${dt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span>`;
-      table.appendChild(headerCell);
-    }
-
-    scroll.appendChild(table);
-    wrapper.appendChild(scroll);
-    wrapper.appendChild(Pagination.createEmpty());
-
-    resultsContainer.appendChild(wrapper);
-  }
 
   function showLoader() {
     resultsContainer.classList.remove("results-ready");
@@ -305,7 +273,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function runSearch() {
     if (!dataLoaded || !activeIds.length) {
-      renderEmptyTable();
+      resultsContainer.innerHTML = "";
+      resultsContainer.classList.remove("results-ready");
       return;
     }
 
