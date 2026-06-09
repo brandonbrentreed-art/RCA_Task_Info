@@ -92,20 +92,6 @@ resource "google_cloud_run_v2_service_iam_member" "api_public" {
   member   = "allUsers"
 }
 
-# ─── BigQuery access for the service account ─────────────────────────────────
-
-resource "google_project_iam_member" "sa_bq_viewer" {
-  project = var.project_id
-  role    = "roles/bigquery.dataViewer"
-  member  = "serviceAccount:scheduler-sa@or-tfconfig-dec-exp-prod.iam.gserviceaccount.com"
-}
-
-resource "google_project_iam_member" "sa_bq_job_user" {
-  project = var.project_id
-  role    = "roles/bigquery.jobUser"
-  member  = "serviceAccount:scheduler-sa@or-tfconfig-dec-exp-prod.iam.gserviceaccount.com"
-}
-
 # ─── Outputs ─────────────────────────────────────────────────────────────────
 
 output "frontend_url" {
