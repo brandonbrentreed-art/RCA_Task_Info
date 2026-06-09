@@ -21,6 +21,11 @@ variable "image_tag" {
   default = "latest"
 }
 
+variable "api_service_account" {
+  type        = string
+  description = "Service account email for the API Cloud Run service"
+}
+
 locals {
   frontend_image = "${var.region}-docker.pkg.dev/${var.project_id}/rca-task-info/frontend:${var.image_tag}"
   api_image      = "${var.region}-docker.pkg.dev/${var.project_id}/rca-task-info/api:${var.image_tag}"
@@ -44,6 +49,10 @@ resource "google_cloud_run_v2_service" "frontend" {
       resources {
         limits = { cpu = "1", memory = "256Mi" }
       }
+      env {
+        name  = "PORT"
+        value = "8080"
+      }
     }
     scaling {
       min_instance_count = 0
@@ -54,10 +63,11 @@ resource "google_cloud_run_v2_service" "frontend" {
 
 # Frontend is publicly accessible — Entra ID auth happens in the browser
 resource "google_cloud_run_v2_service_iam_member" "frontend_public" {
-  name     = google_cloud_run_v2_service.frontend.name
-  location = var.region
-  role     = "roles/run.invoker"
-  member   = "allUsers"
+  depends_on = [google_cloud_run_v2_service.frontend]
+  name       = google_cloud_run_v2_service.frontend.name
+  location   = var.region
+  role       = "roles/run.invoker"
+  member     = "allUsers"
 }
 
 # ─── Backend API (service account, queries BigQuery) ──────────────────────────
@@ -67,13 +77,17 @@ resource "google_cloud_run_v2_service" "api" {
   location = var.region
 
   template {
-    service_account = "scheduler-sa@or-tfconfig-dec-exp-prod.iam.gserviceaccount.com"
+    service_account = var.api_service_account
 
     containers {
       image = local.api_image
       ports { container_port = 8080 }
       resources {
         limits = { cpu = "1", memory = "512Mi" }
+      }
+      env {
+        name  = "PORT"
+        value = "8080"
       }
     }
     scaling {
@@ -83,13 +97,14 @@ resource "google_cloud_run_v2_service" "api" {
   }
 }
 
-# API is also publicly accessible at network level — auth is validated in code
+# API is publicly accessible at network level — auth is validated in code
 # (the API verifies the Entra ID Bearer token before processing requests)
 resource "google_cloud_run_v2_service_iam_member" "api_public" {
-  name     = google_cloud_run_v2_service.api.name
-  location = var.region
-  role     = "roles/run.invoker"
-  member   = "allUsers"
+  depends_on = [google_cloud_run_v2_service.api]
+  name       = google_cloud_run_v2_service.api.name
+  location   = var.region
+  role       = "roles/run.invoker"
+  member     = "allUsers"
 }
 
 # ─── Outputs ─────────────────────────────────────────────────────────────────

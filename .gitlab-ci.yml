@@ -44,7 +44,7 @@ terraform-deploy:
   script:
     - cd terraform
     - terraform init
-    - terraform apply -auto-approve
+    - terraform apply -auto-approve -var="project_id=${GCP_PROJECT_ID}" -var="api_service_account=scheduler-sa@or-tfconfig-dec-exp-prod.iam.gserviceaccount.com" -var="deployer_sa_email=${DEPLOYER_SA_EMAIL}"
   after_script:
     - rm -f key.json
   only:

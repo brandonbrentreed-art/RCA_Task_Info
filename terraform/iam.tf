@@ -3,7 +3,7 @@
 # IAM = service accounts, deployment, and data access permissions
 
 locals {
-  scheduler_sa = "serviceAccount:scheduler-sa@or-tfconfig-dec-exp-prod.iam.gserviceaccount.com"
+  scheduler_sa = "serviceAccount:${var.api_service_account}"
   deployer_sa  = "serviceAccount:${var.deployer_sa_email}"
 }
 
