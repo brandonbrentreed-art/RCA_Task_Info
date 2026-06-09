@@ -26,6 +26,16 @@ variable "api_service_account" {
   description = "Service account email for the API Cloud Run service"
 }
 
+variable "entra_tenant_id" {
+  type        = string
+  description = "BT Entra ID tenant ID"
+}
+
+variable "entra_client_id" {
+  type        = string
+  description = "Entra ID App Registration client ID"
+}
+
 locals {
   frontend_image = "${var.region}-docker.pkg.dev/${var.project_id}/rca-task-info/frontend:${var.image_tag}"
   api_image      = "${var.region}-docker.pkg.dev/${var.project_id}/rca-task-info/api:${var.image_tag}"
@@ -88,6 +98,18 @@ resource "google_cloud_run_v2_service" "api" {
       env {
         name  = "PORT"
         value = "8080"
+      }
+      env {
+        name  = "ENTRA_TENANT_ID"
+        value = var.entra_tenant_id
+      }
+      env {
+        name  = "ENTRA_CLIENT_ID"
+        value = var.entra_client_id
+      }
+      env {
+        name  = "FRONTEND_URL"
+        value = google_cloud_run_v2_service.frontend.uri
       }
     }
     scaling {
