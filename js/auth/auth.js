@@ -1,11 +1,11 @@
 // auth.js - Entra ID authentication via MSAL.js
-// Users authenticate with BT SSO. The Entra token is sent to the backend API
+// Users authenticate with BT SSO. The access token is sent to the backend API
 // which validates it and runs BigQuery queries as the service account.
 
 const msalConfig = {
   auth: {
     clientId: window.__AUTH_CONFIG__.entraClientId,
-    authority: `https://login.microsoftonline.com/${window.__AUTH_CONFIG__.entraTenantId}`,
+    authority: "https://login.microsoftonline.com/" + window.__AUTH_CONFIG__.entraTenantId,
     redirectUri: window.location.origin,
   },
   cache: {
@@ -13,6 +13,8 @@ const msalConfig = {
     storeAuthStateInCookie: false,
   },
 };
+
+const apiScopes = [`api://${window.__AUTH_CONFIG__.entraClientId}/access_as_user`];
 
 let msalInstance = null;
 
@@ -30,7 +32,7 @@ async function initAuth() {
   const redirectResponse = await instance.handleRedirectPromise();
 
   if (redirectResponse) {
-    sessionStorage.setItem("entra_token", redirectResponse.idToken);
+    sessionStorage.setItem("entra_token", redirectResponse.accessToken);
     window.dispatchEvent(new Event("authenticated"));
     return true;
   }
@@ -39,8 +41,8 @@ async function initAuth() {
   if (accounts.length > 0) {
     instance.setActiveAccount(accounts[0]);
     try {
-      const response = await instance.acquireTokenSilent({ scopes: ["openid", "profile", "email"] });
-      sessionStorage.setItem("entra_token", response.idToken);
+      const response = await instance.acquireTokenSilent({ scopes: apiScopes });
+      sessionStorage.setItem("entra_token", response.accessToken);
       window.dispatchEvent(new Event("authenticated"));
       return true;
     } catch (e) {
@@ -49,7 +51,7 @@ async function initAuth() {
   }
 
   // Not logged in — redirect to Entra ID
-  await instance.loginRedirect({ scopes: ["openid", "profile", "email"] });
+  await instance.loginRedirect({ scopes: apiScopes });
   return false;
 }
 
