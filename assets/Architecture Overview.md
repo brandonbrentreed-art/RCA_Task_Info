@@ -2,18 +2,54 @@
 
 Lightweight RCA (Root Cause Analysis) web app built with vanilla HTML, CSS, and JavaScript. No frameworks, no build step.
 
+## Architecture Overview
+
+```
+┌─────────────┐       ┌──────────────────┐       ┌────────────┐
+│   Browser   │──────▶│  Frontend (Nginx) │       │  BigQuery  │
+│  (Entra ID  │       │  Cloud Run        │       └─────▲──────┘
+│   MSAL.js)  │       └──────────────────┘             │
+│             │                                        │
+│             │       ┌──────────────────┐             │
+│             │──────▶│  API (Flask)      │─────────────┘
+│             │ Bearer│  Cloud Run        │  SA identity
+└─────────────┘ token └──────────────────┘
+```
+
+- **Auth**: Microsoft Entra ID (MSAL.js in browser → Bearer token → API validates via JWKS)
+- **Frontend**: Static HTML/CSS/JS served by Nginx container on Cloud Run
+- **API**: Flask + BigQuery client, parameterised queries only (no raw SQL)
+- **Data**: BigQuery (accessed via service account, not user credentials)
+- **IaC**: Terraform (GCP provider)
+- **CI/CD**: GitLab CI → Cloud Build → Artifact Registry → Terraform apply
+
 ## Structure
 
 ```
 ├── index.html                  ← App entry point
+├── ndc.html                    ← NDC page
+├── timeline.html               ← Timeline page
+├── auth-guard.html             ← Auth gate (redirects unauthenticated users)
 ├── serve.py                    ← Dev server (python)
+├── Launch.bat                  ← Windows launch script
+├── Dockerfile                  ← Frontend container image
+├── nginx.conf                  ← Nginx config for containerised frontend
+├── .gitlab-ci.yml              ← CI/CD pipeline definition
+├── .gitattributes
+├── api/                        ← BACKEND API (Cloud Run)
+│   ├── main.py                 ← Flask application (Entra token validation + BigQuery)
+│   ├── requirements.txt        ← Python dependencies
+│   └── Dockerfile              ← API container image
 ├── css/
 │   └── styles.css              ← Page-level layout (imports shared-ui)
 ├── js/
 │   ├── app.js                  ← Main init + event wiring
 │   ├── dataLoader.js           ← CSV parsing + data store
 │   ├── timelineEngine.js       ← 15-min interval bucketing + change detection
-│   └── timelineRenderer.js     ← Pivot grid DOM rendering
+│   ├── timelineRenderer.js     ← Pivot grid DOM rendering
+│   └── auth/                   ← AUTHENTICATION
+│       ├── auth-config.js      ← Entra ID / MSAL config
+│       └── auth.js             ← Auth logic (login, token, guard)
 ├── shared-ui/                  ← CENTRALISED DESIGN SYSTEM
 │   ├── theme.css               ← Tokens (colours, spacing, radius, shadows, typography)
 │   ├── typography.css          ← MUI heading/body/caption scale
@@ -26,14 +62,17 @@ Lightweight RCA (Root Cause Analysis) web app built with vanilla HTML, CSS, and 
 │   ├── timeline.css            ← Pivot grid timeline
 │   ├── modal.css + modal.js    ← Dialog overlay
 │   ├── tooltip.css + tooltip.js← MUI tooltip (suppresses native title)
-│   └── [future components]
+│   ├── loader.css              ← Spinner / linear / overlay loaders
+│   ├── notify.css + notify.js  ← Toast notifications
+│   └── pagination.js           ← Pagination logic
+├── terraform/                  ← INFRASTRUCTURE AS CODE
+│   ├── main.tf                 ← Cloud Run, Artifact Registry, IAM
+│   └── iam.tf                  ← Service account permissions
 ├── assets/
 │   ├── Brand_Logo.png
-│   ├── Dev_Build.csv
+│   ├── favicon-light.svg
+│   ├── Idenna_x_Open_Reach_screen_shots_300dpi-11.jpg
 │   └── README.md (this file)
-└── .vscode/
-    ├── tasks.json
-    └── launch.json
 ```
 
 ---
@@ -164,7 +203,69 @@ Native `title` attributes are **suppressed** app-wide. The `tooltip.js` auto-con
 
 ---
 
-## Running
+## CI/CD Pipeline (.gitlab-ci.yml)
+
+Triggered on push to `main`. Three jobs:
+
+| Stage | Job | What it does |
+|-------|-----|--------------|
+| build | `build-frontend` | Cloud Build → pushes `frontend:SHA` + `:latest` to Artifact Registry |
+| build | `build-api` | Cloud Build → pushes `api:SHA` + `:latest` to Artifact Registry |
+| deploy | `terraform-deploy` | `terraform init` + `apply -auto-approve` with project vars |
+
+GCP Project: `or-tfconfig-dec-exp-prod`
+Region: `europe-west2`
+Registry: `europe-west2-docker.pkg.dev/or-tfconfig-dec-exp-prod/rca-task-info`
+
+---
+
+## Terraform / Infrastructure
+
+### What it provisions
+
+| Resource | Purpose |
+|----------|--------|
+| `google_cloud_run_v2_service.frontend` | Static frontend (Nginx), public, scales 0→3 |
+| `google_cloud_run_v2_service.api` | FastAPI backend, public (token-validated), scales 0→5 |
+| IAM: `bigquery.dataViewer` + `bigquery.jobUser` | API SA → BigQuery access |
+| IAM: `cloudbuild.builds.editor` + `artifactregistry.writer` + `run.admin` + `iam.serviceAccountUser` | Deployer SA → CI/CD permissions |
+
+### Variables required
+
+| Variable | Source |
+|----------|--------|
+| `project_id` | GCP project |
+| `region` | Default `europe-west2` |
+| `image_tag` | Set by CI (commit SHA or `latest`) |
+| `api_service_account` | Pre-created SA for the API |
+| `deployer_sa_email` | Pre-created SA for GitLab CI |
+| `entra_tenant_id` | Azure Entra ID |
+| `entra_client_id` | Entra App Registration |
+
+### Pre-requisites (one-time)
+
+1. **Artifact Registry** — create the container repo:
+   ```bash
+   gcloud artifacts repositories create rca-task-info \
+     --repository-format=docker \
+     --location=europe-west2
+   ```
+2. **Service Accounts** — create API SA + Deployer SA in GCP IAM
+3. **Entra App Registration** — create in Azure, expose scope `access_as_user`, set redirect URI after first deploy
+4. **GitLab CI/CD Variables** — add: `GCP_SA_KEY`, `DEPLOYER_SA_EMAIL`, `entra_tenant_id`, `entra_client_id`
+
+### Outputs
+
+| Output | Value |
+|--------|-------|
+| `frontend_url` | Cloud Run URL for the frontend |
+| `api_url` | Cloud Run URL for the API |
+
+After first deploy, update `js/auth/auth-config.js` → `apiBaseUrl` with the `api_url` output, then rebuild and push.
+
+---
+
+## Running (local dev)
 
 ```bash
 python serve.py
