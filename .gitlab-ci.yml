@@ -8,30 +8,32 @@ stages:
   - build
   - deploy
 
-.docker-base:
-  image: docker:latest
-  services:
-    - docker:dind
+.gcp-auth:
   before_script:
-    - echo "${GCP_SA_KEY}" | docker login -u _json_key --password-stdin https://${REGION}-docker.pkg.dev
+    - echo "$GCP_SA_KEY" > /tmp/key.json
+    - gcloud auth activate-service-account --key-file=/tmp/key.json
+    - gcloud config set project ${GCP_PROJECT_ID}
+    - gcloud auth configure-docker ${REGION}-docker.pkg.dev --quiet
+  after_script:
+    - rm -f /tmp/key.json
   only:
     - main
 
 build-frontend:
-  extends: .docker-base
+  extends: .gcp-auth
   stage: build
+  image: google/cloud-sdk:slim
   script:
-    - docker build -t ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA} -t ${REGISTRY}/frontend:latest .
-    - docker push ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA}
-    - docker push ${REGISTRY}/frontend:latest
+    - gcloud builds submit --tag ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA} .
+    - gcloud artifacts docker tags add ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA} ${REGISTRY}/frontend:latest
 
 build-api:
-  extends: .docker-base
+  extends: .gcp-auth
   stage: build
+  image: google/cloud-sdk:slim
   script:
-    - docker build -t ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA} -t ${REGISTRY}/api:latest ./api
-    - docker push ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA}
-    - docker push ${REGISTRY}/api:latest
+    - gcloud builds submit --tag ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA} ./api
+    - gcloud artifacts docker tags add ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA} ${REGISTRY}/api:latest
 
 terraform-deploy:
   stage: deploy
@@ -43,5 +45,7 @@ terraform-deploy:
     - cd terraform
     - terraform init
     - terraform apply -auto-approve
+  after_script:
+    - rm -f key.json
   only:
     - main
