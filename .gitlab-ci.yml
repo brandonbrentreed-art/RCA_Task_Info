@@ -1,0 +1,33 @@
+variables:
+  GCP_PROJECT_ID: "or-tfconfig-dec-exp-prod"
+  REGION: "europe-west2"
+  REPO_NAME: "rca-task-info"
+  REGISTRY: "${REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${REPO_NAME}"
+
+stages:
+  - build
+
+.docker-base:
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "${GCP_SA_KEY}" | docker login -u _json_key --password-stdin https://${REGION}-docker.pkg.dev
+  only:
+    - main
+
+build-frontend:
+  extends: .docker-base
+  stage: build
+  script:
+    - docker build -t ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA} -t ${REGISTRY}/frontend:latest .
+    - docker push ${REGISTRY}/frontend:${CI_COMMIT_SHORT_SHA}
+    - docker push ${REGISTRY}/frontend:latest
+
+build-api:
+  extends: .docker-base
+  stage: build
+  script:
+    - docker build -t ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA} -t ${REGISTRY}/api:latest ./api
+    - docker push ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA}
+    - docker push ${REGISTRY}/api:latest
