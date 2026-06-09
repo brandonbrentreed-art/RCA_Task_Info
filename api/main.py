@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from google.cloud import bigquery
 from functools import wraps
 import google.auth
@@ -6,6 +7,7 @@ import google.auth.transport.requests
 from google.oauth2 import id_token
 
 app = Flask(__name__)
+CORS(app, origins=["https://*.run.app"], supports_credentials=True)
 
 # Verify the caller's Entra ID token (forwarded from frontend)
 ENTRA_TENANT_ID = "YOUR_BT_TENANT_ID"
