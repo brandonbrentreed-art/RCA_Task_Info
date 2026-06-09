@@ -6,6 +6,7 @@ variables:
 
 stages:
   - build
+  - deploy
 
 .docker-base:
   image: docker:latest
@@ -31,3 +32,16 @@ build-api:
     - docker build -t ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA} -t ${REGISTRY}/api:latest ./api
     - docker push ${REGISTRY}/api:${CI_COMMIT_SHORT_SHA}
     - docker push ${REGISTRY}/api:latest
+
+terraform-deploy:
+  stage: deploy
+  image: hashicorp/terraform:latest
+  before_script:
+    - echo "$GCP_SA_KEY" > key.json
+    - export GOOGLE_APPLICATION_CREDENTIALS=key.json
+  script:
+    - cd terraform
+    - terraform init
+    - terraform apply -auto-approve
+  only:
+    - main
