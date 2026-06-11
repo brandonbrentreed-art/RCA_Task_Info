@@ -122,7 +122,7 @@ Weights: `--font-weight-light` (300), `--font-weight-regular` (400), `--font-wei
 
 ### Shape
 
-`--radius: 2px` — Enterprise feel, applied to all components.
+`--radius: 4px` — Enterprise feel, applied to all components.
 
 ### Shadows (Elevation)
 
@@ -141,11 +141,81 @@ Weights: `--font-weight-light` (300), `--font-weight-regular` (400), `--font-wei
 
 ### Table Border
 
-Defined in `shared-components/table.css`:
+Defined in `shared-ui/theme.css`:
 ```css
 --table-border: 1px solid var(--color-grey-300);
 ```
 Use for ALL table/grid outer borders and cell dividers.
+
+### Nav Brand Logo
+
+The navigation sidebar uses an inline SVG wordmark (`openreach`) with `fill="currentColor"` to inherit `var(--nav-text)`. No external image dependency — adapts to light/dark themes automatically.
+
+### Component Sizes (MUI-guided)
+
+All component dimensions are centralised in `shared-ui/theme.css`. Zero hardcoded pixel values across shared CSS.
+
+#### Icons
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-icon-xs` | 16px | Inline indicators, dismiss/remove icons |
+| `--size-icon-sm` | 20px | Secondary actions, toast icons |
+| `--size-icon-md` | 24px | Standard icon (MUI default) |
+| `--size-icon-lg` | 40px | Prominent icons, card icons |
+
+#### Touch Targets
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-btn-touch` | 48px | Primary interactive (hamburger, theme toggle, icon-btn) |
+| `--size-btn-sm` | 36px | Compact interactive (modal close) |
+| `--size-btn-xs` | 32px | Dense interactive (pagination arrows) |
+
+#### Navigation
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-nav-width` | 260px | Drawer width (MUI standard 240–320) |
+| `--size-nav-logo` | 40px | Brand mark max-height |
+
+#### Surfaces
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-modal-sm` | 360px | Confirmation dialogs |
+| `--size-modal-md` | 500px | Standard modal |
+| `--size-modal-lg` | 720px | Content-heavy modal |
+| `--size-dialog` | 400px | Alert/confirm dialog |
+| `--size-toast-max` | 360px | Snackbar / toast |
+
+#### Form Controls
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-toggle-width` | 36px | Switch track width |
+| `--size-toggle-height` | 20px | Switch track height |
+| `--size-toggle-knob` | 16px | Switch thumb |
+| `--size-chip-radius` | 16px | Chip pill shape |
+| `--size-chip-dismiss` | 18px | Chip close button |
+| `--size-textarea-min` | 100px | Textarea minimum height |
+| `--size-search-width` | 200px | Expanded search field |
+| `--size-select-arrow` | 18px | Dropdown caret icon |
+
+#### Feedback
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-spinner` | 36px | Circular progress |
+| `--size-spinner-sm` | 20px | Inline circular progress |
+| `--size-progress-height` | 4px | Linear progress bar |
+| `--size-tooltip-font` | 11px | Tooltip text (MUI uses 10–11px) |
+
+#### Misc
+
+| Token | Size | Usage |
+|-------|------|-------|
+| `--size-avatar` | 40px | User avatar (MUI default) |
 
 ---
 
@@ -161,14 +231,15 @@ Use for ALL table/grid outer borders and cell dividers.
 - Shadows → use `var(--shadow-*)` tokens
 - Transitions → use `var(--transition-*)` tokens
 - Table/grid borders → use `var(--table-border)`
-- Icon sizes → 24px standard, 28px for nav trigger
-- Touch targets → 48px minimum (MUI standard)
-- Hover states → `rgba(20, 32, 50, 0.08)` for light surfaces, `rgba(255, 255, 255, 0.12)` for dark surfaces
+- Component sizes → use `var(--size-*)` tokens (icons, buttons, modals, form controls)
+- Icon sizes → `var(--size-icon-md)` standard, never hardcode px values
+- Touch targets → `var(--size-btn-touch)` minimum (48px, MUI accessibility standard)
+- Hover states → use `var(--hover-overlay)` for light surfaces, `var(--nav-hover)` for dark surfaces
 
 ### Component usage
 
 - Buttons → `btn btn-primary | btn-success | btn-outlined | btn-text`
-- Icon buttons → `icon-btn` (48px circular, hover state built-in)
+- Icon buttons → `icon-btn` (`var(--size-btn-touch)` circular, hover state built-in)
 - Inputs → `input` | `input-sm` | `input-lg`
 - Cards → `card`
 - Chips → `chip` (with optional `chip-dismiss` button inside, `chip-count` for overflow)
@@ -193,8 +264,8 @@ body (--color-page-bg, padding: --spacing-6, viewport-locked)
 1. Create CSS + JS in `shared-components/`
 2. Use only theme tokens — no raw values
 3. Link CSS in `<head>`, JS before `</body>`
-4. Follow MUI naming/sizing conventions (48px touch targets, 24px icons, 4px grid)
-5. All interactive icons use `icon-btn` class (48px circle, circular hover)
+4. Follow MUI naming/sizing conventions — use `var(--size-*)` tokens, never hardcode
+5. All interactive icons use `icon-btn` class (`var(--size-btn-touch)` circle, circular hover)
 6. Disabled state: `opacity: 0.38` + `pointer-events: none`
 
 ### Tooltip system

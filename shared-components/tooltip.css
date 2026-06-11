@@ -6,10 +6,10 @@
   background: var(--color-navy);
   color: var(--color-white);
   font-family: var(--font-family);
-  font-size: 11px;
+  font-size: var(--size-tooltip-font);
   font-weight: var(--font-weight-medium);
   line-height: 1.4;
-  padding: 5px 10px;
+  padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius);
   white-space: nowrap;
   pointer-events: none;

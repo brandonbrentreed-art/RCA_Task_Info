@@ -115,8 +115,8 @@ header {
 
 /* Icon buttons (MUI style) */
 .icon-btn {
-  width: 48px;
-  height: 48px;
+  width: var(--size-btn-touch);
+  height: var(--size-btn-touch);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,8 +132,8 @@ header {
   color: var(--color-navy);
 }
 .icon-btn svg {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
 }
 
 /* Expandable search (MUI style) */
@@ -157,7 +157,7 @@ header {
 }
 
 .search-expand.active .search-input {
-  width: 200px;
+  width: var(--size-search-width);
   padding: var(--spacing-2) var(--spacing-1);
   padding-right: var(--spacing-6);
   border-bottom-color: var(--color-blue);
@@ -169,8 +169,8 @@ header {
   justify-content: center;
   position: absolute;
   right: 0;
-  width: 20px;
-  height: 20px;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
   border: none;
   background: transparent;
   color: var(--color-grey-light);
@@ -180,8 +180,8 @@ header {
 }
 
 .search-clear svg {
-  width: 16px;
-  height: 16px;
+  width: var(--size-icon-xs);
+  height: var(--size-icon-xs);
 }
 
 .search-clear:hover {

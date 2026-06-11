@@ -9,8 +9,8 @@
 }
 
 .loader-spinner {
-  width: 36px;
-  height: 36px;
+  width: var(--size-spinner);
+  height: var(--size-spinner);
   border: 3px solid var(--color-grey-200);
   border-top-color: var(--color-blue);
   border-radius: 50%;
@@ -18,15 +18,15 @@
 }
 
 .loader-sm .loader-spinner {
-  width: 20px;
-  height: 20px;
+  width: var(--size-spinner-sm);
+  height: var(--size-spinner-sm);
   border-width: 2px;
 }
 
 /* -- Linear progress bar -- */
 .loader-linear {
   width: 100%;
-  height: 4px;
+  height: var(--size-progress-height);
   background: var(--color-grey-200);
   border-radius: var(--radius);
   overflow: hidden;

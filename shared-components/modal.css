@@ -3,7 +3,7 @@
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(20, 32, 50, 0.5);
+  background: var(--overlay-backdrop);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,7 +22,7 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow-3);
   width: 90%;
-  max-width: 500px;
+  max-width: var(--size-modal-md);
   max-height: 85vh;
   display: flex;
   flex-direction: column;
@@ -34,8 +34,8 @@
 }
 
 /* Size variants */
-.modal-sm { max-width: 360px; }
-.modal-lg { max-width: 720px; }
+.modal-sm { max-width: var(--size-modal-sm); }
+.modal-lg { max-width: var(--size-modal-lg); }
 .modal-full { max-width: 90vw; }
 
 .modal-header {
@@ -58,8 +58,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-btn-sm);
+  height: var(--size-btn-sm);
   background: none;
   border: none;
   cursor: pointer;
@@ -68,8 +68,8 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 .modal-close svg {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
 }
 .modal-close:hover {
   background: var(--hover-overlay);

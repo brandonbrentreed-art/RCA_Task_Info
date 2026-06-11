@@ -6,8 +6,8 @@
   top: var(--spacing-4);
   left: var(--spacing-4);
   z-index: 150;
-  width: 48px;
-  height: 48px;
+  width: var(--size-btn-touch);
+  height: var(--size-btn-touch);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,8 +21,8 @@
 .nav-trigger:hover { background: var(--hover-overlay); }
 
 .nav-trigger svg {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
 }
 
 /* Backdrop overlay when nav is open */
@@ -45,7 +45,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 260px;
+  width: var(--size-nav-width);
   height: 100vh;
   background: var(--nav-bg);
   color: var(--nav-text);
@@ -73,8 +73,8 @@
   background: none;
   border: none;
   color: var(--nav-text);
-  width: 40px;
-  height: 40px;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,18 +86,19 @@
 .nav-close:hover { background: var(--nav-hover); }
 
 .nav-close svg {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
 }
 
 .nav-brand-logo {
-  max-width: 100%;
+  width: 100%;
   height: auto;
+  max-height: var(--size-nav-logo);
   flex-shrink: 0;
-  margin-top: var(--spacing-4);
-  padding-bottom: var(--spacing-2);
+  margin-top: var(--spacing-6);
+  margin-bottom: var(--spacing-4);
   display: block;
-  clip-path: inset(0 2px 0 0);
+  color: var(--nav-text);
 }
 
 .nav-items {
@@ -118,7 +119,7 @@
   white-space: nowrap;
   border-radius: var(--radius);
   margin: 0 var(--spacing-2);
-  min-height: 40px;
+  min-height: var(--size-icon-lg);
   transition: background var(--transition-fast), color var(--transition-fast);
   cursor: pointer;
 }
@@ -132,8 +133,8 @@
 }
 
 .nav-icon {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -160,8 +161,8 @@
   top: var(--spacing-4);
   right: var(--spacing-4);
   z-index: 150;
-  width: 48px;
-  height: 48px;
+  width: var(--size-btn-touch);
+  height: var(--size-btn-touch);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -174,8 +175,8 @@
 }
 .theme-toggle:hover { background: var(--hover-overlay); }
 .theme-toggle svg {
-  width: 24px;
-  height: 24px;
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
   position: absolute;
   top: 50%;
   left: 50%;

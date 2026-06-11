@@ -87,7 +87,7 @@
   font-family: var(--font-family);
   font-size: var(--text-caption);
   font-weight: var(--font-weight-medium);
-  border-radius: 16px;
+  border-radius: var(--size-chip-radius);
   background: var(--color-grey-200);
   color: var(--color-navy);
   line-height: 1.5;
@@ -100,8 +100,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: var(--size-chip-dismiss);
+  height: var(--size-chip-dismiss);
   border: none;
   background: var(--color-grey-300);
   color: var(--color-navy);

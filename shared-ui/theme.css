@@ -85,6 +85,49 @@
   /* ===== Content spacing (internal padding for panels/components) ===== */
   --content-inset: var(--spacing-4);
 
+  /* ===== Component Sizes (MUI-guided) ===== */
+
+  /* Icons — consistent with MUI's IconButton sizing */
+  --size-icon-xs: 16px;       /* inline indicators, dismiss icons */
+  --size-icon-sm: 20px;       /* secondary actions, toast icons */
+  --size-icon-md: 24px;       /* standard icon (MUI default) */
+  --size-icon-lg: 40px;       /* prominent icons, card icons */
+
+  /* Touch targets — MUI minimum 48px for accessibility */
+  --size-btn-touch: 48px;     /* primary interactive (hamburger, theme toggle) */
+  --size-btn-sm: 36px;        /* compact interactive (modal close) */
+  --size-btn-xs: 32px;        /* dense interactive (pagination) */
+
+  /* Navigation */
+  --size-nav-width: 260px;    /* drawer width (MUI standard 240–320) */
+  --size-nav-logo: 40px;      /* brand mark max-height */
+
+  /* Surfaces — max-width constraints */
+  --size-modal-sm: 360px;     /* confirmation dialogs */
+  --size-modal-md: 500px;     /* standard modal */
+  --size-modal-lg: 720px;     /* content-heavy modal */
+  --size-dialog: 400px;       /* alert/confirm dialog */
+  --size-toast-max: 360px;    /* snackbar / toast */
+
+  /* Form controls */
+  --size-toggle-width: 36px;  /* switch track width */
+  --size-toggle-height: 20px; /* switch track height */
+  --size-toggle-knob: 16px;   /* switch thumb */
+  --size-chip-radius: 16px;   /* chip pill shape */
+  --size-chip-dismiss: 18px;  /* chip close button */
+  --size-textarea-min: 100px; /* textarea minimum height */
+  --size-search-width: 200px; /* expanded search field */
+  --size-select-arrow: 18px;  /* dropdown caret icon */
+
+  /* Feedback */
+  --size-spinner: 36px;       /* circular progress */
+  --size-spinner-sm: 20px;    /* inline circular progress */
+  --size-progress-height: 4px;/* linear progress bar */
+  --size-tooltip-font: 11px;  /* tooltip text (MUI uses 10–11px) */
+
+  /* Misc */
+  --size-avatar: 40px;        /* user avatar (MUI default) */
+
   /* ===== Nav (fixed dark panel) ===== */
   --nav-bg: #142032;
   --nav-text: #FFFFFF;

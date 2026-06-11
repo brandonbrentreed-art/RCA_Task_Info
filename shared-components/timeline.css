@@ -85,8 +85,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
   border: none;
   background: transparent;
   color: var(--color-grey-light);
@@ -97,8 +97,8 @@
 }
 
 .pivot-copy svg {
-  width: 16px;
-  height: 16px;
+  width: var(--size-icon-xs);
+  height: var(--size-icon-xs);
 }
 
 .pivot-row-label:hover .pivot-copy {
@@ -292,7 +292,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2350535A'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--spacing-1) center;
-  background-size: 18px;
+  background-size: var(--size-select-arrow);
 }
 
 .pagination-footer select:hover {
@@ -313,8 +313,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: var(--size-btn-xs);
+  height: var(--size-btn-xs);
   border: none;
   border-radius: 50%;
   background: transparent;
@@ -335,8 +335,8 @@
 }
 
 .pagination-footer button svg {
-  width: 20px;
-  height: 20px;
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
 }
 
 .pagination-info {

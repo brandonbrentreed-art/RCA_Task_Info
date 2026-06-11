@@ -55,7 +55,7 @@
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2350535A' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right var(--spacing-3) center;
   padding-right: var(--spacing-8);
   cursor: pointer;
   transition: border-color var(--transition-fast);
@@ -69,7 +69,7 @@
 /* -- Textarea -- */
 .textarea {
   width: 100%;
-  min-height: 100px;
+  min-height: var(--size-textarea-min);
   padding: var(--spacing-2) var(--spacing-3);
   font-family: var(--font-family);
   font-size: var(--text-body1);
@@ -107,23 +107,23 @@
 .checkbox-label input,
 .radio-label input {
   accent-color: var(--color-blue);
-  width: 16px;
-  height: 16px;
+  width: var(--size-icon-xs);
+  height: var(--size-icon-xs);
 }
 
 /* -- Toggle Switch -- */
 .toggle {
   position: relative;
   display: inline-block;
-  width: 36px;
-  height: 20px;
+  width: var(--size-toggle-width);
+  height: var(--size-toggle-height);
 }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
   position: absolute;
   inset: 0;
   background: var(--color-grey-300);
-  border-radius: 10px;
+  border-radius: calc(var(--size-toggle-height) / 2);
   transition: background var(--transition-fast);
   cursor: pointer;
 }
@@ -132,11 +132,11 @@
   position: absolute;
   left: 2px;
   top: 2px;
-  width: 16px;
-  height: 16px;
+  width: var(--size-toggle-knob);
+  height: var(--size-toggle-knob);
   background: var(--color-white);
   border-radius: 50%;
   transition: transform var(--transition-fast);
 }
 .toggle input:checked + .toggle-slider { background: var(--color-blue); }
-.toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(var(--size-toggle-knob)); }
