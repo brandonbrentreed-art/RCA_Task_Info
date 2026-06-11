@@ -99,6 +99,8 @@
   margin-bottom: var(--spacing-4);
   display: block;
   color: var(--nav-text);
+  cursor: default;
+  user-select: none;
 }
 
 .nav-items {
