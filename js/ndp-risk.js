@@ -171,7 +171,9 @@ var NdpRisk = (function () {
           return ci !== -1 ? (item.row[ci] || "") : "";
         }).join("\t") + "\n";
       });
-      navigator.clipboard.writeText(tsv).catch(function () {});
+      navigator.clipboard.writeText(tsv).then(function () {
+        Notify.success("Copied " + visible.length + " rows", 2000);
+      }).catch(function () {});
     });
 
     // Screenshot risk summary (same format as WMS)
@@ -258,7 +260,9 @@ var NdpRisk = (function () {
         canvas.toBlob(function (blob) {
           if (!blob) return;
           try {
-            navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]).catch(function () {
+            navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]).then(function () {
+              Notify.success("Screenshot copied to clipboard", 2000);
+            }).catch(function () {
               window.open(URL.createObjectURL(blob), "_blank");
             });
           } catch (e) {

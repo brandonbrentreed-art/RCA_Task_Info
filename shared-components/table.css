@@ -46,6 +46,26 @@
 .table th.sort-asc::after { content: "↑"; opacity: 1; }
 .table th.sort-desc::after { content: "↓"; opacity: 1; }
 
+/* -- Sort icon (SVG, used by JS-driven tables) -- */
+.table-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: var(--spacing-1);
+  opacity: 0.3;
+  transition: opacity var(--transition-fast);
+}
+
+.table-sort-icon svg {
+  width: var(--size-icon-xs);
+  height: var(--size-icon-xs);
+}
+
+.table-sort-icon.is-active {
+  opacity: 1;
+  color: var(--color-navy);
+}
+
 /* -- Prevent text selection on table rows (consistent across app) -- */
 .table tbody tr {
   user-select: none;
@@ -145,6 +165,7 @@
 
 .table-pagination__select {
   padding: var(--spacing-1) var(--spacing-2);
+  padding-right: var(--spacing-5);
   font-family: var(--font-family);
   font-size: var(--text-caption);
   border: 1px solid var(--color-grey-300);
@@ -156,7 +177,13 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%2350535A' d='M5 7L1 3h8z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right var(--spacing-1) center;
-  padding-right: var(--spacing-4);
+  transition: border-color var(--transition-fast);
+}
+
+.table-pagination__select:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .table-pagination__range {

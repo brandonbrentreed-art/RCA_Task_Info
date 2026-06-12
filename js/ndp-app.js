@@ -239,34 +239,48 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // --- Export button ---
+  // --- Export button (page-aware — exports active tab's table) ---
   exportBtn.addEventListener("click", function () {
     if (exportBtn.disabled) return;
-    exportToExcel();
-  });
-
-  function exportToExcel() {
     if (typeof XLSX === "undefined") return;
-    var headers = NdpData.state.planHeaders;
-    var rows = NdpData.state.planRows;
-    if (!headers.length || !rows.length) return;
+
+    var activeTab = document.querySelector(".tabs__tab.is-active");
+    var target = activeTab ? activeTab.getAttribute("data-tab") : "plan";
 
     var wb = XLSX.utils.book_new();
+    var headers, rows, sheetName;
+
+    if (target === "plan") {
+      headers = NdpData.state.planHeaders;
+      rows = NdpData.state.planRows;
+      sheetName = "Plan";
+    } else if (target === "demand") {
+      headers = NdpData.state.taskforceHeaders;
+      rows = NdpData.state.taskforceRows;
+      sheetName = "Demand";
+    } else if (target === "risk") {
+      headers = NdpData.state.planHeaders;
+      rows = NdpData.state.planRows;
+      sheetName = "Risk";
+    }
+
+    if (!headers || !rows || !rows.length) return;
+
     var border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
-    var hdrS = { font: { bold: true }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: "142032" } }, font: { bold: true, color: { rgb: "FFFFFF" } } };
+    var hdrS = { font: { bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: "142032" } } };
     var cellS = { alignment: { horizontal: "center", vertical: "center" }, border: border };
 
-    // Sheet 1: Plan assignments
-    var s1 = [headers];
-    rows.forEach(function (row) { s1.push(row); });
-    var ws1 = XLSX.utils.aoa_to_sheet(s1);
-    ws1["!cols"] = headers.map(function (h) { return { wch: Math.max(h.length + 2, 10) }; });
-    styleSheet(ws1, hdrS, cellS);
-    XLSX.utils.book_append_sheet(wb, ws1, "Plan");
+    var data = [headers];
+    rows.forEach(function (row) { data.push(row); });
+    var ws = XLSX.utils.aoa_to_sheet(data);
+    ws["!cols"] = headers.map(function (h) { return { wch: Math.max((h || "").length + 2, 10) }; });
+    styleSheet(ws, hdrS, cellS);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
     var d = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, "NDP_Export_" + d + ".xlsx");
-  }
+    XLSX.writeFile(wb, "NDP_" + sheetName + "_" + d + ".xlsx");
+    Notify.success(sheetName + " exported", 2000);
+  });
 
   function styleSheet(ws, hdrS, cellS) {
     var range = XLSX.utils.decode_range(ws["!ref"]);

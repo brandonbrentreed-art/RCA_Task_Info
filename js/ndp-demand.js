@@ -385,7 +385,10 @@ var NdpDemand = (function () {
       '<div class="modal-backdrop open" id="ndpDrillModal">' +
         '<div class="modal modal-full">' +
           '<div class="modal-header">' +
-            '<h3>' + NDP.escapeHtml(title) + ' (' + allRows.length + ')</h3>' +
+            '<div class="modal-header-actions">' +
+              '<h3>' + NDP.escapeHtml(title) + ' (' + allRows.length + ')</h3>' +
+              '<button class="icon-btn icon-btn--sm tooltip" id="ndpDrillCopy" data-tooltip="Copy table"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>' +
+            '</div>' +
             '<button class="modal-close" aria-label="Close">' +
               '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' +
             '</button>' +
@@ -396,15 +399,15 @@ var NdpDemand = (function () {
               '<div class="table-scroll">' +
                 '<table class="table">' +
                   '<thead><tr>' +
-                    '<th style="text-align:left">Task ID</th>' +
-                    '<th style="text-align:left">PWA</th>' +
-                    '<th style="text-align:left">Exchange</th>' +
-                    '<th style="text-align:center">Appt</th>' +
-                    '<th style="text-align:center">Commit</th>' +
-                    '<th style="text-align:center">Skill</th>' +
-                    '<th style="text-align:center">Response Code</th>' +
-                    '<th style="text-align:center">Task Type</th>' +
-                    '<th style="text-align:center">Tech</th>' +
+                    '<th style="text-align:left" data-col="' + idIdx + '">Task ID</th>' +
+                    '<th style="text-align:left" data-col="' + pwaLocalIdx + '">PWA</th>' +
+                    '<th style="text-align:left" data-col="' + exchIdx + '">Exchange</th>' +
+                    '<th style="text-align:center" data-col="' + slotLocalIdx + '">Appt</th>' +
+                    '<th style="text-align:center" data-col="' + tagIdx + '">Commit</th>' +
+                    '<th style="text-align:center" data-col="' + skillIdx + '">Skill</th>' +
+                    '<th style="text-align:center" data-col="' + careIdx + '">Response Code</th>' +
+                    '<th style="text-align:center" data-col="' + typeIdx + '">Task Type</th>' +
+                    '<th style="text-align:center" data-col="' + pinIdx + '">Tech</th>' +
                   '</tr></thead>' +
                   '<tbody id="ndpDrillTbody"></tbody>' +
                 '</table>' +
@@ -425,13 +428,40 @@ var NdpDemand = (function () {
     modal.querySelector(".modal-close").addEventListener("click", function () { modal.remove(); });
     modal.addEventListener("click", function (e) { if (e.target === modal) modal.remove(); });
 
+    // Copy table to clipboard
+    document.getElementById("ndpDrillCopy").addEventListener("click", function () {
+      var filtered = getFilteredRows();
+      if (!filtered.length) return;
+      var cols = ["Task ID", "PWA", "Exchange", "Appt", "Commit", "Skill", "Response Code", "Task Type", "Tech"];
+      var indices = [idIdx, pwaLocalIdx, exchIdx, slotLocalIdx, tagIdx, skillIdx, careIdx, typeIdx, pinIdx];
+      var tsv = cols.join("\t") + "\n";
+      filtered.forEach(function (row) {
+        tsv += indices.map(function (ci) { return ci !== -1 ? (row[ci] || "") : ""; }).join("\t") + "\n";
+      });
+      navigator.clipboard.writeText(tsv).then(function () {
+        Notify.success("Copied " + filtered.length + " rows", 2000);
+      }).catch(function () {});
+    });
+
     // State
     var drillPage = 0;
     var activePwa = "";
+    var sortCol = -1;
+    var sortAsc = true;
 
     function getFilteredRows() {
-      if (!activePwa) return allRows;
-      return allRows.filter(function (r) { return (r[pwaLocalIdx] || "").trim() === activePwa; });
+      var filtered = activePwa
+        ? allRows.filter(function (r) { return (r[pwaLocalIdx] || "").trim() === activePwa; })
+        : allRows.slice();
+      if (sortCol !== -1) {
+        filtered.sort(function (a, b) {
+          var va = (a[sortCol] || ""), vb = (b[sortCol] || "");
+          var na = parseFloat(va), nb = parseFloat(vb);
+          var cmp = (!isNaN(na) && !isNaN(nb)) ? na - nb : va.localeCompare(vb);
+          return sortAsc ? cmp : -cmp;
+        });
+      }
+      return filtered;
     }
 
     function renderDrillRows() {
@@ -469,6 +499,46 @@ var NdpDemand = (function () {
       document.getElementById("ndpDrillPrev").disabled = drillPage === 0;
       document.getElementById("ndpDrillNext").disabled = drillPage >= totalPages - 1;
     }
+
+    // Header sort clicks
+    modal.querySelectorAll("thead th[data-col]").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var col = parseInt(th.getAttribute("data-col"), 10);
+        if (isNaN(col) || col === -1) return;
+        if (sortCol === col) {
+          if (sortAsc) { sortAsc = false; }
+          else { sortCol = -1; }
+        } else {
+          sortCol = col;
+          sortAsc = true;
+        }
+        drillPage = 0;
+        renderDrillRows();
+        updateSortIndicators();
+      });
+    });
+
+    function updateSortIndicators() {
+      modal.querySelectorAll("thead th[data-col]").forEach(function (th) {
+        var col = parseInt(th.getAttribute("data-col"), 10);
+        var icon = th.querySelector(".table-sort-icon");
+        if (!icon) {
+          icon = document.createElement("span");
+          icon.className = "table-sort-icon";
+          th.appendChild(icon);
+        }
+        if (col === sortCol) {
+          icon.classList.add("is-active");
+          icon.innerHTML = sortAsc
+            ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8z"/></svg>'
+            : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z"/></svg>';
+        } else {
+          icon.classList.remove("is-active");
+          icon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/></svg>';
+        }
+      });
+    }
+    updateSortIndicators();
 
     // PWA filter clicks
     modal.querySelectorAll(".ndp-pwa-filter").forEach(function (btn) {

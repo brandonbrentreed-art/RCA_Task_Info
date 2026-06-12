@@ -252,7 +252,9 @@ function initTables() {
   document.getElementById("tableCtxCopy").addEventListener("click", function () {
     if (!targetCell) return;
     var text = targetCell.textContent.trim();
-    navigator.clipboard.writeText(text).catch(function () {});
+    navigator.clipboard.writeText(text).then(function () {
+      if (typeof Notify !== "undefined") Notify.success("Copied: " + (text.length > 20 ? text.slice(0, 18) + "\u2026" : text), 2000);
+    }).catch(function () {});
     menu.classList.remove("is-open");
   });
 
