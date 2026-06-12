@@ -260,21 +260,65 @@ All component dimensions are centralised in `shared-ui/theme.css`. Zero hardcode
 ### Component usage
 
 - Buttons → `btn btn-primary | btn-success | btn-outlined | btn-text`
-- Icon buttons → `icon-btn` (`var(--size-btn-touch)` circular, hover state built-in)
-- Inputs → `input` | `input-sm` | `input-lg`
+- Icon buttons → `icon-btn` (48px) | `icon-btn icon-btn--sm` (36px) — circular, hover overlay
+- Icon buttons (dense) → `--size-btn-xs` (32px) — used in pagination, filter chevrons, clear buttons
+- Inputs → `input` | `input-sm` | `input-lg` (padding `--spacing-2`/`--spacing-3`, font `--text-body1`)
 - Selects → `select` | `select input-sm` (custom chevron, focus ring built-in)
+- Searchable filters → `.ndp-filter-wrap` with input + clear button + chevron button + dropdown
 - Cards → `card`
 - Chips → `chip` (with optional `chip-dismiss` button inside, `chip-count` for overflow)
-- Tooltips → add class `tooltip` + `data-tooltip="text"` (placement: default bottom, `tooltip-top`, `tooltip-left`, `tooltip-right`)
+- Tooltips → add `data-tooltip="text"` to any element (auto-wired by `tooltip.js`)
 - Loader → `loader-spinner` (circular), `loader-linear` (bar), `loader-overlay` (full area with text)
+- Notify → `Notify.success(msg, ms)` | `Notify.error(msg)` | `Notify.info(msg)` — toast feedback
 - Search → `initSearch({ onInput: fn })` — auto-wires expand/collapse/blur on `.search-expand`
 - Tabs → `.tabs-bar` > `.tabs` > `.tabs__tab` (MUI tab bar, `is-active` class, `data-tab` attribute)
 - Tables → `.table` inside `.table-wrapper` or `.table-wrapper--flex` (sticky headers, pagination)
+- Table pagination → `.table-pagination` with `__label`, `__size` (custom dropdown), `__range`, `__selected`, circular SVG prev/next buttons
+- Table page size → `.table-pagination__size` with `__size-value` (text) + `__size-trigger` (circular icon button) + `__size-dropdown` (custom popup)
+- Table sort → `.table-sort-icon` with MUI ArrowUpward/Downward/UpDown SVGs (`--size-icon-xs`)
+- Table context menu → right-click any `.table td` — auto-wired by `table.js`, shows copy with preview
 - Row selection → `TableSelect.rows({ container, getRows, onSelect })` — click, shift+click, select all
 - Cell selection → `TableSelect.cells({ container, cellSelector, onPaste, onDelete })` — drag, shift, ctrl, paste, delete
 - Modal → `openModal(id)` / `closeModal(id)` on `.modal-backdrop` > `.modal`
 - Layout → `flex`, `flex-col`, `grid`, `grid-2/3/4`, `gap-*`, `mt-*`, `mb-*`, `p-*`
 - Typography → `text-h1` through `text-h4`, `text-body1`, `text-body2`, `text-caption`, `text-overline`
+
+### MUI Icon Button Pattern (all interactive icons follow this)
+
+```css
+/* Three sizes: */
+--size-btn-touch: 48px   /* Primary: hamburger, theme toggle, header actions */
+--size-btn-sm: 36px      /* Compact: modal close, tab actions */
+--size-btn-xs: 32px      /* Dense: pagination, filter chevrons, clear buttons */
+
+/* Consistent style: */
+border-radius: 50%;
+background: transparent;
+color: var(--color-grey);
+
+/* Hover: */
+background: var(--hover-overlay);
+color: var(--color-navy);
+
+/* Disabled: */
+opacity: 0.38;
+cursor: not-allowed;
+
+/* SVG inside: */
+width: var(--size-icon-sm);  /* 20px - standard for sm/xs buttons */
+height: var(--size-icon-sm);
+```
+
+### Custom Dropdown Pattern (replaces native select)
+
+```
+Trigger (button/text) → clicks toggle .is-open on dropdown
+Dropdown (absolute positioned) → options list
+Option (.is-active for selected) → click selects, updates trigger
+Click outside → centralised close in table.js
+```
+
+Used by: pagination page-size, filter inputs. Never use native `<select>` for styled dropdowns.
 
 ### Page layout pattern
 
@@ -308,6 +352,10 @@ Every piece of logic lives in ONE place. If two pages need the same behaviour, i
 | Cell selection + paste | `TableSelect.cells(opts)` in `table.js` | No inline drag/paste/delete handlers |
 | Expandable search | `initSearch(opts)` in `search.js` | No inline expand/collapse/blur wiring |
 | Modal open/close | `openModal(id)` / `closeModal(id)` in `modal.js` | No inline backdrop listeners |
+| Toast notifications | `Notify.success/error/info(msg, ms)` in `notify.js` | No inline toast/feedback logic |
+| Right-click copy | Auto-wired in `table.js` on any `.table td` | No per-page context menu code |
+| Sort icons | `.table-sort-icon` class in `table.css` | No inline text arrows or custom icon styles |
+| Cursor behaviour | Global `cursor: default` in `styles.css` | No per-element `cursor: default` overrides |
 | HTML escape | `NDP.escapeHtml(s)` in `constants.js` | No inline createElement('div') |
 | Date → TAG | `NDP.deriveTag(dateStr)` in `constants.js` | No inline date parsing |
 | Column resolution | `COL_MAP.findSourceIdx()` in `column-map.js` | No inline header scanning |
@@ -336,9 +384,11 @@ Every piece of logic lives in ONE place. If two pages need the same behaviour, i
 <script src="shared-components/modal.js"></script>
 <script src="shared-components/search.js"></script>
 <script src="shared-components/table.js"></script>
+<script src="shared-components/notify.js"></script>
 
 <!-- 2. External libs (if needed) -->
 <script src="js/lib/xlsx-js-style.min.js"></script>
+<script src="js/lib/html2canvas.min.js"></script>
 
 <!-- 3. Data layer (constants first, then modules that depend on them) -->
 <script src="js/data/constants.js"></script>
@@ -363,6 +413,13 @@ Every piece of logic lives in ONE place. If two pages need the same behaviour, i
 <!-- 7. Nav (always last — handles page transitions) -->
 <script src="shared-components/nav.js"></script>
 ```
+
+### Global UX Rules
+
+- **Cursor**: Global `cursor: default` on body. Only override with `pointer` (clickable), `cell` (editable cells), `not-allowed` (disabled). Never set `cursor: default` on individual elements.
+- **User feedback**: Every clipboard/export action uses `Notify.success()`. Never silently succeed.
+- **Text selection**: `user-select: none` on `.table tbody tr` (central). Users don't accidentally select table text.
+- **Dark mode**: All components use token vars that auto-switch. No component needs its own `[data-theme="dark"]` overrides unless it uses colours not covered by tokens.
 
 ### Tooltip system
 

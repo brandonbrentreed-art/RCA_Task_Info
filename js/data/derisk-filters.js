@@ -162,5 +162,7 @@ var DERISK_COLUMNS = [
   { name: 'TASK LINK',     src: 'TF_LINK' },
   { name: 'PWA ID',        src: 'DIRECTORY_PWA' },
   { name: 'OUC',           src: 'DIRECTORY_OUC' },
-  { name: 'DURATION',      src: 'DURATION' }
+  { name: 'DURATION',      src: 'DURATION' },
+  { name: 'WORK ID',        src: 'WORK ID' },
+  { name: 'AGEING',         src: null }
 ];

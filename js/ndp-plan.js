@@ -19,7 +19,7 @@ var NdpPlan = (function () {
   };
 
   var PAGE_SIZES = [30, 50, 100];
-  var FILTER_COLS = ["OUC", "CARE LEVEL", "TASK TYPE", "COMMIT TYPE"];
+  var FILTER_COLS = ["OUC", "COMMIT TYPE", "CARE LEVEL", "AGEING", "TASK TYPE"];
   var SEARCH_COLS = []; // empty = search all columns
   var filterSelections = {}; // colName -> [selected values]
 
@@ -38,13 +38,15 @@ var NdpPlan = (function () {
     "CARE LEVEL": { label: "Response Code", align: "center" },
     "TASK TYPE": { label: "Task Type", align: "center" },
     "EXCHANGE NAME": { label: "Exchange", align: "left" },
+    "WORK ID": { label: "Service ID", align: "left" },
+    "AGEING": { label: "Ageing", align: "center" },
     "PWA ID": { label: "PWA", align: "left" },
     "OUC": { label: "OUC", align: "left" }
   };
 
   // Visible columns (ordered) — filtered to only those present in headers
   var VISIBLE_COLS_DEFAULT = [
-    "JOB NO", "OUC", "PWA ID", "COMMIT TYPE", "DERISK REASON",
+    "JOB NO", "OUC", "PWA ID", "COMMIT TYPE", "AGEING", "DERISK REASON",
     "APPT SLOT", "TECH PIN", "TECH NAME", "CARE LEVEL", "TASK TYPE", "EXCHANGE NAME"
   ];
 
@@ -75,7 +77,7 @@ var NdpPlan = (function () {
     if (existingFilters) existingFilters.remove();
 
     document.getElementById("ndpEmptyPlan").style.display = "none";
-    if (rowSelect) rowSelect.clear();
+    rowSelect = null; // Disconnect old selection before DOM rebuild
     Object.keys(filterSelections).forEach(function(k) { delete filterSelections[k]; });
     st.sortCol = -1;
     st.page = 0;
@@ -107,11 +109,15 @@ var NdpPlan = (function () {
           '<span class="table-pagination__selected" id="ndpPlanSelected"></span>' +
           '<span style="flex:1"></span>' +
           '<span class="table-pagination__label">Rows per page:</span>' +
-          '<select class="table-pagination__select" id="ndpPlanPageSize">' +
-            '<option value="30" selected>30</option>' +
-            '<option value="50">50</option>' +
-            '<option value="100">100</option>' +
-          '</select>' +
+          '<div class="table-pagination__size" id="ndpPlanPageSize">' +
+            '<span class="table-pagination__size-value">30</span>' +
+            '<button class="table-pagination__size-trigger"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg></button>' +
+            '<div class="table-pagination__size-dropdown">' +
+              '<div class="table-pagination__size-option is-active" data-value="30">30</div>' +
+              '<div class="table-pagination__size-option" data-value="50">50</div>' +
+              '<div class="table-pagination__size-option" data-value="100">100</div>' +
+            '</div>' +
+          '</div>' +
           '<span class="table-pagination__range" id="ndpPlanRange"></span>' +
           '<button id="ndpPlanPrev" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' +
           '<button id="ndpPlanNext" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' +
@@ -136,12 +142,17 @@ var NdpPlan = (function () {
       if (!options.length) return;
 
       filterSelections[col] = [];
-      html += '<select class="select input-sm ndp-filter-select" data-col="' + col + '">';
-      html += '<option value="">' + (COL_CONFIG[col] ? COL_CONFIG[col].label : col) + '</option>';
-      options.forEach(function (o) {
-        html += '<option value="' + NDP.escapeHtml(o) + '">' + NDP.escapeHtml(o) + '</option>';
-      });
-      html += '</select>';
+      var label = COL_CONFIG[col] ? COL_CONFIG[col].label : col;
+      html += '<div class="ndp-filter-wrap" data-col="' + col + '">' +
+        '<input class="ndp-filter-input" type="text" placeholder="' + NDP.escapeHtml(label) + '" size="' + Math.max(label.length + 2, 10) + '" autocomplete="off" data-col="' + col + '">' +
+        '<button class="ndp-filter-clear"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>' +
+        '<button class="ndp-filter-chevron"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg></button>' +
+        '<div class="ndp-filter-dropdown">' +
+          options.map(function (o) {
+            return '<div class="ndp-filter-option" data-value="' + NDP.escapeHtml(o) + '">' + NDP.escapeHtml(o) + '</div>';
+          }).join('') +
+        '</div>' +
+      '</div>';
     });
     return html;
   }
@@ -149,48 +160,117 @@ var NdpPlan = (function () {
   function rebuildFilters() {
     var filtersEl = document.getElementById("ndpPlanFilters");
     if (!filtersEl) return;
-    // Preserve current selections
-    var prevSelections = {};
-    filtersEl.querySelectorAll(".ndp-filter-select").forEach(function (sel) {
-      var col = sel.getAttribute("data-col");
-      if (sel.value) prevSelections[col] = sel.value;
-    });
-    // Remove old selects
-    filtersEl.querySelectorAll(".ndp-filter-select").forEach(function (sel) { sel.remove(); });
-    // Rebuild with fresh values
+    // Remove old filter wraps
+    filtersEl.querySelectorAll(".ndp-filter-wrap").forEach(function (el) { el.remove(); });
+    // Rebuild
     var addBtn = filtersEl.querySelector("[style*='margin-left']");
     var temp = document.createElement("div");
     temp.innerHTML = buildFilterDropdowns();
-    var selects = Array.from(temp.children);
-    selects.forEach(function (sel) {
-      var col = sel.getAttribute("data-col");
-      // Restore previous selection if still valid
-      if (prevSelections[col]) {
-        var opt = sel.querySelector('option[value="' + prevSelections[col] + '"]');
-        if (opt) {
-          sel.value = prevSelections[col];
-          filterSelections[col] = [prevSelections[col]];
-        }
+    var wraps = Array.from(temp.children);
+    wraps.forEach(function (wrap) {
+      filtersEl.insertBefore(wrap, addBtn);
+    });
+    // Re-wire events on new elements
+    wireFilterDropdowns();
+  }
+
+  function wireFilterDropdowns() {
+    // Close any open dropdown on scroll within the panel
+    panel.addEventListener("scroll", function () {
+      panel.querySelectorAll(".ndp-filter-dropdown.is-open").forEach(function (d) {
+        d.classList.remove("is-open");
+      });
+    }, true);
+
+    panel.querySelectorAll(".ndp-filter-wrap").forEach(function (wrap) {
+      var input = wrap.querySelector(".ndp-filter-input");
+      var dropdown = wrap.querySelector(".ndp-filter-dropdown");
+      var clearBtn = wrap.querySelector(".ndp-filter-clear");
+      var chevron = wrap.querySelector(".ndp-filter-chevron");
+      var col = wrap.getAttribute("data-col");
+      var options = wrap.querySelectorAll(".ndp-filter-option");
+
+      function updateClear() {
+        clearBtn.classList.toggle("is-visible", !!input.value);
       }
-      sel.addEventListener("change", function () {
-        filterSelections[col] = sel.value ? [sel.value] : [];
+
+      // Chevron click opens/focuses
+      chevron.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        input.focus();
+      });
+
+      input.addEventListener("focus", function () {
+        dropdown.classList.add("is-open");
+        filterOpts("");
+      });
+
+      input.addEventListener("input", function () {
+        dropdown.classList.add("is-open");
+        filterOpts(input.value.trim().toLowerCase());
+        updateClear();
+      });
+
+      input.addEventListener("blur", function () {
+        setTimeout(function () { dropdown.classList.remove("is-open"); }, 150);
+      });
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          input.value = "";
+          filterSelections[col] = [];
+          dropdown.classList.remove("is-open");
+          updateClear();
+          input.blur();
+          st.page = 0;
+          render();
+        }
+      });
+
+      clearBtn.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        input.value = "";
+        filterSelections[col] = [];
+        options.forEach(function (o) { o.classList.remove("is-selected"); });
+        updateClear();
         st.page = 0;
         render();
       });
-      filtersEl.insertBefore(sel, addBtn);
+
+      function filterOpts(q) {
+        options.forEach(function (opt) {
+          opt.style.display = (!q || opt.textContent.toLowerCase().indexOf(q) !== -1) ? "" : "none";
+        });
+      }
+
+      options.forEach(function (opt) {
+        opt.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+          var val = opt.getAttribute("data-value");
+          if (filterSelections[col].indexOf(val) !== -1) {
+            filterSelections[col] = [];
+            input.value = "";
+            opt.classList.remove("is-selected");
+          } else {
+            filterSelections[col] = [val];
+            input.value = val;
+            options.forEach(function (o) { o.classList.remove("is-selected"); });
+            opt.classList.add("is-selected");
+          }
+          dropdown.classList.remove("is-open");
+          updateClear();
+          st.page = 0;
+          render();
+        });
+      });
+
+      updateClear();
     });
   }
 
   function wireEvents() {
-    // Filter dropdowns
-    panel.querySelectorAll(".ndp-filter-select").forEach(function (sel) {
-      sel.addEventListener("change", function () {
-        var col = sel.getAttribute("data-col");
-        filterSelections[col] = sel.value ? [sel.value] : [];
-        st.page = 0;
-        render();
-      });
-    });
+    // Filter dropdowns (searchable)
+    wireFilterDropdowns();
 
     // Pagination
     document.getElementById("ndpPlanPrev").addEventListener("click", function () {
@@ -200,10 +280,21 @@ var NdpPlan = (function () {
       st.page++;
       render();
     });
-    document.getElementById("ndpPlanPageSize").addEventListener("change", function (e) {
-      st.pageSize = parseInt(e.target.value, 10);
-      st.page = 0;
-      render();
+    document.getElementById("ndpPlanPageSize").addEventListener("click", function (e) {
+      var valueEl = e.currentTarget.querySelector(".table-pagination__size-value");
+      var dropdown = e.currentTarget.querySelector(".table-pagination__size-dropdown");
+      var opt = e.target.closest(".table-pagination__size-option");
+      if (opt) {
+        st.pageSize = parseInt(opt.getAttribute("data-value"), 10);
+        st.page = 0;
+        valueEl.textContent = st.pageSize;
+        dropdown.querySelectorAll(".table-pagination__size-option").forEach(function (o) { o.classList.remove("is-active"); });
+        opt.classList.add("is-active");
+        dropdown.classList.remove("is-open");
+        render();
+      } else {
+        dropdown.classList.toggle("is-open");
+      }
     });
 
     // Delete selected
@@ -249,6 +340,7 @@ var NdpPlan = (function () {
   }
 
   function updateSelectionUI() {
+    if (!rowSelect) return;
     var delBtn = document.getElementById("ndpPlanDelete");
     var selBtn = document.getElementById("ndpPlanSelectAll");
     var selectedEl = document.getElementById("ndpPlanSelected");

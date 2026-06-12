@@ -18,7 +18,13 @@ var NdpData = (function () {
     taskforceHeaders: [],
     taskforceRows: [],
     planHeaders: [],
-    planRows: []
+    planRows: [],
+    enrichHeaders: [],
+    enrichRows: [],
+    enrichIdIdx: -1,
+    enrichSlaIdx: -1,
+    enrichDwellIdx: -1,
+    enrichAgeIdx: -1
   };
 
   // --- Parse CSV text (auto-detect delimiter) ---
@@ -174,8 +180,41 @@ var NdpData = (function () {
     state.planHeaders = outHeaders;
     state.planRows = outRows;
 
+    // Enrich plan with ageing data from enrichment file
+    enrichPlanWithAgeing();
+
     try { sessionStorage.setItem(STORE.PLAN_STATE, JSON.stringify({ headers: outHeaders, rows: outRows })); } catch (e) {}
     return outRows.length;
+  }
+
+  // Backfill AGEING column from enrichment data (matched via Work ID / Service ID)
+  function enrichPlanWithAgeing() {
+    if (!state.enrichRows.length || state.enrichAgeIdx === -1) return;
+    var ageIdx = state.enrichAgeIdx;
+    var enrichIdIdx = state.enrichIdIdx;
+    var planWorkIdx = state.planHeaders.indexOf("WORK ID");
+    var planAgeIdx = state.planHeaders.indexOf("AGEING");
+    if (planWorkIdx === -1 || planAgeIdx === -1 || enrichIdIdx === -1) return;
+
+    // Build enrichment ID → ageing lookup
+    var idToAge = {};
+    state.enrichRows.forEach(function (row) {
+      var id = String(row[enrichIdIdx] || "").trim();
+      var age = String(row[ageIdx] || "").trim();
+      if (id && age) {
+        idToAge[id] = age;
+        idToAge[id.toUpperCase()] = age;
+      }
+    });
+
+    // Apply to plan rows
+    state.planRows.forEach(function (row) {
+      if (row[planAgeIdx]) return; // Already set
+      var workId = (row[planWorkIdx] || "").trim();
+      if (workId) {
+        row[planAgeIdx] = idToAge[workId] || idToAge[workId.toUpperCase()] || "";
+      }
+    });
   }
 
   // --- Restore from session ---
@@ -203,8 +242,24 @@ var NdpData = (function () {
         var p = JSON.parse(plan);
         state.planHeaders = p.headers;
         state.planRows = p.rows;
-        return true;
       }
+
+      var enrich = sessionStorage.getItem(STORE.ENRICH);
+      if (enrich) {
+        var en = JSON.parse(enrich);
+        state.enrichHeaders = en.headers;
+        state.enrichRows = en.rows;
+        // Re-resolve column indices
+        for (var ei = 0; ei < state.enrichHeaders.length; ei++) {
+          var eh = String(state.enrichHeaders[ei] || "").toLowerCase().trim();
+          if (eh === "wm jin" || eh === "unique task id" || eh === "job no" || eh === "jin" || eh === "css jin") state.enrichIdIdx = ei;
+          if (state.enrichSlaIdx === -1 && (eh === "sla" || eh.indexOf("sla outcome") !== -1)) state.enrichSlaIdx = ei;
+          if (state.enrichDwellIdx === -1 && (eh === "fault dwell" || eh === "fault_dwell" || eh === "dwell")) state.enrichDwellIdx = ei;
+          if (state.enrichAgeIdx === -1 && (eh === "ageing" || eh === "aging" || eh === "age")) state.enrichAgeIdx = ei;
+        }
+      }
+
+      return !!plan;
     } catch (e) {}
     return false;
   }
@@ -232,12 +287,83 @@ var NdpData = (function () {
     try { sessionStorage.setItem(STORE.WS_TYPE, ws); } catch (e) {}
   }
 
+  // --- Load enrichment file (Autofix CSV or XLSX for Copper) ---
+  function loadEnrichment(file, cb) {
+    var isExcel = file.name.match(/\.xlsx?$/i);
+
+    if (isExcel && typeof XLSX !== "undefined") {
+      // Parse XLSX
+      var reader = new FileReader();
+      reader.onload = function (evt) {
+        var data = new Uint8Array(evt.target.result);
+        var wb;
+        try { wb = XLSX.read(data, { type: "array", cellDates: true }); }
+        catch (e) { cb(false, "Failed to parse file"); return; }
+
+        // Use first sheet
+        var sheetName = wb.SheetNames[0];
+        var ws = wb.Sheets[sheetName];
+        var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+        if (rows.length < 2) { cb(false, "File appears empty"); return; }
+
+        processEnrichRows(rows[0], rows.slice(1), cb);
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      // Parse CSV
+      file.text().then(function (text) {
+        var rows = parseCsv(text);
+        if (rows.length < 2) { cb(false, "File appears empty"); return; }
+        processEnrichRows(rows[0], rows.slice(1), cb);
+      });
+    }
+  }
+
+  function processEnrichRows(headers, dataRows, cb) {
+    // Find ID column — check in priority order (JIN > task ID > service ID)
+    var idIdx = -1;
+    var idPatterns = ["serviceid", "service id", "wm jin", "css jin", "unique task id", "job no", "job_no", "jin", "task_id", "task id"];
+    var headersLower = headers.map(function (h) { return String(h || "").toLowerCase().trim(); });
+    for (var pi = 0; pi < idPatterns.length; pi++) {
+      var found = headersLower.indexOf(idPatterns[pi]);
+      if (found !== -1) { idIdx = found; break; }
+    }
+
+    // Find SLA, Fault Dwell, and Ageing columns
+    var slaIdx = -1, dwellIdx = -1, ageIdx = -1;
+    for (var j = 0; j < headers.length; j++) {
+      var hdr = String(headers[j] || "").toLowerCase().trim();
+      if (slaIdx === -1 && (hdr === "sla" || hdr.indexOf("sla outcome") !== -1)) slaIdx = j;
+      if (dwellIdx === -1 && (hdr === "fault dwell" || hdr === "fault_dwell" || hdr === "dwell")) dwellIdx = j;
+      if (ageIdx === -1 && (hdr === "ageing" || hdr === "aging" || hdr === "age")) ageIdx = j;
+    }
+
+    state.enrichHeaders = headers;
+    state.enrichRows = dataRows;
+    state.enrichIdIdx = idIdx;
+    state.enrichSlaIdx = slaIdx;
+    state.enrichDwellIdx = dwellIdx;
+    state.enrichAgeIdx = ageIdx;
+
+    // Debug: log what we found
+    console.log("[NDP Enrich] Headers:", headers);
+    console.log("[NDP Enrich] ID col:", idIdx !== -1 ? headers[idIdx] : "NOT FOUND");
+    console.log("[NDP Enrich] SLA col:", slaIdx !== -1 ? headers[slaIdx] : "NOT FOUND");
+    console.log("[NDP Enrich] Dwell col:", dwellIdx !== -1 ? headers[dwellIdx] : "NOT FOUND");
+    console.log("[NDP Enrich] Sample row 0:", dataRows[0]);
+    console.log("[NDP Enrich] Sample ID value:", idIdx !== -1 ? dataRows[0][idIdx] : "N/A");
+
+    try { sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: headers, rows: dataRows })); } catch (e) {}
+    cb(true, dataRows.length + " records loaded (ID col: " + (idIdx !== -1 ? headers[idIdx] : "not found") + ")");
+  }
+
   return {
     state: state,
     parseCsv: parseCsv,
     loadTechSheet: loadTechSheet,
     loadTaskforce: loadTaskforce,
     enrichAndStore: enrichAndStore,
+    loadEnrichment: loadEnrichment,
     buildPlan: buildPlan,
     savePlan: function () {
       try { sessionStorage.setItem(STORE.PLAN_STATE, JSON.stringify({ headers: state.planHeaders, rows: state.planRows })); } catch (e) {}

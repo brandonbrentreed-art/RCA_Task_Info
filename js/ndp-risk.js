@@ -86,11 +86,15 @@ var NdpRisk = (function () {
               '</div>' +
               '<div class="table-pagination pagination-footer" id="ndpRiskPager">' +
                 '<span class="table-pagination__label">Rows per page:</span>' +
-                '<select class="table-pagination__select" id="ndpRiskPageSize">' +
-                  '<option value="30" selected>30</option>' +
-                  '<option value="50">50</option>' +
-                  '<option value="100">100</option>' +
-                '</select>' +
+                '<div class="table-pagination__size" id="ndpRiskPageSize">' +
+                  '<span class="table-pagination__size-value">30</span>' +
+                  '<button class="table-pagination__size-trigger"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg></button>' +
+                  '<div class="table-pagination__size-dropdown">' +
+                    '<div class="table-pagination__size-option is-active" data-value="30">30</div>' +
+                    '<div class="table-pagination__size-option" data-value="50">50</div>' +
+                    '<div class="table-pagination__size-option" data-value="100">100</div>' +
+                  '</div>' +
+                '</div>' +
                 '<span class="table-pagination__range" id="ndpRiskRange"></span>' +
                 '<button id="ndpRiskPrev" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' +
                 '<button id="ndpRiskNext" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' +
@@ -151,10 +155,21 @@ var NdpRisk = (function () {
     document.getElementById("ndpRiskNext").addEventListener("click", function () {
       page++; render();
     });
-    document.getElementById("ndpRiskPageSize").addEventListener("change", function (e) {
-      pageSize = parseInt(e.target.value, 10);
-      page = 0;
-      render();
+    document.getElementById("ndpRiskPageSize").addEventListener("click", function (e) {
+      var valueEl = e.currentTarget.querySelector(".table-pagination__size-value");
+      var dropdown = e.currentTarget.querySelector(".table-pagination__size-dropdown");
+      var opt = e.target.closest(".table-pagination__size-option");
+      if (opt) {
+        pageSize = parseInt(opt.getAttribute("data-value"), 10);
+        page = 0;
+        valueEl.textContent = pageSize;
+        dropdown.querySelectorAll(".table-pagination__size-option").forEach(function (o) { o.classList.remove("is-active"); });
+        opt.classList.add("is-active");
+        dropdown.classList.remove("is-open");
+        render();
+      } else {
+        dropdown.classList.toggle("is-open");
+      }
     });
 
     // Copy visible rows to clipboard

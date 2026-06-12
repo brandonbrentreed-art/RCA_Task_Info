@@ -159,25 +159,39 @@ document.addEventListener("DOMContentLoaded", function () {
   var enrichFile = document.getElementById("ndpEnrichFile");
   enrichFile.addEventListener("change", function (e) {
     if (!e.target.files.length) return;
-    state.enrich = true;
-    markStep("ndpStepEnrich", true);
-    checkReady();
-    // TODO: Phase 2+ — BTTW/Autofix enrichment parsing
+    NdpData.loadEnrichment(e.target.files[0], function (ok) {
+      if (ok) {
+        state.enrich = true;
+        markStep("ndpStepEnrich", true);
+        checkReady();
+      }
+    });
   });
 
   // --- Load Plan action ---
   loaderGo.addEventListener("click", function () {
     if (loaderGo.disabled) return;
-    var count = NdpData.buildPlan();
+
+    // Show loading spinner
+    hideEmptyStates();
+    document.querySelectorAll(".tab-panel").forEach(function (p) {
+      if (!p.querySelector(".loader-overlay")) {
+        p.insertAdjacentHTML("afterbegin", '<div class="loader-overlay"><div class="loader-spinner"></div><span class="loader-text">Building plan...</span></div>');
+      }
+    });
     closeModal("ndpLoaderModal");
-    activateToolbar();
 
-    // If de-risk gate filtered everything out, load ALL tasks as the plan instead
-    if (count === 0 && NdpData.state.taskforceRows.length > 0) {
-      buildUnfilteredPlan();
-    }
-
-    initTabs();
+    // Process async to allow spinner to render
+    setTimeout(function () {
+      var count = NdpData.buildPlan();
+      if (count === 0 && NdpData.state.taskforceRows.length > 0) {
+        buildUnfilteredPlan();
+      }
+      // Remove spinners
+      document.querySelectorAll(".tab-panel .loader-overlay").forEach(function (el) { el.remove(); });
+      activateToolbar();
+      initTabs();
+    }, 50);
   });
 
   // Fallback: build plan from all taskforce rows without de-risk gating
@@ -320,9 +334,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- Restore session (if data already loaded) ---
   if (NdpData.restore()) {
-    activateToolbar();
     hideEmptyStates();
-    initTabs();
+    document.querySelectorAll(".tab-panel").forEach(function (p) {
+      p.insertAdjacentHTML("afterbegin", '<div class="loader-overlay"><div class="loader-spinner"></div><span class="loader-text">Loading...</span></div>');
+    });
+    setTimeout(function () {
+      document.querySelectorAll(".tab-panel .loader-overlay").forEach(function (el) { el.remove(); });
+      activateToolbar();
+      initTabs();
+    }, 600);
   }
 
   // --- Init all tab renderers ---

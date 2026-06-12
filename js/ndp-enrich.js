@@ -29,7 +29,8 @@ function mapTaskforceRowToDerisk(tfRow, tfHeaders, outHeaders) {
     "AF_FAULT_DWELL": "AF_FAULT_DWELL",
     "DIRECTORY_PWA": "PWA",
     "DIRECTORY_OUC": "OUC",
-    "DURATION": "Estimated task duration"
+    "DURATION": "Estimated task duration",
+    "WORK ID": "Work ID"
   };
 
   var mapped = [];

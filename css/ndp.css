@@ -525,3 +525,137 @@
   color: var(--color-blue);
 }
 
+
+
+/* -- Searchable filter dropdown -- */
+.ndp-filter-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ndp-filter-input {
+  width: auto;
+  min-width: 140px;
+  padding: var(--spacing-2) var(--spacing-3);
+  padding-right: calc(var(--size-btn-xs) + var(--size-btn-xs) + var(--spacing-2));
+  font-family: var(--font-family);
+  font-size: var(--text-body1);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--radius);
+  background: var(--color-white);
+  color: var(--color-navy);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.ndp-filter-input:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 2px var(--focus-ring);
+  cursor: text;
+}
+
+.ndp-filter-input::placeholder {
+  color: var(--color-grey-light);
+}
+
+.ndp-filter-chevron {
+  position: absolute;
+  right: var(--spacing-1);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--size-btn-xs);
+  height: var(--size-btn-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-grey);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ndp-filter-chevron svg {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+.ndp-filter-chevron:hover {
+  background: var(--hover-overlay);
+  color: var(--color-navy);
+}
+
+.ndp-filter-clear {
+  position: absolute;
+  right: calc(var(--size-btn-xs) + var(--spacing-1));
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--size-btn-xs);
+  height: var(--size-btn-xs);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-grey);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ndp-filter-clear svg {
+  width: var(--size-icon-xs);
+  height: var(--size-icon-xs);
+}
+
+.ndp-filter-clear:hover {
+  background: var(--hover-overlay);
+  color: var(--color-navy);
+}
+
+.ndp-filter-clear.is-visible {
+  display: flex;
+}
+
+.ndp-filter-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  min-width: 140px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  z-index: 100;
+  margin-top: 2px;
+}
+
+.ndp-filter-dropdown.is-open {
+  display: block;
+}
+
+.ndp-filter-option {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--text-caption);
+  color: var(--color-navy);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.ndp-filter-option:hover {
+  background: var(--hover-overlay);
+}
+
+.ndp-filter-option.is-selected {
+  background: var(--hover-primary);
+  color: var(--color-blue);
+  font-weight: var(--font-weight-medium);
+}

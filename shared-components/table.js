@@ -263,4 +263,20 @@ function initTables() {
 })();
 
 
+// --- Close any open dropdowns on click outside (centralised) ---
+document.addEventListener("click", function (e) {
+  // Pagination size dropdowns
+  if (!e.target.closest(".table-pagination__size")) {
+    document.querySelectorAll(".table-pagination__size-dropdown.is-open").forEach(function (d) {
+      d.classList.remove("is-open");
+    });
+  }
+  // Filter dropdowns
+  if (!e.target.closest(".ndp-filter-wrap")) {
+    document.querySelectorAll(".ndp-filter-dropdown.is-open").forEach(function (d) {
+      d.classList.remove("is-open");
+    });
+  }
+});
+
 document.addEventListener("DOMContentLoaded", initTables);
