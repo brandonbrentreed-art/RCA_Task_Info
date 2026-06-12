@@ -1,0 +1,354 @@
+/* ===== Next Day Plan — Page Styles ===== */
+
+/* -- Loader Dialog Internals -- */
+.ndp-loader__steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.ndp-loader__step {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--radius);
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.ndp-loader__step.is-done {
+  border-color: var(--color-green);
+  background: rgba(67, 176, 114, 0.04);
+}
+
+.ndp-loader__step-icon {
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--color-grey-100);
+  color: var(--color-grey);
+  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.ndp-loader__step.is-done .ndp-loader__step-icon {
+  background: var(--color-green);
+  color: var(--color-white);
+}
+
+.ndp-loader__step-icon svg {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.ndp-loader__step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ndp-loader__step-title {
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+}
+
+.ndp-loader__step-desc {
+  font-size: var(--text-caption);
+  color: var(--color-grey-light);
+  margin-top: 2px;
+}
+
+.ndp-loader__step-action {
+  flex-shrink: 0;
+}
+
+/* Workstack toggle (radio-style) */
+.ndp-ws-toggle {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.ndp-ws-toggle__btn {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-grey);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ndp-ws-toggle__btn:hover {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.ndp-ws-toggle__btn.is-active {
+  border-color: var(--color-blue);
+  background: var(--color-blue);
+  color: var(--color-white);
+}
+
+/* Paste area */
+.ndp-paste-area {
+  width: 100%;
+  min-height: 60px;
+  max-height: 80px;
+  padding: var(--spacing-2) var(--spacing-3);
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+  border: 1px dashed var(--color-grey-300);
+  border-radius: var(--radius);
+  background: var(--color-grey-100);
+  color: var(--color-grey);
+  resize: none;
+  margin-top: var(--spacing-2);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.ndp-paste-area:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  border-style: solid;
+  color: var(--color-navy);
+}
+
+/* -- Empty state -- */
+.ndp-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: var(--spacing-3);
+  color: var(--color-grey-light);
+  text-align: center;
+  padding: var(--spacing-10);
+}
+
+.ndp-empty svg {
+  width: 48px;
+  height: 48px;
+  opacity: 0.4;
+}
+
+.ndp-empty p {
+  font-size: var(--text-body2);
+  max-width: 320px;
+}
+
+/* -- Filter bar -- */
+.ndp-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) 0;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.ndp-filters .select {
+  max-width: 160px;
+}
+
+/* -- Risk toggles -- */
+.ndp-risk-toggles {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.ndp-risk-btn {
+  padding: var(--spacing-1) var(--spacing-3);
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  border: 1px solid var(--color-grey-300);
+  border-radius: var(--size-chip-radius);
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.ndp-risk-btn:hover {
+  background: var(--hover-overlay);
+}
+
+.ndp-risk-btn.is-active {
+  background: var(--color-grey-100);
+}
+
+/* -- Scarcity chart -- */
+.ndp-chart {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--spacing-3) 0;
+}
+
+.ndp-bar-row {
+  display: grid;
+  grid-template-columns: 140px 100px 1fr 80px;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1) 0;
+  font-size: var(--text-caption);
+}
+
+.ndp-bar-row__label {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ndp-bar-row__pwa {
+  color: var(--color-grey);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ndp-bar-row__track {
+  height: 6px;
+  background: var(--color-grey-100);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ndp-bar-row__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width var(--transition-standard);
+}
+
+.ndp-bar-row__meta {
+  text-align: right;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+/* -- Demand chart (stacked bar) -- */
+.ndp-demand-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 160px;
+  padding: var(--spacing-4) 0;
+  flex-shrink: 0;
+}
+
+.ndp-demand-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  min-width: 0;
+}
+
+.ndp-demand-col__bar {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 1px;
+  min-height: 0;
+}
+
+.ndp-demand-col__seg {
+  width: 100%;
+  border-radius: 2px;
+  min-height: 2px;
+  transition: height var(--transition-standard);
+}
+
+.ndp-demand-col__seg--tail { background: var(--color-warning); }
+.ndp-demand-col__seg--due { background: var(--color-blue); }
+.ndp-demand-col__seg--future { background: var(--color-grey-300); }
+
+.ndp-demand-col__label {
+  font-size: 0.6rem;
+  color: var(--color-grey);
+  margin-top: var(--spacing-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+}
+
+.ndp-demand-col__cap {
+  width: 100%;
+  border-top: 2px dashed var(--color-green);
+  position: relative;
+}
+
+/* -- Pivot table override for compact display -- */
+.ndp-pivot .table th,
+.ndp-pivot .table td {
+  padding: var(--spacing-2) var(--spacing-3);
+  font-size: var(--text-caption);
+}
+
+/* -- PIN cell styles -- */
+.ndp-pin-cell {
+  font-weight: var(--font-weight-medium);
+  cursor: cell;
+  transition: background var(--transition-fast);
+}
+
+.ndp-pin-cell--empty {
+  background: var(--color-grey-100);
+  color: var(--color-grey-light);
+}
+
+.ndp-pin-cell--unresolved {
+  color: var(--color-error);
+}
+
+.ndp-pin-cell.is-dragged {
+  background: rgba(84, 136, 199, 0.12);
+}
+
+
+
+
+/* -- Drilldown cell hover -- */
+.ndp-drill:hover {
+  background: var(--hover-primary);
+  border-radius: var(--radius);
+}
+
+/* -- Selected row highlight -- */
+.table tbody tr[style*="hover-row"] {
+  position: relative;
+}
+
+/* -- Filter select compact -- */
+.ndp-filter-select {
+  cursor: pointer;
+}
+
+/* -- Plan action buttons -- */
+#ndpPlanAdd:hover,
+#ndpPlanDelete:hover:not(:disabled) {
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+/* Dark mode: drilldown cells */
+[data-theme="dark"] .ndp-drill:hover {
+  background: var(--hover-primary);
+}
+

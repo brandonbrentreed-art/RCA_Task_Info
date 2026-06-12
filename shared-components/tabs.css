@@ -1,0 +1,71 @@
+/* ===== Tabs Component (MUI Pattern) ===== */
+
+.tabs-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-divider);
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+}
+
+.tabs__tab {
+  position: relative;
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.02857em;
+  color: var(--color-grey);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tabs__tab:hover {
+  color: var(--color-navy);
+  background: var(--hover-overlay);
+}
+
+.tabs__tab.is-active {
+  color: var(--color-blue);
+}
+
+.tabs__tab.is-active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-blue);
+  border-radius: 1px 1px 0 0;
+}
+
+/* Tab actions (right side of tab bar) */
+.tabs-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding-right: var(--spacing-2);
+}
+
+/* Tab panels */
+.tab-panel {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-panel.is-active {
+  display: flex;
+  flex-direction: column;
+}

@@ -60,47 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   } catch (e) {}
 
-  // Search expand toggle
-  searchToggle.addEventListener("click", () => {
-    searchExpand.classList.toggle("active");
-    if (searchExpand.classList.contains("active")) {
-      searchFilter.focus();
-    } else {
-      searchFilter.value = "";
-      runSearch();
-    }
-  });
-
-  searchFilter.addEventListener("input", debounce(() => {
-    updateSearchState();
-    filterRows();
-  }, 300));
-
-  searchFilter.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      searchExpand.classList.remove("active");
-      searchFilter.value = "";
-      updateSearchState();
+  // Search expand — handled by shared component
+  initSearch({
+    onInput: function (query) {
       filterRows();
     }
-  });
-
-  // Close search on click outside
-  document.addEventListener("click", (e) => {
-    if (!searchExpand.contains(e.target) && searchExpand.classList.contains("active")) {
-      if (!searchFilter.value.trim()) {
-        searchExpand.classList.remove("active");
-        filterRows();
-      }
-    }
-  });
-
-  // Search clear dismiss
-  searchClear.addEventListener("click", () => {
-    searchFilter.value = "";
-    searchFilter.focus();
-    updateSearchState();
-    filterRows();
   });
 
   function updateSearchState() {

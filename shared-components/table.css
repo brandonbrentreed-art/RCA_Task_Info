@@ -46,7 +46,10 @@
 .table th.sort-asc::after { content: "↑"; opacity: 1; }
 .table th.sort-desc::after { content: "↓"; opacity: 1; }
 
+/* -- Prevent text selection on table rows (consistent across app) -- */
 .table tbody tr {
+  user-select: none;
+  -webkit-user-select: none;
   transition: background var(--transition-fast);
 }
 .table tbody tr:hover { background: var(--hover-row); }
