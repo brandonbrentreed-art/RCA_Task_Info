@@ -220,7 +220,7 @@ var NdpData = (function () {
   // --- Restore from session ---
   function restore() {
     try {
-      var ws = sessionStorage.getItem(STORE.WS_TYPE);
+      var ws = sessionStorage.getItem(STORE.WS_TYPE) || localStorage.getItem(STORE.WS_TYPE);
       if (ws) state.workstack = ws;
 
       var techs = sessionStorage.getItem(STORE.TECHS);
@@ -255,7 +255,7 @@ var NdpData = (function () {
           if (eh === "wm jin" || eh === "unique task id" || eh === "job no" || eh === "jin" || eh === "css jin") state.enrichIdIdx = ei;
           if (state.enrichSlaIdx === -1 && (eh === "sla" || eh.indexOf("sla outcome") !== -1)) state.enrichSlaIdx = ei;
           if (state.enrichDwellIdx === -1 && (eh === "fault dwell" || eh === "fault_dwell" || eh === "dwell")) state.enrichDwellIdx = ei;
-          if (state.enrichAgeIdx === -1 && (eh === "ageing" || eh === "aging" || eh === "age")) state.enrichAgeIdx = ei;
+          if (state.enrichAgeIdx === -1 && (eh === "ageing" || eh === "aging" || eh === "age" || eh === "order_age_cat" || eh === "crd_tail_age_group")) state.enrichAgeIdx = ei;
         }
       }
 
@@ -284,15 +284,17 @@ var NdpData = (function () {
   // --- Set workstack ---
   function setWorkstack(ws) {
     state.workstack = ws;
-    try { sessionStorage.setItem(STORE.WS_TYPE, ws); } catch (e) {}
+    try {
+      sessionStorage.setItem(STORE.WS_TYPE, ws);
+      localStorage.setItem(STORE.WS_TYPE, ws);
+    } catch (e) {}
   }
 
-  // --- Load enrichment file (Autofix CSV or XLSX for Copper) ---
+  // --- Load enrichment file (workstack-aware) ---
   function loadEnrichment(file, cb) {
     var isExcel = file.name.match(/\.xlsx?$/i);
 
     if (isExcel && typeof XLSX !== "undefined") {
-      // Parse XLSX
       var reader = new FileReader();
       reader.onload = function (evt) {
         var data = new Uint8Array(evt.target.result);
@@ -300,13 +302,63 @@ var NdpData = (function () {
         try { wb = XLSX.read(data, { type: "array", cellDates: true }); }
         catch (e) { cb(false, "Failed to parse file"); return; }
 
-        // Use first sheet
-        var sheetName = wb.SheetNames[0];
-        var ws = wb.Sheets[sheetName];
-        var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-        if (rows.length < 2) { cb(false, "File appears empty"); return; }
-
-        processEnrichRows(rows[0], rows.slice(1), cb);
+        if (state.workstack === "fibre") {
+          // Fibre: look for BTTW_Data or KCI2_DATA_NEW sheets
+          var bttwSheets = ["BTTW_Data", "KCI2_DATA_NEW", "BTTW", "KCI2"];
+          var found = false;
+          for (var si = 0; si < bttwSheets.length; si++) {
+            var ws = wb.Sheets[bttwSheets[si]];
+            if (!ws) continue;
+            var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+            if (rows.length >= 2 && rows[0].length > 2) {
+              processEnrichRows(rows[0], rows.slice(1), cb);
+              found = true;
+              break;
+            }
+          }
+          // Fallback: try any sheet with usable headers
+          if (!found) {
+            for (var fi = 0; fi < wb.SheetNames.length; fi++) {
+              var fws = wb.Sheets[wb.SheetNames[fi]];
+              var frows = XLSX.utils.sheet_to_json(fws, { header: 1, defval: "", raw: false });
+              if (frows.length >= 2 && frows[0].length > 2) {
+                processEnrichRows(frows[0], frows.slice(1), cb);
+                found = true;
+                break;
+              }
+            }
+          }
+          if (!found) cb(false, "No BTTW/KCI2 sheet found");
+        } else {
+          // Copper: find sheet with recognisable headers (TailsReport)
+          var found2 = false;
+          for (var ci = 0; ci < wb.SheetNames.length; ci++) {
+            var cws = wb.Sheets[wb.SheetNames[ci]];
+            var crows = XLSX.utils.sheet_to_json(cws, { header: 1, defval: "", raw: false });
+            if (crows.length < 2) continue;
+            var testHeaders = crows[0].map(function (h) { return String(h || "").toLowerCase().trim(); });
+            var hasId = testHeaders.some(function (h) { return h === "wm jin" || h === "serviceid" || h === "unique task id" || h === "job no" || h === "jin"; });
+            var hasAge = testHeaders.some(function (h) { return h === "ageing" || h === "aging"; });
+            if (hasId || hasAge) {
+              processEnrichRows(crows[0], crows.slice(1), cb);
+              found2 = true;
+              break;
+            }
+          }
+          if (!found2) {
+            // Fallback: first sheet with enough columns
+            for (var di = 0; di < wb.SheetNames.length; di++) {
+              var dws = wb.Sheets[wb.SheetNames[di]];
+              var drows = XLSX.utils.sheet_to_json(dws, { header: 1, defval: "", raw: false });
+              if (drows.length >= 2 && drows[0].length > 2) {
+                processEnrichRows(drows[0], drows.slice(1), cb);
+                found2 = true;
+                break;
+              }
+            }
+          }
+          if (!found2) cb(false, "No usable sheet found");
+        }
       };
       reader.readAsArrayBuffer(file);
     } else {
@@ -320,6 +372,14 @@ var NdpData = (function () {
   }
 
   function processEnrichRows(headers, dataRows, cb) {
+    if (state.workstack === "fibre") {
+      return processEnrichFibre(headers, dataRows, cb);
+    }
+    return processEnrichCopper(headers, dataRows, cb);
+  }
+
+  // --- Copper: TailsReport (Ageing, SLA, Dwell) ---
+  function processEnrichCopper(headers, dataRows, cb) {
     // Find ID column — check in priority order (JIN > task ID > service ID)
     var idIdx = -1;
     var idPatterns = ["serviceid", "service id", "wm jin", "css jin", "unique task id", "job no", "job_no", "jin", "task_id", "task id"];
@@ -335,7 +395,7 @@ var NdpData = (function () {
       var hdr = String(headers[j] || "").toLowerCase().trim();
       if (slaIdx === -1 && (hdr === "sla" || hdr.indexOf("sla outcome") !== -1)) slaIdx = j;
       if (dwellIdx === -1 && (hdr === "fault dwell" || hdr === "fault_dwell" || hdr === "dwell")) dwellIdx = j;
-      if (ageIdx === -1 && (hdr === "ageing" || hdr === "aging" || hdr === "age")) ageIdx = j;
+      if (ageIdx === -1 && (hdr === "ageing" || hdr === "aging" || hdr === "age" || hdr === "order_age_cat" || hdr === "crd_tail_age_group")) ageIdx = j;
     }
 
     state.enrichHeaders = headers;
@@ -345,16 +405,71 @@ var NdpData = (function () {
     state.enrichDwellIdx = dwellIdx;
     state.enrichAgeIdx = ageIdx;
 
-    // Debug: log what we found
-    console.log("[NDP Enrich] Headers:", headers);
-    console.log("[NDP Enrich] ID col:", idIdx !== -1 ? headers[idIdx] : "NOT FOUND");
-    console.log("[NDP Enrich] SLA col:", slaIdx !== -1 ? headers[slaIdx] : "NOT FOUND");
-    console.log("[NDP Enrich] Dwell col:", dwellIdx !== -1 ? headers[dwellIdx] : "NOT FOUND");
-    console.log("[NDP Enrich] Sample row 0:", dataRows[0]);
-    console.log("[NDP Enrich] Sample ID value:", idIdx !== -1 ? dataRows[0][idIdx] : "N/A");
-
     try { sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: headers, rows: dataRows })); } catch (e) {}
     cb(true, dataRows.length + " records loaded (ID col: " + (idIdx !== -1 ? headers[idIdx] : "not found") + ")");
+  }
+
+  // --- Fibre: BTTW/KCI2 (commitType + ORDER_AGE enrichment) ---
+  function processEnrichFibre(headers, dataRows, cb) {
+    var headersLower = headers.map(function (h) { return String(h || "").toLowerCase().trim(); });
+
+    // Find columns: jin/job_no, resource_type/owner, ORDER_AGE/priority
+    var jobIdx = headersLower.indexOf("jin");
+    if (jobIdx === -1) jobIdx = headersLower.indexOf("job_no");
+    var ctIdx = headersLower.indexOf("resource_type");
+    if (ctIdx === -1) ctIdx = headersLower.indexOf("owner");
+    var ageIdx = headersLower.indexOf("order_age");
+    if (ageIdx === -1) ageIdx = headersLower.indexOf("priority");
+    var ageCatIdx = headersLower.indexOf("order_age_cat");
+
+    if (jobIdx === -1) { cb(false, "No JIN/job_no column found"); return; }
+
+    // Build lookup: canonicalKey -> { commitType, age, ageCat }
+    var lookup = {};
+    dataRows.forEach(function (row) {
+      var jobNo = String(row[jobIdx] || "").trim();
+      if (!jobNo) return;
+      var key = NDP.canonicalKey(jobNo);
+      if (!key) return;
+      lookup[key] = {
+        commitType: ctIdx !== -1 ? String(row[ctIdx] || "").trim() : "",
+        age: ageIdx !== -1 ? String(row[ageIdx] || "").trim() : "",
+        ageCat: ageCatIdx !== -1 ? String(row[ageCatIdx] || "").trim() : ""
+      };
+    });
+
+    // Enrich taskforce rows with COMMIT TYPE + AGEING
+    var tfHeaders = state.taskforceHeaders;
+    var tfRows = state.taskforceRows;
+    var tfIdIdx = tfHeaders.indexOf("Unique Task ID");
+    if (tfIdIdx === -1) tfIdIdx = tfHeaders.indexOf("JOB NO");
+    var tagIdx = tfHeaders.indexOf("TAG");
+    if (tagIdx === -1) { tfHeaders.push("TAG"); tagIdx = tfHeaders.length - 1; }
+
+    var matched = 0;
+    tfRows.forEach(function (row) {
+      while (row.length < tfHeaders.length) row.push("");
+      if (tfIdIdx === -1) return;
+      var id = NDP.canonicalKey(row[tfIdIdx] || "");
+      if (!id || !lookup[id]) return;
+      if (tagIdx !== -1 && lookup[id].commitType) row[tagIdx] = lookup[id].commitType;
+      matched++;
+    });
+
+    // Store enrichment for the demand secondary table
+    state.enrichHeaders = headers;
+    state.enrichRows = dataRows;
+    state.enrichIdIdx = jobIdx;
+    state.enrichSlaIdx = -1;
+    state.enrichDwellIdx = -1;
+    state.enrichAgeIdx = ageCatIdx !== -1 ? ageCatIdx : ageIdx;
+
+    try {
+      sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: headers, rows: dataRows }));
+      sessionStorage.setItem(STORE.TASKFORCE, JSON.stringify({ headers: tfHeaders, rows: tfRows }));
+    } catch (e) {}
+
+    cb(true, matched + " of " + dataRows.length + " tasks enriched");
   }
 
   return {

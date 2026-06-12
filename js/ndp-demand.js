@@ -51,13 +51,22 @@ var NdpDemand = (function () {
       return true;
     });
 
+    // Detect extra tags (fibre resource_type values like BTTW, KCI2)
+    var KNOWN = ["Tail", "Today", "Tomorrow", "Future", "Manual Add", ""];
+    var extraTags = {};
+    rows.forEach(function (row) {
+      var tag = tagIdx !== -1 ? (row[tagIdx] || "").trim() : "";
+      if (tag && KNOWN.indexOf(tag) === -1) extraTags[tag] = true;
+    });
+    var extraTagList = Object.keys(extraTags).sort();
+
     // Build PWA pivot
     var pwaMap = {};
     rows.forEach(function (row) {
       var ouc = oucIdx !== -1 ? (row[oucIdx] || "").trim() || "(blank)" : "(blank)";
       var pwa = pwaIdx !== -1 ? (row[pwaIdx] || "").trim() || "(blank)" : "(blank)";
       var key = ouc + "|" + pwa;
-      if (!pwaMap[key]) pwaMap[key] = { ouc: ouc, pwa: pwa, am: 0, pm: 0, allDay: 0, total: 0, tail: 0, due: 0, future: 0, rows: [] };
+      if (!pwaMap[key]) pwaMap[key] = { ouc: ouc, pwa: pwa, am: 0, pm: 0, allDay: 0, total: 0, tail: 0, due: 0, future: 0, extra: {}, rows: [] };
       var p = pwaMap[key];
       p.total++;
       p.rows.push(row);
@@ -71,6 +80,9 @@ var NdpDemand = (function () {
       if (tag === "Tail") p.tail++;
       else if (tag === "Today" || tag === "Tomorrow") p.due++;
       else if (tag === "Future") p.future++;
+      else if (tag && extraTags[tag]) {
+        p.extra[tag] = (p.extra[tag] || 0) + 1;
+      }
     });
 
     pwaRows = Object.keys(pwaMap).sort().map(function (k) { return pwaMap[k]; });
@@ -121,7 +133,7 @@ var NdpDemand = (function () {
           '</table>' +
         '</div>' +
       '</div>' +
-      buildEnrichTable(pwaRows, techsByPwa) +
+      buildSecondaryTable(pwaRows, techsByPwa, rows, headers, oucIdx, tagIdx, extraTagList) +
     '</div>' +
       '<div class="ndp-demand-chart" id="ndpDemandChart">' +
         buildChart(pwaRows, techsByPwa) +
@@ -564,9 +576,20 @@ var NdpDemand = (function () {
     renderDrillRows();
   }
 
-  // --- Enrichment secondary table (Copper: SLA + Fault Dwell) ---
-  function buildEnrichTable(pwaRows, techsByPwa) {
-    if (NdpData.state.workstack !== "copper") return "";
+  // --- Secondary table (workstack-aware) ---
+  // Copper: Ageing buckets by OUC (from TailsReport enrichment)
+  // Fibre: Priority types by OUC (from BTTW/KCI2 resource_type)
+  function buildSecondaryTable(pwaRows, techsByPwa, rows, headers, oucIdx, tagIdx, extraTagList) {
+    var isFibre = NdpData.state.workstack === "fibre";
+
+    if (isFibre) {
+      return buildFibrePriorityTable(rows, headers, oucIdx, tagIdx, extraTagList);
+    }
+    return buildEnrichTable();
+  }
+
+  // --- Copper: Ageing buckets by OUC ---
+  function buildEnrichTable() {
     if (!NdpData.state.enrichRows.length) return "";
 
     var enrichRows = NdpData.state.enrichRows;
@@ -609,23 +632,14 @@ var NdpDemand = (function () {
         }
       });
     }
-    // Debug: sample IDs from both sides
-    var sampleTfIds = Object.keys(idToOuc).slice(0, 5);
-    var sampleEnrichIds = enrichRows.slice(0, 5).map(function (r) { return idIdx !== -1 ? String(r[idIdx] || "").trim() : ""; });
-    console.log("[NDP Enrich] TF ID samples:", sampleTfIds);
-    console.log("[NDP Enrich] Enrich ID samples:", sampleEnrichIds);
-    console.log("[NDP Enrich] TF lookup size:", Object.keys(idToOuc).length);
-
     // Group enrichment by OUC — only matched rows
     var oucData = {};
     var ageIdx = NdpData.state.enrichAgeIdx;
-    var matchCount = 0, skipCount = 0;
     enrichRows.forEach(function (row) {
       var rawId = idIdx !== -1 ? (row[idIdx] || "").trim() : "";
       var canonical = NDP.canonicalKey(rawId);
       var ouc = idToOuc[canonical] || idToOuc[rawId.toUpperCase()] || null;
-      if (!ouc) { skipCount++; return; } // Skip unmatched
-      matchCount++;
+      if (!ouc) { return; }
       if (!oucData[ouc]) oucData[ouc] = { ouc: ouc, total: 0, slaBreach: 0, highDwell: 0, ageBuckets: {} };
       oucData[ouc].total++;
       if (slaIdx !== -1) {
@@ -641,7 +655,6 @@ var NdpDemand = (function () {
         if (age) oucData[ouc].ageBuckets[age] = (oucData[ouc].ageBuckets[age] || 0) + 1;
       }
     });
-    console.log("[NDP Enrich Table] Matched:", matchCount, "Skipped:", skipCount, "Age buckets found:", Object.keys(oucData).length ? Object.keys(oucData[Object.keys(oucData)[0]].ageBuckets) : "none");
 
     var oucList = Object.keys(oucData).sort().map(function (k) { return oucData[k]; });
     if (!oucList.length) return '';
@@ -779,6 +792,51 @@ var NdpDemand = (function () {
     '</div>' +
       '<div class="ndp-demand-bars" id="ndpDemandBars">' + gridLines + cols + '</div>' +
       '<div class="ndp-demand-oucs" id="ndpDemandOucs">' + oucRow + '</div>';
+  }
+
+  // --- Fibre Priority table (extra commit types from BTTW/KCI2 enrichment) ---
+  function buildFibrePriorityTable(rows, headers, oucIdx, tagIdx, extraTagList) {
+    if (!extraTagList || !extraTagList.length) return "";
+
+    // Build tag x OUC counts
+    var oucSet = {};
+    var tagOuc = {};
+    extraTagList.forEach(function (tag) { tagOuc[tag] = {}; });
+
+    rows.forEach(function (row) {
+      var tag = tagIdx !== -1 ? (row[tagIdx] || "").trim() : "";
+      if (!tag || !tagOuc[tag]) return;
+      var ouc = oucIdx !== -1 ? (row[oucIdx] || "").trim() || "(blank)" : "(blank)";
+      oucSet[ouc] = true;
+      tagOuc[tag][ouc] = (tagOuc[tag][ouc] || 0) + 1;
+    });
+
+    var oucList = Object.keys(oucSet).sort();
+    if (!oucList.length) return "";
+
+    var html =
+      '<div style="flex:1;min-width:0">' +
+        '<div class="table-wrapper">' +
+          '<table class="table">' +
+            '<thead><tr>' +
+              '<th style="text-align:left">Fibre Priority</th>' +
+              oucList.map(function (o) { return '<th style="text-align:center">' + NDP.escapeHtml(o) + '</th>'; }).join('') +
+            '</tr></thead>' +
+            '<tbody>';
+
+    extraTagList.forEach(function (tag) {
+      html += '<tr>' +
+        '<td style="text-align:left;font-weight:var(--font-weight-medium);color:var(--color-blue)">' + NDP.escapeHtml(tag) + '</td>' +
+        oucList.map(function (ouc) {
+          var count = tagOuc[tag][ouc] || 0;
+          var color = count ? 'var(--color-warning)' : 'var(--color-grey-light)';
+          return '<td style="text-align:center;color:' + color + ';font-weight:' + (count ? 'var(--font-weight-medium)' : 'var(--font-weight-regular)') + '">' + count + '</td>';
+        }).join('') +
+      '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
+    return html;
   }
 
   var demandSearch = "";

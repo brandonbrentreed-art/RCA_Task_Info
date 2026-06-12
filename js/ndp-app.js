@@ -333,7 +333,25 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // --- Restore session (if data already loaded) ---
+  // Always sync workstack toggle from persisted preference
+  var savedWs = localStorage.getItem(NDP.STORE.WS_TYPE);
+  if (savedWs && savedWs !== currentWs) {
+    currentWs = savedWs;
+    NdpData.setWorkstack(currentWs);
+    wsBtns.forEach(function (b) {
+      b.classList.toggle("is-active", b.getAttribute("data-ws") === currentWs);
+    });
+    updateEnrichLabel();
+  }
+
   if (NdpData.restore()) {
+    // Sync workstack toggle to restored state
+    currentWs = NdpData.state.workstack;
+    wsBtns.forEach(function (b) {
+      b.classList.toggle("is-active", b.getAttribute("data-ws") === currentWs);
+    });
+    updateEnrichLabel();
+
     hideEmptyStates();
     document.querySelectorAll(".tab-panel").forEach(function (p) {
       p.insertAdjacentHTML("afterbegin", '<div class="loader-overlay"><div class="loader-spinner"></div><span class="loader-text">Loading...</span></div>');
