@@ -194,7 +194,7 @@ var NdpRisk = (function () {
     { key: "DERISK REASON", label: "De-Risk" },
     { key: "TECH PIN", label: "Tech" },
     { key: "TECH NAME", label: "Name" },
-    { key: "CARE LEVEL", label: "Care" },
+    { key: "CARE LEVEL", label: "Response Code" },
     { key: "_ALTS", label: "Alts" }
   ];
 

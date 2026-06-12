@@ -19,7 +19,7 @@ var NdpPlan = (function () {
   };
 
   var PAGE_SIZES = [30, 50, 100];
-  var FILTER_COLS = ["OUC", "CARE LEVEL", "TASK TYPE", "DERISK REASON"];
+  var FILTER_COLS = ["OUC", "CARE LEVEL", "TASK TYPE", "COMMIT TYPE"];
   var SEARCH_COLS = []; // empty = search all columns
   var filterSelections = {}; // colName -> [selected values]
 
@@ -27,7 +27,7 @@ var NdpPlan = (function () {
   var COL_CONFIG = {
     "JOB NO": { label: "Task ID", align: "left", bold: true },
     "COMMIT DATE": { label: "Commit", align: "center" },
-    "COMMIT TYPE": { label: "Type", align: "center", pill: true },
+    "COMMIT TYPE": { label: "Commit Type", align: "center", pill: true },
     "SOURCE": { label: "Source", align: "center", pill: true },
     "DERISK REASON": { label: "De-Risk", align: "left" },
     "APPT SLOT": { label: "Appt", align: "center" },
@@ -35,8 +35,8 @@ var NdpPlan = (function () {
     "TECH NAME": { label: "Name", align: "left" },
     "PRIMARY SKILL": { label: "Skill", align: "center" },
     "CAPABILITIES": { label: "Skills", align: "center" },
-    "CARE LEVEL": { label: "Care", align: "center" },
-    "TASK TYPE": { label: "Type", align: "center" },
+    "CARE LEVEL": { label: "Response Code", align: "center" },
+    "TASK TYPE": { label: "Task Type", align: "center" },
     "EXCHANGE NAME": { label: "Exchange", align: "left" },
     "PWA ID": { label: "PWA", align: "left" },
     "OUC": { label: "OUC", align: "left" }
