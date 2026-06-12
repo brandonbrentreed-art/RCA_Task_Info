@@ -303,6 +303,29 @@ var NdpDemand = (function () {
       barsEl.outerHTML = '<div class="ndp-demand-bars" id="ndpDemandBars">' + buildGridLines(maxExcess) + overflowCols + '</div>';
     }
 
+    // --- OUC label click → drilldown with PWA filter ---
+    var oucsEl = document.getElementById("ndpDemandOucs");
+    if (oucsEl) {
+      oucsEl.addEventListener("click", function (e) {
+        var oucSpan = e.target.closest(".ndp-demand-ouc");
+        if (!oucSpan) return;
+        var ouc = oucSpan.textContent.trim();
+        if (!ouc) return;
+
+        // Get all tasks for this OUC
+        var matchedRows = [];
+        var oucPwas = {};
+        pwaRows.forEach(function (p) {
+          if (p.ouc !== ouc) return;
+          oucPwas[p.pwa] = true;
+          p.rows.forEach(function (row) { matchedRows.push(row); });
+        });
+
+        if (!matchedRows.length) return;
+        showDrilldown(ouc + ' \u2014 All Tasks', matchedRows, headers, idIdx, Object.keys(oucPwas).sort());
+      });
+    }
+
     // Drilldown click handler
     panel.addEventListener("click", function (e) {
       var cell = e.target.closest(".ndp-drill");
@@ -321,38 +344,78 @@ var NdpDemand = (function () {
   }
 
   // --- Drilldown modal ---
-  function showDrilldown(title, rows, headers, idIdx) {
+  var DRILL_PAGE_SIZE = 30;
+
+  function showDrilldown(title, allRows, headers, idIdx, pwas) {
     var existing = document.getElementById("ndpDrillModal");
     if (existing) existing.remove();
 
     var skillIdx = headers.indexOf("Skill");
+    if (skillIdx === -1) skillIdx = headers.indexOf("PRIMARY SKILL");
     var careIdx = headers.indexOf("Care Level");
     if (careIdx === -1) careIdx = headers.indexOf("CARE LEVEL");
     var typeIdx = headers.indexOf("Task type");
+    if (typeIdx === -1) typeIdx = headers.indexOf("TASK TYPE");
+    var pinIdx = headers.indexOf("Designated resource ID");
+    if (pinIdx === -1) pinIdx = headers.indexOf("TECH PIN");
+    var tagIdx = headers.indexOf("TAG");
+    if (tagIdx === -1) tagIdx = headers.indexOf("COMMIT TYPE");
+    var exchIdx = headers.indexOf("Asset name");
+    if (exchIdx === -1) exchIdx = headers.indexOf("EXCHANGE NAME");
+    var slotLocalIdx = headers.indexOf("Appt Slot");
+    if (slotLocalIdx === -1) slotLocalIdx = headers.indexOf("APPT SLOT");
+
+    var pwaLocalIdx = headers.indexOf("PWA");
+    if (pwaLocalIdx === -1) pwaLocalIdx = headers.indexOf("PWA ID");
+
+    // PWA filter bar (only if pwas provided)
+    var pwaFilterHtml = '';
+    if (pwas && pwas.length > 1) {
+      pwaFilterHtml = '<div style="display:flex;gap:var(--spacing-2);flex-wrap:wrap;padding-bottom:var(--spacing-3);flex-shrink:0">';
+      pwaFilterHtml += '<button class="ndp-pwa-filter is-active" data-pwa="">All (' + allRows.length + ')</button>';
+      pwas.forEach(function (pwa) {
+        var count = allRows.filter(function (r) { return (r[pwaLocalIdx] || "").trim() === pwa; }).length;
+        var shortLabel = pwa.replace(/^[A-Z]{2}-/, "").replace(/-19$/, "");
+        pwaFilterHtml += '<button class="ndp-pwa-filter" data-pwa="' + NDP.escapeHtml(pwa) + '">' + NDP.escapeHtml(shortLabel) + ' (' + count + ')</button>';
+      });
+      pwaFilterHtml += '</div>';
+    }
 
     var html =
       '<div class="modal-backdrop open" id="ndpDrillModal">' +
-        '<div class="modal modal-lg">' +
+        '<div class="modal modal-full">' +
           '<div class="modal-header">' +
-            '<h3>' + NDP.escapeHtml(title) + ' (' + rows.length + ')</h3>' +
+            '<h3>' + NDP.escapeHtml(title) + ' (' + allRows.length + ')</h3>' +
             '<button class="modal-close" aria-label="Close">' +
               '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' +
             '</button>' +
           '</div>' +
-          '<div class="modal-body" style="overflow:auto">' +
-            '<table class="table" style="font-size:var(--text-caption)">' +
-              '<thead><tr><th style="text-align:left">Task ID</th><th>Skill</th><th>Care</th><th>Type</th></tr></thead>' +
-              '<tbody>' +
-              rows.map(function (row) {
-                return '<tr>' +
-                  '<td style="text-align:left;font-weight:500">' + NDP.escapeHtml(idIdx !== -1 ? (row[idIdx] || "") : "") + '</td>' +
-                  '<td>' + NDP.escapeHtml(skillIdx !== -1 ? (row[skillIdx] || "") : "") + '</td>' +
-                  '<td>' + NDP.escapeHtml(careIdx !== -1 ? (row[careIdx] || "") : "") + '</td>' +
-                  '<td>' + NDP.escapeHtml(typeIdx !== -1 ? (row[typeIdx] || "") : "") + '</td>' +
-                '</tr>';
-              }).join("") +
-              '</tbody>' +
-            '</table>' +
+          '<div class="modal-body" style="display:flex;flex-direction:column;min-height:0">' +
+            pwaFilterHtml +
+            '<div class="table-wrapper--flex">' +
+              '<div class="table-scroll">' +
+                '<table class="table">' +
+                  '<thead><tr>' +
+                    '<th style="text-align:left">Task ID</th>' +
+                    '<th style="text-align:left">PWA</th>' +
+                    '<th style="text-align:left">Exchange</th>' +
+                    '<th style="text-align:center">Appt</th>' +
+                    '<th style="text-align:center">Commit</th>' +
+                    '<th style="text-align:center">Skill</th>' +
+                    '<th style="text-align:center">Response Code</th>' +
+                    '<th style="text-align:center">Task Type</th>' +
+                    '<th style="text-align:center">Tech</th>' +
+                  '</tr></thead>' +
+                  '<tbody id="ndpDrillTbody"></tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="table-pagination pagination-footer">' +
+                '<span id="ndpDrillCount"></span>' +
+                '<span id="ndpDrillRange"></span>' +
+                '<button id="ndpDrillPrev" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' +
+                '<button id="ndpDrillNext" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' +
+              '</div>' +
+            '</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -361,6 +424,71 @@ var NdpDemand = (function () {
     var modal = document.getElementById("ndpDrillModal");
     modal.querySelector(".modal-close").addEventListener("click", function () { modal.remove(); });
     modal.addEventListener("click", function (e) { if (e.target === modal) modal.remove(); });
+
+    // State
+    var drillPage = 0;
+    var activePwa = "";
+
+    function getFilteredRows() {
+      if (!activePwa) return allRows;
+      return allRows.filter(function (r) { return (r[pwaLocalIdx] || "").trim() === activePwa; });
+    }
+
+    function renderDrillRows() {
+      var tbody = document.getElementById("ndpDrillTbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      var filtered = getFilteredRows();
+      var totalPages = Math.max(1, Math.ceil(filtered.length / DRILL_PAGE_SIZE));
+      if (drillPage >= totalPages) drillPage = totalPages - 1;
+      if (drillPage < 0) drillPage = 0;
+      var start = drillPage * DRILL_PAGE_SIZE;
+      var end = Math.min(start + DRILL_PAGE_SIZE, filtered.length);
+      var pageRows = filtered.slice(start, end);
+
+      pageRows.forEach(function (row) {
+        var tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td style="text-align:left;font-weight:var(--font-weight-medium)">' + NDP.escapeHtml(idIdx !== -1 ? (row[idIdx] || "") : "") + '</td>' +
+          '<td style="text-align:left">' + NDP.escapeHtml(pwaLocalIdx !== -1 ? (row[pwaLocalIdx] || "") : "") + '</td>' +
+          '<td style="text-align:left">' + NDP.escapeHtml(exchIdx !== -1 ? (row[exchIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center">' + NDP.escapeHtml(slotLocalIdx !== -1 ? (row[slotLocalIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center;color:var(--color-blue);font-weight:var(--font-weight-medium)">' + NDP.escapeHtml(tagIdx !== -1 ? (row[tagIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center">' + NDP.escapeHtml(skillIdx !== -1 ? (row[skillIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center">' + NDP.escapeHtml(careIdx !== -1 ? (row[careIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center">' + NDP.escapeHtml(typeIdx !== -1 ? (row[typeIdx] || "") : "") + '</td>' +
+          '<td style="text-align:center">' + NDP.escapeHtml(pinIdx !== -1 ? (row[pinIdx] || "") : "") + '</td>';
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("ndpDrillCount").textContent = filtered.length + " tasks";
+      document.getElementById("ndpDrillRange").textContent = filtered.length
+        ? (start + 1) + "\u2013" + end + " of " + filtered.length
+        : "0 of 0";
+      document.getElementById("ndpDrillPrev").disabled = drillPage === 0;
+      document.getElementById("ndpDrillNext").disabled = drillPage >= totalPages - 1;
+    }
+
+    // PWA filter clicks
+    modal.querySelectorAll(".ndp-pwa-filter").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        modal.querySelectorAll(".ndp-pwa-filter").forEach(function (b) { b.classList.remove("is-active"); });
+        btn.classList.add("is-active");
+        activePwa = btn.getAttribute("data-pwa");
+        drillPage = 0;
+        renderDrillRows();
+      });
+    });
+
+    document.getElementById("ndpDrillPrev").addEventListener("click", function () {
+      if (drillPage > 0) { drillPage--; renderDrillRows(); }
+    });
+    document.getElementById("ndpDrillNext").addEventListener("click", function () {
+      drillPage++; renderDrillRows();
+    });
+
+    renderDrillRows();
   }
 
   // --- Chart helpers ---

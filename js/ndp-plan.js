@@ -104,10 +104,17 @@ var NdpPlan = (function () {
           '</table>' +
         '</div>' +
         '<div class="table-pagination" id="ndpPlanPager">' +
-          '<span id="ndpPlanCount"></span>' +
-          '<span id="ndpPlanRange"></span>' +
-          '<button id="ndpPlanPrev" disabled>&laquo;</button>' +
-          '<button id="ndpPlanNext" disabled>&raquo;</button>' +
+          '<span class="table-pagination__selected" id="ndpPlanSelected"></span>' +
+          '<span style="flex:1"></span>' +
+          '<span class="table-pagination__label">Rows per page:</span>' +
+          '<select class="table-pagination__select" id="ndpPlanPageSize">' +
+            '<option value="30" selected>30</option>' +
+            '<option value="50">50</option>' +
+            '<option value="100">100</option>' +
+          '</select>' +
+          '<span class="table-pagination__range" id="ndpPlanRange"></span>' +
+          '<button id="ndpPlanPrev" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' +
+          '<button id="ndpPlanNext" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' +
         '</div>' +
       '</div>';
 
@@ -193,6 +200,11 @@ var NdpPlan = (function () {
       st.page++;
       render();
     });
+    document.getElementById("ndpPlanPageSize").addEventListener("change", function (e) {
+      st.pageSize = parseInt(e.target.value, 10);
+      st.page = 0;
+      render();
+    });
 
     // Delete selected
     document.getElementById("ndpPlanDelete").addEventListener("click", deleteSelected);
@@ -237,13 +249,18 @@ var NdpPlan = (function () {
   }
 
   function updateSelectionUI() {
-    if (!rowSelect) return;
     var delBtn = document.getElementById("ndpPlanDelete");
     var selBtn = document.getElementById("ndpPlanSelectAll");
+    var selectedEl = document.getElementById("ndpPlanSelected");
     var hasSelection = rowSelect.size() > 0;
 
     delBtn.disabled = !hasSelection;
     delBtn.style.opacity = hasSelection ? "1" : "0.38";
+
+    // Selected count (MUI pattern: "X selected" on footer left)
+    if (selectedEl) {
+      selectedEl.textContent = hasSelection ? rowSelect.size() + " selected" : "";
+    }
 
     var filtered = getFilteredRows();
     var jobIdx = st.headers.indexOf("JOB NO");
@@ -523,7 +540,6 @@ var NdpPlan = (function () {
     tbody.appendChild(frag);
 
     // Pagination
-    document.getElementById("ndpPlanCount").textContent = filtered.length + " tasks";
     document.getElementById("ndpPlanRange").textContent = filtered.length
       ? (start + 1) + "\u2013" + end + " of " + filtered.length
       : "0 of 0";

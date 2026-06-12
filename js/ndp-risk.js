@@ -85,10 +85,15 @@ var NdpRisk = (function () {
                 '</table>' +
               '</div>' +
               '<div class="table-pagination pagination-footer" id="ndpRiskPager">' +
-                '<span id="ndpRiskCount"></span>' +
-                '<span id="ndpRiskRange"></span>' +
-                '<button id="ndpRiskPrev" disabled>&laquo;</button>' +
-                '<button id="ndpRiskNext" disabled>&raquo;</button>' +
+                '<span class="table-pagination__label">Rows per page:</span>' +
+                '<select class="table-pagination__select" id="ndpRiskPageSize">' +
+                  '<option value="30" selected>30</option>' +
+                  '<option value="50">50</option>' +
+                  '<option value="100">100</option>' +
+                '</select>' +
+                '<span class="table-pagination__range" id="ndpRiskRange"></span>' +
+                '<button id="ndpRiskPrev" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>' +
+                '<button id="ndpRiskNext" disabled><svg viewBox="0 0 24 24" fill="currentColor" style="width:var(--size-icon-sm);height:var(--size-icon-sm)"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg></button>' +
               '</div>' +
             '</div>' +
           '</div>' +
@@ -145,6 +150,11 @@ var NdpRisk = (function () {
     });
     document.getElementById("ndpRiskNext").addEventListener("click", function () {
       page++; render();
+    });
+    document.getElementById("ndpRiskPageSize").addEventListener("change", function (e) {
+      pageSize = parseInt(e.target.value, 10);
+      page = 0;
+      render();
     });
 
     // Copy visible rows to clipboard
@@ -345,7 +355,6 @@ var NdpRisk = (function () {
       tbody.appendChild(tr);
     });
 
-    document.getElementById("ndpRiskCount").textContent = visible.length + " tasks";
     document.getElementById("ndpRiskRange").textContent = visible.length
       ? (start + 1) + "\u2013" + end + " of " + visible.length
       : "0 of 0";

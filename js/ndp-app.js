@@ -68,11 +68,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
   wsBtns.forEach(function (btn) {
     btn.addEventListener("click", function () {
+      var newWs = btn.getAttribute("data-ws");
+      if (newWs === currentWs) return;
       wsBtns.forEach(function (b) { b.classList.remove("is-active"); });
       btn.classList.add("is-active");
-      currentWs = btn.getAttribute("data-ws");
+      currentWs = newWs;
       NdpData.setWorkstack(currentWs);
       updateEnrichLabel();
+
+      // Clear all loaded data — workstack change invalidates everything
+      NdpData.clear();
+      state.techs = false;
+      state.taskforce = false;
+      state.enrich = false;
+      markStep("ndpStepTechs", false);
+      markStep("ndpStepTaskforce", false);
+      markStep("ndpStepEnrich", false);
+      techFile.value = "";
+      enrichFile.value = "";
+      pasteArea.value = "";
+      pasteArea.style.color = "";
       checkReady();
     });
   });
