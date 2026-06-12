@@ -28,6 +28,7 @@ Lightweight RCA (Root Cause Analysis) web app built with vanilla HTML, CSS, and 
 ```
 ├── index.html                  ← App entry point
 ├── ndc.html                    ← NDC page
+├── ndp.html                    ← Next Day Plan page
 ├── timeline.html               ← Timeline page
 ├── auth-guard.html             ← Auth gate (redirects unauthenticated users)
 ├── serve.py                    ← Dev server (python)
@@ -36,20 +37,38 @@ Lightweight RCA (Root Cause Analysis) web app built with vanilla HTML, CSS, and 
 ├── nginx.conf                  ← Nginx config for containerised frontend
 ├── .gitlab-ci.yml              ← CI/CD pipeline definition
 ├── .gitattributes
+├── NDP_MIGRATION.md            ← NDP migration plan & decisions log
 ├── api/                        ← BACKEND API (Cloud Run)
 │   ├── main.py                 ← Flask application (Entra token validation + BigQuery)
 │   ├── requirements.txt        ← Python dependencies
 │   └── Dockerfile              ← API container image
 ├── css/
-│   └── styles.css              ← Page-level layout (imports shared-ui)
+│   ├── styles.css              ← Page-level layout (imports shared-ui)
+│   └── ndp.css                 ← NDP page-specific styles (charts, filters, PIN cells)
 ├── js/
-│   ├── app.js                  ← Main init + event wiring
-│   ├── dataLoader.js           ← CSV parsing + data store
+│   ├── app.js                  ← Timeline init + event wiring
+│   ├── dataLoader.js           ← CSV parsing + data store (timeline)
 │   ├── timelineEngine.js       ← 15-min interval bucketing + change detection
 │   ├── timelineRenderer.js     ← Pivot grid DOM rendering
-│   └── auth/                   ← AUTHENTICATION
-│       ├── auth-config.js      ← Entra ID / MSAL config
-│       └── auth.js             ← Auth logic (login, token, guard)
+│   ├── ndp-app.js              ← NDP page controller (tabs, dialog, toolbar)
+│   ├── ndp-data.js             ← NDP data layer (load, parse, enrich, persist)
+│   ├── ndp-enrich.js           ← Taskforce → Plan column mapping
+│   ├── ndp-plan.js             ← NDP Plan tab (table, filters, selection)
+│   ├── ndp-demand.js           ← NDP Demand tab (pivot, chart, drilldown)
+│   ├── ndp-risk.js             ← NDP Risk tab (scoring, chart, export)
+│   ├── ndp-tf-parser.js        ← Taskforce clipboard parser (HTML + TSV)
+│   ├── auth/                   ← AUTHENTICATION
+│   │   ├── auth-config.js      ← Entra ID / MSAL config
+│   │   └── auth.js             ← Auth logic (login, token, guard)
+│   ├── data/                   ← SHARED DATA MODULES
+│   │   ├── constants.js        ← NDP namespace (utils, risk levels, resolveTech)
+│   │   ├── column-map.js       ← Taskforce header → internal column mapping
+│   │   ├── derisk-filters.js   ← Skill patterns, wildcard matching, de-risk gate
+│   │   ├── directory-map.js    ← Exchange code → OUC/PWA lookup
+│   │   └── tech-db.js          ← Tech PIN → name/title lookup
+│   └── lib/                    ← EXTERNAL LIBRARIES (vendored)
+│       ├── xlsx-js-style.min.js← Excel export
+│       └── html2canvas.min.js  ← Screenshot to clipboard
 ├── shared-ui/                  ← CENTRALISED DESIGN SYSTEM
 │   ├── theme.css               ← Tokens (colours, spacing, radius, shadows, typography)
 │   ├── typography.css          ← MUI heading/body/caption scale
@@ -58,9 +77,11 @@ Lightweight RCA (Root Cause Analysis) web app built with vanilla HTML, CSS, and 
 │   └── forms.css               ← field, label, input, select, textarea, toggle
 ├── shared-components/          ← REUSABLE UI COMPONENTS
 │   ├── nav.css + nav.js        ← Off-canvas sidebar navigation
-│   ├── table.css + table.js    ← Sortable table (defines --table-border)
+│   ├── table.css + table.js    ← Table styles + TableSelect (row/cell selection, drag, paste)
+│   ├── tabs.css                ← MUI tab bar component
+│   ├── search.js               ← Expandable search (initSearch)
 │   ├── timeline.css            ← Pivot grid timeline
-│   ├── modal.css + modal.js    ← Dialog overlay
+│   ├── modal.css + modal.js    ← Dialog overlay (openModal/closeModal)
 │   ├── tooltip.css + tooltip.js← MUI tooltip (suppresses native title)
 │   ├── loader.css              ← Spinner / linear / overlay loaders
 │   ├── notify.css + notify.js  ← Toast notifications
@@ -241,11 +262,17 @@ All component dimensions are centralised in `shared-ui/theme.css`. Zero hardcode
 - Buttons → `btn btn-primary | btn-success | btn-outlined | btn-text`
 - Icon buttons → `icon-btn` (`var(--size-btn-touch)` circular, hover state built-in)
 - Inputs → `input` | `input-sm` | `input-lg`
+- Selects → `select` | `select input-sm` (custom chevron, focus ring built-in)
 - Cards → `card`
 - Chips → `chip` (with optional `chip-dismiss` button inside, `chip-count` for overflow)
 - Tooltips → add class `tooltip` + `data-tooltip="text"` (placement: default bottom, `tooltip-top`, `tooltip-left`, `tooltip-right`)
 - Loader → `loader-spinner` (circular), `loader-linear` (bar), `loader-overlay` (full area with text)
-- Search → `search-expand` wrapper with `search-toggle` icon-btn + `search-input` (expands on click)
+- Search → `initSearch({ onInput: fn })` — auto-wires expand/collapse/blur on `.search-expand`
+- Tabs → `.tabs-bar` > `.tabs` > `.tabs__tab` (MUI tab bar, `is-active` class, `data-tab` attribute)
+- Tables → `.table` inside `.table-wrapper` or `.table-wrapper--flex` (sticky headers, pagination)
+- Row selection → `TableSelect.rows({ container, getRows, onSelect })` — click, shift+click, select all
+- Cell selection → `TableSelect.cells({ container, cellSelector, onPaste, onDelete })` — drag, shift, ctrl, paste, delete
+- Modal → `openModal(id)` / `closeModal(id)` on `.modal-backdrop` > `.modal`
 - Layout → `flex`, `flex-col`, `grid`, `grid-2/3/4`, `gap-*`, `mt-*`, `mb-*`, `p-*`
 - Typography → `text-h1` through `text-h4`, `text-body1`, `text-body2`, `text-caption`, `text-overline`
 
@@ -267,6 +294,75 @@ body (--color-page-bg, padding: --spacing-6, viewport-locked)
 4. Follow MUI naming/sizing conventions — use `var(--size-*)` tokens, never hardcode
 5. All interactive icons use `icon-btn` class (`var(--size-btn-touch)` circle, circular hover)
 6. Disabled state: `opacity: 0.38` + `pointer-events: none`
+
+### Centralisation Rules (Code Architecture)
+
+Every piece of logic lives in ONE place. If two pages need the same behaviour, it's a shared module.
+
+| Concern | Centralised In | Never Duplicate |
+|---------|---------------|----------------|
+| Data persistence | `NdpData` module (sessionStorage access) | No raw `sessionStorage` in tab modules |
+| Tech PIN resolution | `NDP.resolveTech(pin)` in `constants.js` | No inline `_techDB.lookup` calls |
+| Clipboard parsing | `TF_PARSER` in `ndp-tf-parser.js` | No inline DOMParser / TSV parsing |
+| Row selection | `TableSelect.rows(opts)` in `table.js` | No inline shift/ctrl/click logic |
+| Cell selection + paste | `TableSelect.cells(opts)` in `table.js` | No inline drag/paste/delete handlers |
+| Expandable search | `initSearch(opts)` in `search.js` | No inline expand/collapse/blur wiring |
+| Modal open/close | `openModal(id)` / `closeModal(id)` in `modal.js` | No inline backdrop listeners |
+| HTML escape | `NDP.escapeHtml(s)` in `constants.js` | No inline createElement('div') |
+| Date → TAG | `NDP.deriveTag(dateStr)` in `constants.js` | No inline date parsing |
+| Column resolution | `COL_MAP.findSourceIdx()` in `column-map.js` | No inline header scanning |
+| OUC/PWA lookup | `_dm.lookup(ws, code)` in `directory-map.js` | No inline map access |
+
+**The test**: if you're writing logic that already exists somewhere, you're doing it wrong. Find the shared module and call it.
+
+### Building a New Page (Checklist)
+
+1. Create `newpage.html` — copy header/nav/theme-toggle pattern from `ndp.html`
+2. Add to nav in ALL pages (`index.html`, `timeline.html`, `ndp.html`)
+3. Add home card if appropriate
+4. Create `css/newpage.css` for page-specific styles only
+5. Create `js/newpage-app.js` as page controller
+6. Wire shared components: `initSearch`, `TableSelect`, `openModal` as needed
+7. Reference `shared-ui/forms.css` if you have inputs/selects
+8. Use `NDP.*` helpers for any data operations
+9. Keep data access in a dedicated data module (like `NdpData`)
+10. Never access `sessionStorage`, `_techDB`, or `_dm` directly from UI modules
+
+### Script Load Order Pattern
+
+```html
+<!-- 1. Shared components (no dependencies) -->
+<script src="shared-components/tooltip.js"></script>
+<script src="shared-components/modal.js"></script>
+<script src="shared-components/search.js"></script>
+<script src="shared-components/table.js"></script>
+
+<!-- 2. External libs (if needed) -->
+<script src="js/lib/xlsx-js-style.min.js"></script>
+
+<!-- 3. Data layer (constants first, then modules that depend on them) -->
+<script src="js/data/constants.js"></script>
+<script src="js/ndp-tf-parser.js"></script>
+<script src="js/data/column-map.js"></script>
+<script src="js/data/derisk-filters.js"></script>
+<script src="js/data/directory-map.js"></script>
+<script src="js/data/tech-db.js"></script>
+
+<!-- 4. Feature modules (depend on data layer) -->
+<script src="js/ndp-enrich.js"></script>
+<script src="js/ndp-data.js"></script>
+
+<!-- 5. UI modules (depend on feature + shared components) -->
+<script src="js/ndp-plan.js"></script>
+<script src="js/ndp-demand.js"></script>
+<script src="js/ndp-risk.js"></script>
+
+<!-- 6. Page controller (orchestrates everything) -->
+<script src="js/ndp-app.js"></script>
+
+<!-- 7. Nav (always last — handles page transitions) -->
+<script src="shared-components/nav.js"></script>
+```
 
 ### Tooltip system
 
