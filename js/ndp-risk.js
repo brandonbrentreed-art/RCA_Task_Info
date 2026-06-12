@@ -71,8 +71,8 @@ var NdpRisk = (function () {
         '<div style="display:flex;align-items:center;justify-content:space-between">' +
           '<div class="ndp-risk-toggles" id="ndpRiskToggles"></div>' +
           '<div style="display:flex;gap:var(--spacing-1)">' +
-            '<button class="icon-btn tooltip" id="ndpRiskCopy" data-tooltip="Copy table" style="width:36px;height:36px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>' +
-            '<button class="icon-btn tooltip" id="ndpRiskScreenshot" data-tooltip="Screenshot" style="width:36px;height:36px"><svg viewBox="0 0 24 24" fill="currentColor" style="width:18px;height:18px"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></button>' +
+            '<button class="icon-btn icon-btn--sm tooltip" id="ndpRiskCopy" data-tooltip="Copy table"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg></button>' +
+            '<button class="icon-btn icon-btn--sm tooltip" id="ndpRiskScreenshot" data-tooltip="Screenshot to clipboard"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.2"/><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg></button>' +
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex:1;min-height:0;gap:var(--spacing-4)">' +
@@ -92,7 +92,10 @@ var NdpRisk = (function () {
               '</div>' +
             '</div>' +
           '</div>' +
-          '<div class="ndp-chart" id="ndpScarcityChart" style="flex:1"></div>' +
+          '<div class="ndp-scarcity" id="ndpScarcityChart">' +
+            '<div class="ndp-scarcity__header">Skill Scarcity</div>' +
+            '<div class="ndp-scarcity__list"></div>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -161,12 +164,87 @@ var NdpRisk = (function () {
       navigator.clipboard.writeText(tsv).catch(function () {});
     });
 
-    // Screenshot risk summary
+    // Screenshot risk summary (same format as WMS)
     document.getElementById("ndpRiskScreenshot").addEventListener("click", function () {
       if (typeof html2canvas === "undefined") return;
-      var target = panel.querySelector("[style*='flex-direction:column']");
-      if (!target) return;
-      html2canvas(target, { backgroundColor: "#ffffff", scale: 2 }).then(function (canvas) {
+
+      var headers = NdpData.state.planHeaders;
+      var oucIdx = headers.indexOf("OUC");
+      var pwaIdx = headers.indexOf("PWA ID");
+      var skillIdx = headers.indexOf("DERISK REASON");
+      var totalJobs = NdpData.state.planRows.length;
+
+      // Bucket counts
+      var buckets = { Critical: [], High: [], Medium: [], Low: [] };
+      scored.forEach(function (item) { buckets[NDP.riskLevel(item.score)].push(item); });
+
+      // Build PWA-level summary from Critical + High
+      var screenshotRows = buckets.Critical.concat(buckets.High);
+      var pwaRisk = {};
+      screenshotRows.forEach(function (item) {
+        var pwa = pwaIdx !== -1 ? (item.row[pwaIdx] || "").trim() || "(blank)" : "(blank)";
+        var ouc = oucIdx !== -1 ? (item.row[oucIdx] || "").trim() : "";
+        var skill = skillIdx !== -1 ? (item.row[skillIdx] || "").trim() : "";
+        var level = NDP.riskLevel(item.score);
+        var key = pwa + "|" + ouc;
+        if (!pwaRisk[key]) pwaRisk[key] = { pwa: pwa, ouc: ouc, critical: 0, high: 0, skills: {} };
+        if (level === "Critical") pwaRisk[key].critical++;
+        else pwaRisk[key].high++;
+        if (skill) pwaRisk[key].skills[skill] = (pwaRisk[key].skills[skill] || 0) + 1;
+      });
+
+      var pwaList = Object.keys(pwaRisk).map(function (k) { return pwaRisk[k]; });
+      pwaList.sort(function (a, b) {
+        if (a.critical !== b.critical) return b.critical - a.critical;
+        return b.high - a.high;
+      });
+
+      // Build offscreen report
+      var report = document.createElement("div");
+      report.style.cssText = "position:fixed;top:-9999px;left:0;width:680px;padding:24px;background:#fff;font-family:Roboto,Segoe UI,sans-serif;color:#0D1117;";
+      document.body.appendChild(report);
+
+      var dateStr = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
+
+      report.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #142032">' +
+          '<div><div style="font-size:15px;font-weight:600;color:#142032">Pre-Plan Risk Summary</div><div style="font-size:10px;color:#57606A;margin-top:2px">' + dateStr + '</div></div>' +
+          '<div style="font-size:10px;color:#57606A">' + totalJobs + ' tasks</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;margin-bottom:12px">' +
+          '<div style="flex:1;background:#FEE2E2;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#D32F2F">' + buckets.Critical.length + '</div><div style="font-size:8px;color:#7F1D1D;text-transform:uppercase">Critical</div></div>' +
+          '<div style="flex:1;background:#FEF3C7;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#D97706">' + buckets.High.length + '</div><div style="font-size:8px;color:#78350F;text-transform:uppercase">High</div></div>' +
+          '<div style="flex:1;background:#F3F4F6;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600">' + buckets.Medium.length + '</div><div style="font-size:8px;color:#57606A;text-transform:uppercase">Medium</div></div>' +
+          '<div style="flex:1;background:#D1FAE5;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600;color:#059669">' + buckets.Low.length + '</div><div style="font-size:8px;color:#064E3B;text-transform:uppercase">Low</div></div>' +
+        '</div>';
+
+      if (pwaList.length) {
+        var t = '<table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr>';
+        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">PWA</th>';
+        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">OUC</th>';
+        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:center">Critical</th>';
+        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:center">High</th>';
+        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">Scarce Skills</th>';
+        t += '</tr></thead><tbody>';
+        pwaList.forEach(function (p, i) {
+          var bg = i % 2 === 0 ? "#fff" : "#F9FAFB";
+          var topSkills = Object.keys(p.skills).sort(function (a, b) { return p.skills[b] - p.skills[a]; }).slice(0, 3).join(", ");
+          t += '<tr>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left;font-weight:600">' + NDP.escapeHtml(p.pwa) + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left">' + NDP.escapeHtml(p.ouc) + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:center;color:' + (p.critical ? '#D32F2F;font-weight:700' : '#57606A') + '">' + p.critical + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:center;color:' + (p.high ? '#D97706;font-weight:600' : '#57606A') + '">' + p.high + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left;color:#57606A">' + NDP.escapeHtml(topSkills) + '</td>';
+          t += '</tr>';
+        });
+        t += '</tbody></table>';
+        report.innerHTML += t;
+      } else {
+        report.innerHTML += '<div style="padding:14px;text-align:center;color:#059669;font-weight:600">\u2705 No Critical or High risk items</div>';
+      }
+
+      html2canvas(report, { backgroundColor: "#ffffff", scale: 2 }).then(function (canvas) {
+        document.body.removeChild(report);
         canvas.toBlob(function (blob) {
           if (!blob) return;
           try {
@@ -177,7 +255,7 @@ var NdpRisk = (function () {
             window.open(URL.createObjectURL(blob), "_blank");
           }
         }, "image/png");
-      });
+      }).catch(function () { document.body.removeChild(report); });
     });
   }
 
@@ -279,7 +357,8 @@ var NdpRisk = (function () {
 
   // --- Skill Scarcity Chart ---
   function renderChart() {
-    var container = document.getElementById("ndpScarcityChart");
+    var container = document.querySelector("#ndpScarcityChart .ndp-scarcity__list");
+    if (!container) return;
     var visible = getVisible();
     if (!visible.length) { container.innerHTML = ""; return; }
 
@@ -306,18 +385,22 @@ var NdpRisk = (function () {
 
     var maxTasks = combos.reduce(function (m, c) { return Math.max(m, c.tasks); }, 1);
 
-    var html = '<div style="font-size:var(--text-caption);font-weight:var(--font-weight-medium);margin-bottom:var(--spacing-2);color:var(--color-grey)">Skill Scarcity by PWA</div>';
-    combos.slice(0, 20).forEach(function (d) {
+    var html = "";
+    combos.slice(0, 15).forEach(function (d) {
       var pct = Math.max(4, Math.round(d.tasks / maxTasks * 100));
       var level = NDP.riskLevel(d.minAlts);
       var color = level === "Critical" ? "var(--color-error)"
                 : level === "High" ? "var(--color-warning)"
                 : "var(--color-green)";
-      html += '<div class="ndp-bar-row">' +
-        '<span class="ndp-bar-row__label">' + NDP.escapeHtml(d.skill) + '</span>' +
-        '<span class="ndp-bar-row__pwa">' + NDP.escapeHtml(d.pwa) + '</span>' +
-        '<div class="ndp-bar-row__track"><div class="ndp-bar-row__fill" style="width:' + pct + '%;background:' + color + '"></div></div>' +
-        '<span class="ndp-bar-row__meta" style="color:' + color + '">' + d.tasks + ' \u00b7 ' + d.minAlts + ' alt' + (d.minAlts !== 1 ? 's' : '') + '</span>' +
+      html += '<div class="ndp-scarcity__row">' +
+        '<div class="ndp-scarcity__info">' +
+          '<span class="ndp-scarcity__skill">' + NDP.escapeHtml(d.skill) + '</span>' +
+          '<span class="ndp-scarcity__pwa">' + NDP.escapeHtml(d.pwa) + '</span>' +
+        '</div>' +
+        '<div class="ndp-scarcity__bar">' +
+          '<div class="ndp-scarcity__fill" style="width:' + pct + '%;background:' + color + '"></div>' +
+        '</div>' +
+        '<span class="ndp-scarcity__meta" style="color:' + color + '">' + d.tasks + ' task' + (d.tasks !== 1 ? 's' : '') + ', ' + d.minAlts + ' cover</span>' +
       '</div>';
     });
     container.innerHTML = html;

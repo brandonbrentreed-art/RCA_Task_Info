@@ -91,9 +91,9 @@ var NdpPlan = (function () {
       '<div class="ndp-filters" id="ndpPlanFilters">' +
         buildFilterDropdowns() +
         '<div style="margin-left:auto;display:flex;gap:var(--spacing-2);align-items:center">' +
-          '<button class="btn-outlined" id="ndpPlanAdd" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);cursor:pointer">+ Add</button>' +
-          '<button class="btn-outlined" id="ndpPlanSelectAll" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);cursor:pointer">Select All</button>' +
-          '<button class="btn-outlined" id="ndpPlanDelete" disabled style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);cursor:pointer;opacity:0.38">✕ Delete</button>' +
+          '<button class="btn-outlined" id="ndpPlanAdd" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">+ Add</button>' +
+          '<button class="btn-outlined" id="ndpPlanSelectAll" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">Select All</button>' +
+          '<button class="btn-outlined" id="ndpPlanDelete" disabled style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);opacity:0.38">✕ Delete</button>' +
         '</div>' +
       '</div>' +
       '<div class="table-wrapper--flex" id="ndpPlanTable">' +
@@ -467,7 +467,6 @@ var NdpPlan = (function () {
       var th = document.createElement("th");
       th.textContent = cfg.label || colName;
       th.style.textAlign = cfg.align || "center";
-      th.style.cursor = "pointer";
       th.style.whiteSpace = "nowrap";
       if (st.sortCol === ci) {
         th.textContent += st.sortAsc ? " ↑" : " ↓";
@@ -493,7 +492,6 @@ var NdpPlan = (function () {
       if (jobIdx === -1) jobIdx = 0; // fallback to first col as ID
       var jobNo = jobIdx !== -1 ? (row[jobIdx] || "").trim() : "";
       if (rowSelect && rowSelect.has(jobNo)) tr.style.background = "var(--hover-row)";
-      tr.style.cursor = "default";
       tr.addEventListener("click", function (e) {
         if (e.target.closest(".ndp-pin-cell")) return;
         toggleRowSelect(start + ri, jobNo, e);

@@ -109,9 +109,9 @@ var NdpDemand = (function () {
               return '<tr>' +
                 '<td style="text-align:left;font-weight:var(--font-weight-medium)">' + NDP.escapeHtml(p.ouc) + '</td>' +
                 '<td style="text-align:left">' + NDP.escapeHtml(p.pwa) + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="AM" style="cursor:pointer;font-weight:500">' + p.am + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="PM" style="cursor:pointer;font-weight:500">' + p.pm + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="All Day" style="cursor:pointer;font-weight:500">' + p.allDay + '</td>' +
+                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="AM" style="font-weight:500">' + p.am + '</td>' +
+                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="PM" style="font-weight:500">' + p.pm + '</td>' +
+                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="All Day" style="font-weight:500">' + p.allDay + '</td>' +
                 '<td>' + techs + '</td>' +
                 '<td style="font-weight:var(--font-weight-medium);color:' + color + '">' + prefix + needed + '</td>' +
               '</tr>';

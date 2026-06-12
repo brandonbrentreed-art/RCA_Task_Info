@@ -30,6 +30,7 @@
   background: var(--color-grey-100);
   white-space: nowrap;
   user-select: none;
+  cursor: pointer;
 }
 
 .table th.sortable {
