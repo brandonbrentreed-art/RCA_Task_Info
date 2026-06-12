@@ -224,4 +224,41 @@ function initTables() {
   });
 }
 
+// --- Right-click copy cell (context menu on any .table td) ---
+(function () {
+  var menu = document.createElement("div");
+  menu.className = "table-ctx-menu";
+  menu.innerHTML =
+    '<div class="table-ctx-menu__item" id="tableCtxCopy">' +
+      '<svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;flex-shrink:0"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>' +
+      '<span id="tableCtxLabel"></span>' +
+    '</div>';
+  document.body.appendChild(menu);
+  var targetCell = null;
+
+  document.addEventListener("contextmenu", function (e) {
+    var td = e.target.closest(".table td");
+    if (!td) return;
+    e.preventDefault();
+    targetCell = td;
+    var text = td.textContent.trim();
+    var label = document.getElementById("tableCtxLabel");
+    label.textContent = text.length > 24 ? text.slice(0, 22) + "\u2026" : text;
+    menu.style.left = Math.min(e.clientX, window.innerWidth - 160) + "px";
+    menu.style.top = Math.min(e.clientY, window.innerHeight - 40) + "px";
+    menu.classList.add("is-open");
+  });
+
+  document.getElementById("tableCtxCopy").addEventListener("click", function () {
+    if (!targetCell) return;
+    var text = targetCell.textContent.trim();
+    navigator.clipboard.writeText(text).catch(function () {});
+    menu.classList.remove("is-open");
+  });
+
+  document.addEventListener("click", function () { menu.classList.remove("is-open"); });
+  document.addEventListener("scroll", function () { menu.classList.remove("is-open"); }, true);
+})();
+
+
 document.addEventListener("DOMContentLoaded", initTables);

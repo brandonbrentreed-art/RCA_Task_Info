@@ -142,3 +142,44 @@
 }
 .table-pagination button:hover { background: var(--color-grey-100); }
 .table-pagination button:disabled { opacity: 0.38; cursor: not-allowed; }
+
+
+/* -- Table context menu (right-click copy) -- */
+.table-ctx-menu {
+  position: fixed;
+  z-index: 300;
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-2);
+  padding: var(--spacing-1) 0;
+  display: none;
+}
+
+.table-ctx-menu.is-open {
+  display: block;
+}
+
+.table-ctx-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  font-family: var(--font-family);
+  font-size: var(--text-body2);
+  color: var(--color-navy);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.table-ctx-menu__item:hover {
+  background: var(--hover-overlay);
+}
+
+#tableCtxLabel {
+  color: var(--color-grey);
+  font-size: var(--text-caption);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

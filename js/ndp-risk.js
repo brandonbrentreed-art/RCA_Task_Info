@@ -76,18 +76,20 @@ var NdpRisk = (function () {
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex:1;min-height:0;gap:var(--spacing-4)">' +
-          '<div style="flex:2;min-height:0;overflow:auto">' +
-            '<div class="table-wrapper">' +
-              '<table class="table" id="ndpRiskTbl">' +
-                '<thead id="ndpRiskThead"></thead>' +
-                '<tbody id="ndpRiskTbody"></tbody>' +
-              '</table>' +
-            '</div>' +
-            '<div class="table-pagination" id="ndpRiskPager">' +
-              '<span id="ndpRiskCount"></span>' +
-              '<span id="ndpRiskRange"></span>' +
-              '<button id="ndpRiskPrev" disabled>&laquo;</button>' +
-              '<button id="ndpRiskNext" disabled>&raquo;</button>' +
+          '<div style="flex:2;min-height:0;display:flex;flex-direction:column">' +
+            '<div class="table-wrapper--flex">' +
+              '<div class="table-scroll">' +
+                '<table class="table" id="ndpRiskTbl">' +
+                  '<thead id="ndpRiskThead"></thead>' +
+                  '<tbody id="ndpRiskTbody"></tbody>' +
+                '</table>' +
+              '</div>' +
+              '<div class="table-pagination pagination-footer" id="ndpRiskPager">' +
+                '<span id="ndpRiskCount"></span>' +
+                '<span id="ndpRiskRange"></span>' +
+                '<button id="ndpRiskPrev" disabled>&laquo;</button>' +
+                '<button id="ndpRiskNext" disabled>&raquo;</button>' +
+              '</div>' +
             '</div>' +
           '</div>' +
           '<div class="ndp-chart" id="ndpScarcityChart" style="flex:1"></div>' +
@@ -179,10 +181,24 @@ var NdpRisk = (function () {
     });
   }
 
+  var searchQuery = "";
+
   function getVisible() {
-    return scored.filter(function (item) {
+    var filtered = scored.filter(function (item) {
       return activeRisks[NDP.riskLevel(item.score)];
     });
+    if (searchQuery) {
+      var headers = NdpData.state.planHeaders;
+      filtered = filtered.filter(function (item) {
+        for (var i = 0; i < item.row.length; i++) {
+          if ((item.row[i] || "").toUpperCase().indexOf(searchQuery) !== -1) return true;
+        }
+        // Also match risk level text
+        if (NDP.riskLevel(item.score).toUpperCase().indexOf(searchQuery) !== -1) return true;
+        return false;
+      });
+    }
+    return filtered;
   }
 
   // --- Render table ---
@@ -307,5 +323,12 @@ var NdpRisk = (function () {
     container.innerHTML = html;
   }
 
-  return { init: init };
+  return {
+    init: init,
+    setSearch: function (query) {
+      searchQuery = query;
+      page = 0;
+      if (scored.length) render();
+    }
+  };
 })();

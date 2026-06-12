@@ -237,14 +237,23 @@
   white-space: nowrap;
 }
 
-/* -- Demand chart (stacked bar) -- */
+/* -- Demand chart (paired bars per PWA) -- */
 .ndp-demand-chart {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 120px;
+  padding: var(--spacing-3) 0;
+}
+
+.ndp-demand-bars {
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 160px;
-  padding: var(--spacing-4) 0;
-  flex-shrink: 0;
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  border-bottom: 1px solid var(--color-divider);
 }
 
 .ndp-demand-col {
@@ -256,14 +265,28 @@
   min-width: 0;
 }
 
-.ndp-demand-col__bar {
+.ndp-demand-col__pair {
   flex: 1;
   width: 100%;
+  display: flex;
+  gap: 1px;
+  align-items: flex-end;
+  min-height: 0;
+}
+
+.ndp-demand-col__bar {
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 1px;
   min-height: 0;
+  height: 100%;
+  border-radius: 2px;
+}
+
+.ndp-demand-col__bar--resource {
+  border-radius: 2px;
 }
 
 .ndp-demand-col__seg {
@@ -276,23 +299,7 @@
 .ndp-demand-col__seg--tail { background: var(--color-warning); }
 .ndp-demand-col__seg--due { background: var(--color-blue); }
 .ndp-demand-col__seg--future { background: var(--color-grey-300); }
-
-.ndp-demand-col__label {
-  font-size: 0.6rem;
-  color: var(--color-grey);
-  margin-top: var(--spacing-1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  text-align: center;
-}
-
-.ndp-demand-col__cap {
-  width: 100%;
-  border-top: 2px dashed var(--color-green);
-  position: relative;
-}
+.ndp-demand-col__seg--resource { background: var(--color-green); opacity: 0.7; }
 
 /* -- Pivot table override for compact display -- */
 .ndp-pivot .table th,
@@ -352,3 +359,97 @@
   background: var(--hover-primary);
 }
 
+
+
+/* -- Demand chart labels -- */
+.ndp-demand-col__label {
+  font-size: var(--text-caption);
+  color: var(--color-grey);
+  margin-top: var(--spacing-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  text-align: center;
+}
+
+/* -- OUC group row (below PWA labels) -- */
+.ndp-demand-oucs {
+  display: flex;
+  padding-top: var(--spacing-1);
+}
+
+.ndp-demand-ouc {
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ndp-demand-oucs .ndp-demand-ouc + .ndp-demand-ouc {
+  border-left: 1px solid var(--color-divider);
+}
+
+
+/* -- Demand chart legend (clickable toggles) -- */
+.ndp-demand-legend {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.ndp-demand-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--text-caption);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-grey);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.ndp-demand-legend__item.is-active {
+  color: var(--color-navy);
+}
+
+.ndp-demand-legend__item:not(.is-active) {
+  opacity: 0.4;
+}
+
+.ndp-demand-legend__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ndp-demand-legend__item:not(.is-active) .ndp-demand-legend__dot {
+  opacity: 0.3;
+}
+
+
+/* -- Demand chart grid lines (volume scale) -- */
+.ndp-demand-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--color-grey-200);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ndp-demand-grid__label {
+  position: absolute;
+  left: var(--spacing-1);
+  top: -8px;
+  font-size: 9px;
+  color: var(--color-grey-light);
+  line-height: 1;
+}
+
+.ndp-demand-col {
+  z-index: 1;
+}

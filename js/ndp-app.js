@@ -22,13 +22,23 @@ document.addEventListener("DOMContentLoaded", function () {
       panels.forEach(function (p) {
         p.classList.toggle("is-active", p.id === "panel-" + target);
       });
+      // Re-render tabs from live plan data on switch
+      if (target === "risk" && NdpData.state.planRows.length) {
+        NdpRisk.init();
+      }
+      if (target === "demand" && NdpData.state.taskforceRows.length) {
+        NdpDemand.init();
+      }
     });
   });
 
   // --- Central search (shared component) ---
   initSearch({
     onInput: function (query) {
-      NdpPlan.setSearch(query.toUpperCase());
+      var q = query.toUpperCase();
+      NdpPlan.setSearch(q);
+      NdpDemand.setSearch(q);
+      NdpRisk.setSearch(q);
     }
   });
 
