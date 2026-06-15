@@ -18,9 +18,7 @@ var NdpPlan = (function () {
     search: ""
   };
 
-  var PAGE_SIZES = [30, 50, 100];
   var FILTER_COLS = ["OUC", "COMMIT TYPE", "CARE LEVEL", "AGEING", "TASK TYPE"];
-  var SEARCH_COLS = []; // empty = search all columns
   var filterSelections = {}; // colName -> [selected values]
 
   // Column display config
@@ -94,7 +92,6 @@ var NdpPlan = (function () {
         buildFilterDropdowns() +
         '<div style="margin-left:auto;display:flex;gap:var(--spacing-2);align-items:center">' +
           '<button class="btn-outlined" id="ndpPlanAdd" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">+ Add</button>' +
-          '<button class="btn-outlined" id="ndpPlanSelectAll" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">Select All</button>' +
           '<button class="btn-outlined" id="ndpPlanDelete" disabled style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);opacity:0.38">✕ Delete</button>' +
         '</div>' +
       '</div>' +
@@ -194,10 +191,15 @@ var NdpPlan = (function () {
         clearBtn.classList.toggle("is-visible", !!input.value);
       }
 
-      // Chevron click opens/focuses
+      // Chevron toggles dropdown open/closed
       chevron.addEventListener("mousedown", function (e) {
         e.preventDefault();
-        input.focus();
+        if (dropdown.classList.contains("is-open")) {
+          dropdown.classList.remove("is-open");
+          input.blur();
+        } else {
+          input.focus();
+        }
       });
 
       input.addEventListener("focus", function () {
@@ -306,14 +308,10 @@ var NdpPlan = (function () {
       if (!rowSelect || !rowSelect.size()) return;
       var tag = document.activeElement.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
-      // Don't fire if pin cells are highlighted (that's handled by TableSelect.cells)
       if (panel.querySelector(".ndp-pin-cell.is-dragged")) return;
       e.preventDefault();
       deleteSelected();
     });
-
-    // Select All / Deselect All
-    document.getElementById("ndpPlanSelectAll").addEventListener("click", toggleSelectAll);
 
     // Add from clipboard
     document.getElementById("ndpPlanAdd").addEventListener("click", addFromClipboard);
@@ -321,7 +319,6 @@ var NdpPlan = (function () {
 
   // --- Row selection (via shared TableSelect) ---
   var rowSelect = null;
-  var lastClickedIdx = null;
 
   function initRowSelect() {
     if (rowSelect) return;
@@ -342,25 +339,15 @@ var NdpPlan = (function () {
   function updateSelectionUI() {
     if (!rowSelect) return;
     var delBtn = document.getElementById("ndpPlanDelete");
-    var selBtn = document.getElementById("ndpPlanSelectAll");
     var selectedEl = document.getElementById("ndpPlanSelected");
     var hasSelection = rowSelect.size() > 0;
 
     delBtn.disabled = !hasSelection;
     delBtn.style.opacity = hasSelection ? "1" : "0.38";
 
-    // Selected count (MUI pattern: "X selected" on footer left)
     if (selectedEl) {
       selectedEl.textContent = hasSelection ? rowSelect.size() + " selected" : "";
     }
-
-    var filtered = getFilteredRows();
-    var jobIdx = st.headers.indexOf("JOB NO");
-    if (jobIdx === -1) jobIdx = 0;
-    var allSelected = filtered.length > 0 && filtered.every(function (row) {
-      return rowSelect.has((row[jobIdx] || "").trim());
-    });
-    selBtn.textContent = allSelected ? "Deselect All" : "Select All";
   }
 
   function toggleSelectAll() {
@@ -516,15 +503,25 @@ var NdpPlan = (function () {
   // --- Filtering ---
   function getFilteredRows() {
     var rows = st.rows;
+    var indices = [];
+    for (var k = 0; k < rows.length; k++) indices.push(k);
 
-    // Search filter — searches ALL visible columns
+    // Search filter
     if (st.search) {
-      rows = rows.filter(function (row) {
+      var filtered = [];
+      var filteredIdx = [];
+      for (var s = 0; s < rows.length; s++) {
+        var row = rows[s];
         for (var i = 0; i < st.headers.length; i++) {
-          if ((row[i] || "").toUpperCase().indexOf(st.search) !== -1) return true;
+          if ((row[i] || "").toUpperCase().indexOf(st.search) !== -1) {
+            filtered.push(row);
+            filteredIdx.push(indices[s]);
+            break;
+          }
         }
-        return false;
-      });
+      }
+      rows = filtered;
+      indices = filteredIdx;
     }
 
     // Dropdown filters
@@ -533,11 +530,19 @@ var NdpPlan = (function () {
       if (!sel || !sel.length) return;
       var ci = st.headers.indexOf(col);
       if (ci === -1) return;
-      rows = rows.filter(function (row) {
-        return sel.indexOf((row[ci] || "").trim()) !== -1;
-      });
+      var newRows = [];
+      var newIdx = [];
+      for (var j = 0; j < rows.length; j++) {
+        if (sel.indexOf((rows[j][ci] || "").trim()) !== -1) {
+          newRows.push(rows[j]);
+          newIdx.push(indices[j]);
+        }
+      }
+      rows = newRows;
+      indices = newIdx;
     });
 
+    rows._srcIndices = indices;
     return rows;
   }
 
@@ -570,6 +575,23 @@ var NdpPlan = (function () {
     // Header
     var visibleCols = getVisibleCols();
     var hr = document.createElement("tr");
+
+    // Checkbox header (select all)
+    var thCb = document.createElement("th");
+    thCb.className = "table-col-checkbox";
+    thCb.style.cursor = "pointer";
+    var filtered = getFilteredRows();
+    var jobIdx = st.headers.indexOf("JOB NO");
+    if (jobIdx === -1) jobIdx = 0;
+    var selCount = 0;
+    filtered.forEach(function (row) { if (rowSelect && rowSelect.has((row[jobIdx] || "").trim())) selCount++; });
+    var allChecked = filtered.length > 0 && selCount === filtered.length;
+    var indeterminate = selCount > 0 && !allChecked;
+    var cbClass = "table-checkbox" + (allChecked ? " is-checked" : "") + (indeterminate ? " is-indeterminate" : "");
+    thCb.innerHTML = '<span class="' + cbClass + '">' + getCheckboxSvg(allChecked, indeterminate) + '</span>';
+    thCb.addEventListener("click", function () { toggleSelectAll(); });
+    hr.appendChild(thCb);
+
     visibleCols.forEach(function (colName) {
       var ci = st.headers.indexOf(colName);
       var cfg = COL_CONFIG[colName] || {};
@@ -593,7 +615,6 @@ var NdpPlan = (function () {
     thead.appendChild(hr);
 
     // Rows
-    var filtered = getFilteredRows();
     var totalPages = Math.max(1, Math.ceil(filtered.length / st.pageSize));
     if (st.page >= totalPages) st.page = totalPages - 1;
     if (st.page < 0) st.page = 0;
@@ -604,11 +625,22 @@ var NdpPlan = (function () {
     var frag = document.createDocumentFragment();
     pageRows.forEach(function (row, ri) {
       var tr = document.createElement("tr");
-      var jobIdx = st.headers.indexOf("JOB NO");
-      if (jobIdx === -1) jobIdx = 0; // fallback to first col as ID
-      var jobNo = jobIdx !== -1 ? (row[jobIdx] || "").trim() : "";
-      if (rowSelect && rowSelect.has(jobNo)) tr.style.background = "var(--hover-row)";
+      var jobNo = (row[jobIdx] || "").trim();
+      var isSelected = rowSelect && rowSelect.has(jobNo);
+      if (isSelected) tr.style.background = "var(--hover-row)";
+
+      // Row checkbox
+      var tdCb = document.createElement("td");
+      tdCb.className = "table-col-checkbox";
+      var rowCbClass = "table-checkbox" + (isSelected ? " is-checked" : "");
+      tdCb.innerHTML = '<span class="' + rowCbClass + '">' + getCheckboxSvg(isSelected, false) + '</span>';
+      tdCb.addEventListener("click", function (e) {
+        toggleRowSelect(start + ri, jobNo, e);
+      });
+      tr.appendChild(tdCb);
+
       tr.addEventListener("click", function (e) {
+        if (e.target.closest(".table-checkbox")) return;
         if (e.target.closest(".ndp-pin-cell")) return;
         toggleRowSelect(start + ri, jobNo, e);
       });
@@ -626,7 +658,7 @@ var NdpPlan = (function () {
         } else if (cfg.editable) {
           td.textContent = val || "\u2014";
           td.className = "ndp-pin-cell" + (val ? "" : " ndp-pin-cell--empty");
-          td.setAttribute("data-row", start + ri);
+          td.setAttribute("data-row", filtered._srcIndices ? filtered._srcIndices[start + ri] : start + ri);
         } else {
           td.textContent = val;
         }
@@ -647,7 +679,17 @@ var NdpPlan = (function () {
     updateSelectionUI();
   }
 
-  // --- TECH PIN cell selection (via shared TableSelect.cells) ---
+  // --- MUI checkbox SVGs ---
+  var SVG_UNCHECKED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>';
+  var SVG_CHECKED = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+  var SVG_INDETERMINATE = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z"/></svg>';
+
+  function getCheckboxSvg(checked, indeterminate) {
+    if (indeterminate) return SVG_INDETERMINATE;
+    return checked ? SVG_CHECKED : SVG_UNCHECKED;
+  }
+
+  // --- TECH PIN cell selection (drag, paste, delete via TableSelect.cells) ---
   var pinSelect = null;
 
   function initPinDrag() {
@@ -656,29 +698,80 @@ var NdpPlan = (function () {
       container: panel,
       cellSelector: ".ndp-pin-cell",
       onPaste: function (cells, value) {
-        var pin = value.replace(/[\s\-]/g, "").toUpperCase();
+        var pin = extractPin(value);
+        if (pin === null) return;
         applyPinToCells(cells, pin);
       },
       onDelete: function (cells) {
         applyPinToCells(cells, "");
       }
     });
+
+    // Ctrl+C copies only the first selected cell's value
+    document.addEventListener("copy", function (e) {
+      var cells = panel.querySelectorAll(".ndp-pin-cell.is-dragged");
+      if (!cells.length) return;
+      var tag = document.activeElement.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      e.preventDefault();
+      var text = cells[0].textContent.trim();
+      if (text === "\u2014") text = "";
+      e.clipboardData.setData("text/plain", text);
+    });
+
+    // Type directly into a selected cell
+    document.addEventListener("keydown", function (e) {
+      var cells = panel.querySelectorAll(".ndp-pin-cell.is-dragged");
+      if (!cells.length) return;
+      if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) return;
+      e.preventDefault();
+      var td = cells[0];
+      var rowIdx = parseInt(td.getAttribute("data-row"), 10);
+      var pinIdx = st.headers.indexOf("TECH PIN");
+      var current = (pinIdx !== -1 && st.rows[rowIdx]) ? (st.rows[rowIdx][pinIdx] || "") : "";
+      var input = document.createElement("input");
+      input.type = "text";
+      input.className = "ndp-pin-input";
+      input.value = e.key;
+      td.textContent = "";
+      td.appendChild(input);
+      input.focus();
+
+      function commit() {
+        var pin = input.value.replace(/[\s\-]/g, "").toUpperCase();
+        if (pin === current) { render(); return; }
+        applyPinToCells(Array.from(cells), pin);
+      }
+      input.addEventListener("blur", commit);
+      input.addEventListener("keydown", function (ev) {
+        if (ev.key === "Enter") { ev.preventDefault(); input.blur(); }
+        if (ev.key === "Escape") { input.value = current; input.blur(); }
+        ev.stopPropagation();
+      });
+    });
+  }
+
+  // Extract a single PIN from pasted text; reject multi-column/row data
+  function extractPin(value) {
+    var trimmed = value.trim();
+    if (!trimmed) return "";
+    // Reject if contains tabs or newlines (multi-cell paste from spreadsheet/row)
+    if (/[\t\n\r]/.test(trimmed)) return null;
+    // Strip spaces/dashes and uppercase
+    return trimmed.replace(/[\s\-]/g, "").toUpperCase();
   }
 
   function applyPinToCells(cells, pin) {
     var pinIdx = st.headers.indexOf("TECH PIN");
     var nameIdx = st.headers.indexOf("TECH NAME");
     if (pinIdx === -1) return;
-
     var resolved = NDP.resolveTech(pin);
-
     cells.forEach(function (td) {
       var rowIdx = parseInt(td.getAttribute("data-row"), 10);
       if (isNaN(rowIdx) || !st.rows[rowIdx]) return;
       st.rows[rowIdx][pinIdx] = resolved.pin;
       if (nameIdx !== -1) st.rows[rowIdx][nameIdx] = resolved.name;
     });
-
     savePlan();
     render();
   }
@@ -689,9 +782,6 @@ var NdpPlan = (function () {
     NdpData.state.planRows = st.rows;
     NdpData.savePlan();
   }
-
-  // --- Commit pill class resolver ---
-  // (handled via CSS classes: ndp-pill--tail, ndp-pill--today, etc.)
 
   return {
     init: init,

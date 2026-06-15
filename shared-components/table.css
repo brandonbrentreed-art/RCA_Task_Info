@@ -12,6 +12,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-body2);
+  table-layout: fixed;
 }
 
 .table th,
@@ -21,6 +22,9 @@
   border: var(--table-border);
   border-top: none;
   border-left: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table th {
@@ -30,6 +34,25 @@
   white-space: nowrap;
   user-select: none;
   cursor: pointer;
+  position: relative;
+}
+
+/* -- Column resize handle -- */
+.table-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+  transition: background var(--transition-fast);
+  z-index: 1;
+}
+
+.table-resize-handle:hover,
+.table-resize-handle.is-active {
+  background: var(--color-blue);
 }
 
 .table th.sortable {
@@ -108,7 +131,8 @@
 }
 
 .table-wrapper--flex .table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
 }
 
 .table-wrapper--flex .table th {
@@ -267,6 +291,43 @@
 }
 
 .table-pagination button:disabled { opacity: 0.38; cursor: not-allowed; }
+
+
+/* -- Table checkbox (MUI-style row selection) -- */
+.table-checkbox {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-grey);
+  transition: color var(--transition-fast);
+  vertical-align: middle;
+}
+
+.table-checkbox svg {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+.table-checkbox.is-checked {
+  color: var(--color-blue);
+}
+
+.table-checkbox.is-indeterminate {
+  color: var(--color-blue);
+}
+
+/* Checkbox column cell — override to flex for perfect centering */
+.table th.table-col-checkbox,
+.table td.table-col-checkbox {
+  width: 40px;
+  padding: 0;
+  text-align: center;
+  vertical-align: middle;
+  overflow: visible;
+}
 
 
 /* -- Table context menu (right-click copy) -- */

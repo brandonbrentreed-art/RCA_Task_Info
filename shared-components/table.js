@@ -28,10 +28,8 @@ var TableSelect = (function () {
     var selected = new Set();
     var lastIdx = null;
 
-    function getAll() { return getRows(); }
-
     function toggle(id, idx, e) {
-      var all = getAll();
+      var all = getRows();
       if (e.shiftKey && lastIdx !== null) {
         var from = Math.min(lastIdx, idx);
         var to = Math.max(lastIdx, idx);
@@ -280,3 +278,158 @@ document.addEventListener("click", function (e) {
 });
 
 document.addEventListener("DOMContentLoaded", initTables);
+
+// --- Column Resize (auto-wires on any .table th) ---
+var TableResize = (function () {
+  var active = null; // { th, startX, startW }
+
+  function init(table) {
+    if (!table || table.dataset.resizeInit) return;
+    table.dataset.resizeInit = "1";
+    table.querySelectorAll("thead th").forEach(addHandle);
+  }
+
+  function addHandle(th) {
+    if (th.querySelector(".table-resize-handle")) return;
+    var handle = document.createElement("span");
+    handle.className = "table-resize-handle";
+    th.appendChild(handle);
+
+    handle.addEventListener("mousedown", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      active = { th: th, startX: e.clientX, startW: th.offsetWidth };
+      handle.classList.add("is-active");
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+    });
+
+    handle.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
+
+    handle.addEventListener("dblclick", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      autoFit(th);
+      var table = th.closest(".table");
+      if (table) _saveWidths(table);
+    });
+  }
+
+  document.addEventListener("mousemove", function (e) {
+    if (!active) return;
+    var diff = e.clientX - active.startX;
+    var newW = Math.max(40, active.startW + diff);
+    active.th.style.width = newW + "px";
+  });
+
+  document.addEventListener("mouseup", function () {
+    if (!active) return;
+    var handle = active.th.querySelector(".table-resize-handle");
+    if (handle) handle.classList.remove("is-active");
+    var table = active.th.closest(".table");
+    document.body.style.cursor = "";
+    document.body.style.userSelect = "";
+    active = null;
+    if (table) _saveWidths(table);
+  });
+
+  function autoFit(th) {
+    var table = th.closest(".table");
+    if (!table) return;
+    var colIdx = Array.from(th.parentNode.children).indexOf(th);
+    var span = _measureSpan(th);
+    var maxW = span.offsetWidth + 16;
+    table.querySelectorAll("tbody tr").forEach(function (tr) {
+      var td = tr.children[colIdx];
+      if (!td) return;
+      span.textContent = td.textContent;
+      var w = span.offsetWidth + 16;
+      if (w > maxW) maxW = w;
+    });
+    document.body.removeChild(span);
+    th.style.width = Math.max(40, maxW) + "px";
+  }
+
+  function autoFitAll(table) {
+    if (!table) return;
+    var ths = Array.from(table.querySelectorAll("thead th"));
+    if (!ths.length) return;
+    var span = _measureSpan(ths[0]);
+    ths.forEach(function (th, ci) {
+      if (th.classList.contains("table-col-checkbox")) return;
+      span.textContent = th.textContent;
+      var maxW = span.offsetWidth + 16;
+      table.querySelectorAll("tbody tr").forEach(function (tr) {
+        var td = tr.children[ci];
+        if (!td) return;
+        span.textContent = td.textContent;
+        var w = span.offsetWidth + 16;
+        if (w > maxW) maxW = w;
+      });
+      th.style.width = Math.max(40, maxW) + "px";
+    });
+    document.body.removeChild(span);
+  }
+
+  function _measureSpan(refEl) {
+    var span = document.createElement("span");
+    span.style.cssText = "visibility:hidden;position:absolute;white-space:nowrap;";
+    var style = getComputedStyle(refEl);
+    span.style.font = style.font;
+    span.style.padding = style.paddingLeft + " " + style.paddingRight;
+    span.textContent = refEl.textContent;
+    document.body.appendChild(span);
+    return span;
+  }
+
+  // Observe new tables — debounced to batch rapid DOM changes
+  var pending = null;
+  var observer = new MutationObserver(function () {
+    if (pending) return;
+    pending = requestAnimationFrame(function () {
+      pending = null;
+      document.querySelectorAll(".table thead").forEach(function (thead) {
+        var table = thead.closest(".table");
+        if (!table) return;
+        if (!table.dataset.resizeInit) {
+          init(table);
+          autoFitAll(table);
+          _saveWidths(table);
+        } else {
+          var needsHandles = false;
+          thead.querySelectorAll("th").forEach(function (th) {
+            if (!th.querySelector(".table-resize-handle") && !th.classList.contains("table-col-checkbox")) {
+              addHandle(th);
+              needsHandles = true;
+            }
+          });
+          if (needsHandles) _restoreWidths(table);
+        }
+      });
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Persist/restore column widths across re-renders
+  function _saveWidths(table) {
+    var ths = table.querySelectorAll("thead th");
+    var widths = [];
+    ths.forEach(function (th) { widths.push(th.offsetWidth); });
+    table._colWidths = widths;
+  }
+
+  function _restoreWidths(table) {
+    if (!table._colWidths) return;
+    var ths = table.querySelectorAll("thead th");
+    var widths = table._colWidths;
+    ths.forEach(function (th, i) {
+      if (widths[i] && !th.classList.contains("table-col-checkbox")) {
+        th.style.width = widths[i] + "px";
+      }
+    });
+  }
+
+  return { init: init, autoFit: autoFit, autoFitAll: autoFitAll };
+})();

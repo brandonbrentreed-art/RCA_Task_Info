@@ -102,12 +102,16 @@ var NDP = (function () {
 
   // --- Canonical key (strip prefix) ---
   function canonicalKey(v) {
-    var s = String(v || "").replace(/[\s_]/g, "").toUpperCase();
-    var parts = s.split("-");
-    for (var i = parts.length - 1; i >= 0; i--) {
-      if (parts[i].length > 0) return parts[i];
+    if (!v) return "";
+    var s = String(v);
+    var last = s.lastIndexOf("-");
+    if (last !== -1) s = s.substring(last + 1);
+    var out = "";
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c !== 32 && c !== 95) out += s.charAt(i);
     }
-    return s;
+    return out.toUpperCase();
   }
 
   // --- Resolve Tech PIN to { pin, name, title } ---

@@ -172,11 +172,32 @@ var NdpRisk = (function () {
       }
     });
 
-    // Copy visible rows to clipboard
+    // Copy visible rows to clipboard (HTML + TSV)
     document.getElementById("ndpRiskCopy").addEventListener("click", function () {
       var headers = NdpData.state.planHeaders;
       var visible = getVisible();
-      if (!visible.length) return;
+      if (!visible.length) { Notify.info("No rows to copy"); return; }
+
+      var html = '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;font-family:Calibri,sans-serif;font-size:11px">';
+      html += '<thead><tr>';
+      TABLE_COLS.forEach(function (col) {
+        html += '<th style="background:#142032;color:#fff;padding:4px 8px;font-weight:500;text-align:center">' + col.label + '</th>';
+      });
+      html += '</tr></thead><tbody>';
+      visible.forEach(function (item, i) {
+        var bg = i % 2 === 0 ? '#fff' : '#F9FAFB';
+        html += '<tr>';
+        TABLE_COLS.forEach(function (col) {
+          var v = '';
+          if (col.key === '_RISK') v = NDP.riskLevel(item.score);
+          else if (col.key === '_ALTS') v = item.score;
+          else { var ci = headers.indexOf(col.key); v = ci !== -1 ? (item.row[ci] || '') : ''; }
+          html += '<td style="padding:3px 8px;text-align:center;background:' + bg + '">' + NDP.escapeHtml(String(v)) + '</td>';
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+
       var tsv = TABLE_COLS.map(function (c) { return c.label; }).join("\t") + "\n";
       visible.forEach(function (item) {
         tsv += TABLE_COLS.map(function (col) {
@@ -186,10 +207,20 @@ var NdpRisk = (function () {
           return ci !== -1 ? (item.row[ci] || "") : "";
         }).join("\t") + "\n";
       });
-      navigator.clipboard.writeText(tsv).then(function () {
+
+      var htmlBlob = new Blob([html], { type: 'text/html' });
+      var textBlob = new Blob([tsv], { type: 'text/plain' });
+      navigator.clipboard.write([
+        new ClipboardItem({ 'text/html': htmlBlob, 'text/plain': textBlob })
+      ]).then(function () {
         Notify.success("Copied " + visible.length + " rows", 2000);
-      }).catch(function () {});
+      }).catch(function () {
+        navigator.clipboard.writeText(tsv).then(function () {
+          Notify.success("Copied " + visible.length + " rows", 2000);
+        });
+      });
     });
+
 
     // Screenshot risk summary (same format as WMS)
     document.getElementById("ndpRiskScreenshot").addEventListener("click", function () {

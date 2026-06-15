@@ -309,7 +309,7 @@ var NdpData = (function () {
           for (var si = 0; si < bttwSheets.length; si++) {
             var ws = wb.Sheets[bttwSheets[si]];
             if (!ws) continue;
-            var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+            var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true });
             if (rows.length >= 2 && rows[0].length > 2) {
               processEnrichRows(rows[0], rows.slice(1), cb);
               found = true;
@@ -320,7 +320,7 @@ var NdpData = (function () {
           if (!found) {
             for (var fi = 0; fi < wb.SheetNames.length; fi++) {
               var fws = wb.Sheets[wb.SheetNames[fi]];
-              var frows = XLSX.utils.sheet_to_json(fws, { header: 1, defval: "", raw: false });
+              var frows = XLSX.utils.sheet_to_json(fws, { header: 1, defval: "", raw: true });
               if (frows.length >= 2 && frows[0].length > 2) {
                 processEnrichRows(frows[0], frows.slice(1), cb);
                 found = true;
@@ -413,7 +413,6 @@ var NdpData = (function () {
   function processEnrichFibre(headers, dataRows, cb) {
     var headersLower = headers.map(function (h) { return String(h || "").toLowerCase().trim(); });
 
-    // Find columns: jin/job_no, resource_type/owner, ORDER_AGE/priority
     var jobIdx = headersLower.indexOf("jin");
     if (jobIdx === -1) jobIdx = headersLower.indexOf("job_no");
     var ctIdx = headersLower.indexOf("resource_type");
@@ -424,21 +423,22 @@ var NdpData = (function () {
 
     if (jobIdx === -1) { cb(false, "No JIN/job_no column found"); return; }
 
-    // Build lookup: canonicalKey -> { commitType, age, ageCat }
-    var lookup = {};
-    dataRows.forEach(function (row) {
+    // Build lookup using Object.create(null) for fast key access
+    var lookup = Object.create(null);
+    for (var i = 0; i < dataRows.length; i++) {
+      var row = dataRows[i];
       var jobNo = String(row[jobIdx] || "").trim();
-      if (!jobNo) return;
+      if (!jobNo) continue;
       var key = NDP.canonicalKey(jobNo);
-      if (!key) return;
+      if (!key) continue;
       lookup[key] = {
         commitType: ctIdx !== -1 ? String(row[ctIdx] || "").trim() : "",
         age: ageIdx !== -1 ? String(row[ageIdx] || "").trim() : "",
         ageCat: ageCatIdx !== -1 ? String(row[ageCatIdx] || "").trim() : ""
       };
-    });
+    }
 
-    // Enrich taskforce rows with COMMIT TYPE + AGEING
+    // Enrich taskforce rows
     var tfHeaders = state.taskforceHeaders;
     var tfRows = state.taskforceRows;
     var tfIdIdx = tfHeaders.indexOf("Unique Task ID");
@@ -446,17 +446,21 @@ var NdpData = (function () {
     var tagIdx = tfHeaders.indexOf("TAG");
     if (tagIdx === -1) { tfHeaders.push("TAG"); tagIdx = tfHeaders.length - 1; }
 
+    var colCount = tfHeaders.length;
     var matched = 0;
-    tfRows.forEach(function (row) {
-      while (row.length < tfHeaders.length) row.push("");
-      if (tfIdIdx === -1) return;
-      var id = NDP.canonicalKey(row[tfIdIdx] || "");
-      if (!id || !lookup[id]) return;
-      if (tagIdx !== -1 && lookup[id].commitType) row[tagIdx] = lookup[id].commitType;
+    for (var j = 0; j < tfRows.length; j++) {
+      var tfRow = tfRows[j];
+      if (tfRow.length < colCount) tfRow.length = colCount;
+      if (tfIdIdx === -1) continue;
+      var id = NDP.canonicalKey(tfRow[tfIdIdx] || "");
+      if (!id) continue;
+      var match = lookup[id];
+      if (!match) continue;
+      if (match.commitType) tfRow[tagIdx] = match.commitType;
       matched++;
-    });
+    }
 
-    // Store enrichment for the demand secondary table
+    // Store only the columns we need for ageing backfill (not the full dataset)
     state.enrichHeaders = headers;
     state.enrichRows = dataRows;
     state.enrichIdIdx = jobIdx;
@@ -465,7 +469,18 @@ var NdpData = (function () {
     state.enrichAgeIdx = ageCatIdx !== -1 ? ageCatIdx : ageIdx;
 
     try {
-      sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: headers, rows: dataRows }));
+      // Store compact enrichment (only id + age columns)
+      var compactRows = [];
+      var compactAgeIdx = state.enrichAgeIdx;
+      if (jobIdx !== -1 && compactAgeIdx !== -1) {
+        for (var k = 0; k < dataRows.length; k++) {
+          var cr = dataRows[k];
+          compactRows.push([cr[jobIdx] || "", cr[compactAgeIdx] || ""]);
+        }
+        sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: [headers[jobIdx], headers[compactAgeIdx]], rows: compactRows, origIdIdx: 0, origAgeIdx: 1 }));
+      } else {
+        sessionStorage.setItem(STORE.ENRICH, JSON.stringify({ headers: headers, rows: dataRows }));
+      }
       sessionStorage.setItem(STORE.TASKFORCE, JSON.stringify({ headers: tfHeaders, rows: tfRows }));
     } catch (e) {}
 

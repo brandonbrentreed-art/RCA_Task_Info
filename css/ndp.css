@@ -349,6 +349,7 @@
   font-weight: var(--font-weight-medium);
   cursor: cell;
   transition: background var(--transition-fast);
+  overflow: hidden;
 }
 
 .ndp-pin-cell--empty {
@@ -356,12 +357,21 @@
   color: var(--color-grey-light);
 }
 
-.ndp-pin-cell--unresolved {
-  color: var(--color-error);
-}
-
 .ndp-pin-cell.is-dragged {
   background: rgba(84, 136, 199, 0.12);
+}
+
+.ndp-pin-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  text-align: center;
+  font: inherit;
+  width: 0;
+  min-width: 100%;
+  max-width: 100%;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 

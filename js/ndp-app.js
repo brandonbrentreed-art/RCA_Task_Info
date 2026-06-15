@@ -273,9 +273,68 @@ document.addEventListener("DOMContentLoaded", function () {
       rows = NdpData.state.taskforceRows;
       sheetName = "Demand";
     } else if (target === "risk") {
-      headers = NdpData.state.planHeaders;
-      rows = NdpData.state.planRows;
-      sheetName = "Risk";
+      // Multi-sheet risk export (matches WMS pattern)
+      var riskHeaders = NdpData.state.planHeaders;
+      var riskRows = NdpData.state.planRows;
+      if (!riskHeaders || !riskRows || !riskRows.length) return;
+
+      var border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+      var hdrS = { font: { bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: "142032" } } };
+      var cellS = { alignment: { horizontal: "center", vertical: "center" }, border: border };
+
+      // Sheet 1: Assignments (Task ID + Tech Pin)
+      var jobIdx = riskHeaders.indexOf("JOB NO");
+      var pinIdx = riskHeaders.indexOf("TECH PIN");
+      var s1 = [["Task ID", "Tech Pin"]];
+      riskRows.forEach(function (row) {
+        s1.push([
+          jobIdx !== -1 ? (row[jobIdx] || "") : "",
+          pinIdx !== -1 ? (row[pinIdx] || "") : ""
+        ]);
+      });
+      var ws1 = XLSX.utils.aoa_to_sheet(s1);
+      ws1["!cols"] = [{ wch: 16 }, { wch: 12 }];
+      styleSheet(ws1, hdrS, cellS);
+      XLSX.utils.book_append_sheet(wb, ws1, "Assignments");
+
+      // Sheet 2: Risk Summary (scored table)
+      var RISK_COLS = ["Risk", "Task ID", "OUC", "PWA", "De-Risk", "Tech", "Name", "Response Code", "Alts"];
+      var RISK_KEYS = ["_RISK", "JOB NO", "OUC", "PWA ID", "DERISK REASON", "TECH PIN", "TECH NAME", "CARE LEVEL", "_ALTS"];
+      var oucI = riskHeaders.indexOf("OUC");
+      var pinI = riskHeaders.indexOf("TECH PIN");
+      var skillI = riskHeaders.indexOf("DERISK REASON");
+      var oucSkill = {};
+      riskRows.forEach(function (row) {
+        var o = oucI !== -1 ? (row[oucI] || "").trim() : "";
+        var p = pinI !== -1 ? (row[pinI] || "").trim() : "";
+        var sk = skillI !== -1 ? (row[skillI] || "").trim() : "";
+        if (!o || !p || !sk) return;
+        if (!oucSkill[o]) oucSkill[o] = {};
+        if (!oucSkill[o][sk]) oucSkill[o][sk] = {};
+        oucSkill[o][sk][p] = true;
+      });
+      var s2 = [RISK_COLS];
+      riskRows.forEach(function (row) {
+        var o = oucI !== -1 ? (row[oucI] || "").trim() : "";
+        var sk = skillI !== -1 ? (row[skillI] || "").trim() : "";
+        var alts = (o && sk && oucSkill[o] && oucSkill[o][sk]) ? Object.keys(oucSkill[o][sk]).length : 0;
+        var r = RISK_KEYS.map(function (key) {
+          if (key === "_RISK") return NDP.riskLevel(alts);
+          if (key === "_ALTS") return alts;
+          var ci = riskHeaders.indexOf(key);
+          return ci !== -1 ? (row[ci] || "") : "";
+        });
+        s2.push(r);
+      });
+      var ws2 = XLSX.utils.aoa_to_sheet(s2);
+      ws2["!cols"] = RISK_COLS.map(function (h) { return { wch: Math.max(h.length + 3, 10) }; });
+      styleSheet(ws2, hdrS, cellS);
+      XLSX.utils.book_append_sheet(wb, ws2, "Risk Summary");
+
+      var d = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, "NDP_Risk_" + d + ".xlsx");
+      Notify.success("Risk exported", 2000);
+      return;
     }
 
     if (!headers || !rows || !rows.length) return;
