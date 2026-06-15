@@ -9,28 +9,37 @@ document.addEventListener("DOMContentLoaded", function () {
   // --- Tab switching ---
   var tabs = document.querySelectorAll(".tabs__tab");
   var panels = document.querySelectorAll(".tab-panel");
+  var ACTIVE_TAB_KEY = "ndp_active_tab";
+
+  function switchTab(target) {
+    tabs.forEach(function (t) {
+      t.classList.remove("is-active");
+      t.setAttribute("aria-selected", "false");
+    });
+    panels.forEach(function (p) {
+      p.classList.toggle("is-active", p.id === "panel-" + target);
+    });
+    var activeTab = document.querySelector('.tabs__tab[data-tab="' + target + '"]');
+    if (activeTab) {
+      activeTab.classList.add("is-active");
+      activeTab.setAttribute("aria-selected", "true");
+    }
+    try { sessionStorage.setItem(ACTIVE_TAB_KEY, target); } catch (e) {}
+    if (target === "risk" && NdpData.state.planRows.length) NdpRisk.init();
+    if (target === "demand" && NdpData.state.taskforceRows.length) NdpDemand.init();
+  }
 
   tabs.forEach(function (tab) {
     tab.addEventListener("click", function () {
-      var target = tab.getAttribute("data-tab");
-      tabs.forEach(function (t) {
-        t.classList.remove("is-active");
-        t.setAttribute("aria-selected", "false");
-      });
-      tab.classList.add("is-active");
-      tab.setAttribute("aria-selected", "true");
-      panels.forEach(function (p) {
-        p.classList.toggle("is-active", p.id === "panel-" + target);
-      });
-      // Re-render tabs from live plan data on switch
-      if (target === "risk" && NdpData.state.planRows.length) {
-        NdpRisk.init();
-      }
-      if (target === "demand" && NdpData.state.taskforceRows.length) {
-        NdpDemand.init();
-      }
+      switchTab(tab.getAttribute("data-tab"));
     });
   });
+
+  // Restore last active tab
+  var savedTab = sessionStorage.getItem(ACTIVE_TAB_KEY);
+  if (savedTab && document.querySelector('.tabs__tab[data-tab="' + savedTab + '"]')) {
+    switchTab(savedTab);
+  }
 
   // --- Central search (shared component) ---
   initSearch({

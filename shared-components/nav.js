@@ -75,6 +75,23 @@ if (document.readyState === "loading") {
 }
 
 function init() {
+  // Restore scroll position from previous visit
+  var scrollKey = "scroll_" + location.pathname;
+  var savedScroll = sessionStorage.getItem(scrollKey);
+  if (savedScroll) {
+    requestAnimationFrame(function () {
+      var main = document.querySelector(".table-scroll, .results-area, main, #app");
+      if (main) main.scrollTop = parseInt(savedScroll, 10);
+    });
+  }
+  // Save scroll position on navigate away
+  window.addEventListener("beforeunload", function () {
+    var main = document.querySelector(".table-scroll, .results-area, main, #app");
+    if (main) {
+      try { sessionStorage.setItem(scrollKey, main.scrollTop); } catch (e) {}
+    }
+  });
+
   document.body.style.opacity = "0";
   requestAnimationFrame(() => {
     document.body.style.transition = "opacity 200ms ease";
