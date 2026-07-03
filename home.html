@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <link rel="icon" href="assets/favicon-light.svg">
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light')</script>
+  <link rel="stylesheet" href="shared-ui/theme.css?v=6">
+  <link rel="stylesheet" href="shared-ui/typography.css?v=6">
+  <link rel="stylesheet" href="shared-ui/components.css?v=6">
+  <link rel="stylesheet" href="shared-ui/layout.css?v=6">
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-family);
+      color: var(--color-navy);
+      background: var(--color-page-bg);
+      padding: var(--spacing-6);
+      padding-top: var(--spacing-20);
+    }
+
+    .home-hero {
+      background: url('assets/Idenna_x_Open_Reach_screen_shots_300dpi-11.jpg') center/cover no-repeat;
+      color: var(--color-white);
+      padding: var(--spacing-30) var(--spacing-6);
+      border-radius: var(--radius);
+      text-align: left;
+      position: relative;
+    }
+    .home-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--overlay-backdrop);
+      border-radius: var(--radius);
+    }
+    .home-hero h1 {
+      font-size: var(--text-h1);
+      font-weight: var(--font-weight-bold);
+      margin: 0 0 var(--spacing-3);
+      position: relative;
+      z-index: 1;
+      color: var(--color-white);
+      cursor: default;
+    }
+    .home-hero p {
+      font-size: var(--text-body1);
+      max-width: 560px;
+      margin: 0;
+      line-height: var(--line-height);
+      position: relative;
+      z-index: 1;
+      color: var(--color-white);
+      cursor: default;
+    }
+
+    .home-cards-header {
+      max-width: 1000px;
+      margin: var(--spacing-8) auto 0;
+      padding: 0 var(--spacing-6);
+    }
+    .home-cards-header h2 {
+      font-size: var(--text-h2);
+      font-weight: var(--font-weight-medium);
+      margin: 0;
+    }
+
+    .home-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--spacing-6);
+      max-width: 1000px;
+      margin: var(--spacing-4) auto var(--spacing-10);
+      padding: 0 var(--spacing-6);
+    }
+
+    .home-card {
+      background: var(--color-white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-2);
+      padding: var(--spacing-6);
+      color: var(--color-navy);
+      cursor: pointer;
+      text-decoration: none;
+      transition: box-shadow var(--transition-standard), transform var(--transition-standard);
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-3);
+    }
+    .home-card:hover {
+      box-shadow: var(--shadow-3);
+      transform: translateY(-2px);
+    }
+    .home-card-icon {
+      width: var(--size-btn-touch);
+      height: var(--size-btn-touch);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .home-card-icon svg { width: var(--size-icon-lg); height: var(--size-icon-lg); }
+    .home-card h3 {
+      margin: 0;
+      font-size: var(--text-h3);
+      font-weight: var(--font-weight-medium);
+    }
+    .home-card p {
+      margin: 0;
+      font-size: var(--text-body2);
+      color: var(--color-grey-light);
+      line-height: var(--line-height);
+    }
+
+    .home-footer {
+      position: fixed;
+      bottom: var(--spacing-4);
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: var(--text-body2);
+      color: var(--color-grey);
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="home-hero">
+    <h1>Task Diagnostics Hub</h1>
+    <p>Central hub for task diagnostics, timeline tracing, and next day plan tooling.</p>
+  </section>
+
+  <div class="home-cards-header">
+    <h2>Our Tools</h2>
+  </div>
+
+  <div class="home-cards">
+    <div class="home-card" data-page="timeline">
+      <div class="home-card-icon" data-icon="timeline"></div>
+      <h3>RCA Timeline</h3>
+      <p>Load snapshots and trace task changes across 15-min intervals by JIN ID.</p>
+    </div>
+    <div class="home-card" data-page="ndp">
+      <div class="home-card-icon" data-icon="ndp"></div>
+      <h3>Next Day Plan</h3>
+      <p>Build pre-plans, assess demand, and evaluate risk across your workstack.</p>
+    </div>
+    <div class="home-card" data-page="ndc">
+      <div class="home-card-icon" data-icon="ndc"></div>
+      <h3>NDC Allocation</h3>
+      <p>Auto-allocate submitted tasks to Taskforce identifiers via Sporticus Services.</p>
+    </div>
+    <a class="home-card" href="https://teams.microsoft.com/l/app/?source=app-bar-share-entrypoint&titleId=T_f2987bce-b8cd-ed36-6c42-f1ccbaf52147" target="_blank" rel="noopener noreferrer">
+      <div class="home-card-icon" data-icon="patrik"></div>
+      <h3>Patrik AI Assistant</h3>
+      <p>AI-powered support bot built with Microsoft Copilot Studio for your team.</p>
+    </a>
+  </div>
+
+  <footer class="home-footer">System support teams (BVK87 R)</footer>
+
+  <script src="js/icons.js"></script>
+  <script>
+    document.querySelectorAll(".home-card-icon[data-icon]").forEach(function (el) {
+      el.innerHTML = iconSvg(el.dataset.icon, { fill: "var(--color-blue)" });
+    });
+    document.querySelectorAll(".home-card[data-page]").forEach(function (card) {
+      card.addEventListener("click", function () {
+        window.parent.postMessage({ type: "navigate", page: card.dataset.page }, "*");
+      });
+    });
+  </script>
+
+</body>
+</html>

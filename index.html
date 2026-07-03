@@ -3,139 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Diagnostics Hub — Home</title>
+  <title>Task Diagnostics Hub</title>
   <link rel="icon" href="assets/favicon-light.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
-  <link rel="prefetch" href="timeline.html">
-  <!-- <link rel="prefetch" href="ndc.html"> -->
-  <link rel="prefetch" href="css/styles.css?v=6">
-  <link rel="prefetch" href="js/app.js?v=6">
-  <link rel="prefetch" href="js/dataLoader.js?v=6">
-  <link rel="prefetch" href="js/timelineEngine.js?v=6">
-  <link rel="prefetch" href="js/timelineRenderer.js?v=6">
-  <link rel="prefetch" href="shared-components/pagination.js?v=6">
-  <link rel="prefetch" href="shared-components/modal.js?v=6">
-  <link rel="prefetch" href="shared-components/notify.js?v=6">
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light')</script>
   <link rel="stylesheet" href="shared-ui/theme.css?v=6">
   <link rel="stylesheet" href="shared-ui/typography.css?v=6">
   <link rel="stylesheet" href="shared-ui/components.css?v=6">
   <link rel="stylesheet" href="shared-ui/layout.css?v=6">
   <link rel="stylesheet" href="shared-components/nav.css?v=6">
   <link rel="stylesheet" href="shared-components/tooltip.css?v=6">
-  <link rel="stylesheet" href="css/styles.css?v=6">
   <style>
-    body {
+    html, body {
       margin: 0;
-      height: 100vh;
+      height: 100%;
       overflow: hidden;
     }
-    .home-hero {
-      background: url('assets/Idenna_x_Open_Reach_screen_shots_300dpi-11.jpg') center/cover no-repeat;
-      color: #FFFFFF;
-      margin-top: var(--spacing-10);
-      margin-left: var(--spacing-6);
-      margin-right: var(--spacing-6);
-      padding: 240px var(--spacing-6);
-      border-radius: var(--radius);
-      text-align: left;
-      position: relative;
-    }
-    .home-hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(20, 32, 50, 0.6);
-      border-radius: var(--radius);
-    }
-    .home-hero h1 {
-      font-size: var(--text-h1);
-      font-weight: var(--font-weight-bold);
-      margin: 0 0 var(--spacing-3);
-      position: relative;
-      z-index: 1;
-      color: #FFFFFF;
-      cursor: default;
-    }
-    .home-hero p {
-      font-size: var(--text-body1);
-      max-width: 560px;
-      margin: 0;
-      line-height: var(--line-height);
-      position: relative;
-      z-index: 1;
-      color: #FFFFFF;
-      cursor: default;
-    }
-    .home-cards-header {
-      max-width: 1000px;
-      margin: var(--spacing-8) auto 0;
-      padding: 0 var(--spacing-6);
-    }
-    .home-cards-header h2 {
-      font-size: var(--text-h2);
-      font-weight: var(--font-weight-medium);
-      margin: 0;
-    }
-    .home-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-6);
-      max-width: 1000px;
-      margin: var(--spacing-4) auto var(--spacing-10);
-      padding: 0 var(--spacing-6);
-    }
-    .home-card {
-      background: var(--color-white);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-2);
-      padding: var(--spacing-6);
-      text-decoration: none;
-      color: var(--color-navy);
-      transition: box-shadow var(--transition-standard), transform var(--transition-standard);
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-3);
-    }
-    .home-card:hover {
-      box-shadow: var(--shadow-3);
-      transform: translateY(-2px);
-    }
-    .home-card-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: var(--radius);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .home-card-icon svg {
-      width: 40px;
-      height: 40px;
-    }
-    .home-card h3 {
-      margin: 0;
-      font-size: var(--text-h3);
-      font-weight: var(--font-weight-medium);
-    }
-    .home-card p {
-      margin: 0;
-      font-size: var(--text-body2);
-      color: var(--color-grey-light);
-      line-height: var(--line-height);
-    }
-    .home-footer {
+
+    /* iframe container — fills full viewport behind the nav chrome */
+    .page-frame {
       position: fixed;
-      bottom: var(--spacing-4);
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-size: var(--text-body2);
-      color: var(--color-grey);
-      cursor: default;
+      inset: 0;
+      border: none;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 200ms ease;
+    }
+
+    .page-frame.is-active {
+      opacity: 1;
+      pointer-events: auto;
     }
   </style>
 </head>
@@ -158,55 +59,104 @@
       <svg class="nav-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 420" role="img" aria-label="openreach wordmark"><text x="40" y="295" fill="currentColor" font-family="Arial, Helvetica, sans-serif" font-size="285" font-weight="400" letter-spacing="0" text-rendering="geometricPrecision">openreach</text></svg>
     </div>
     <ul class="nav-items">
-      <li class="nav-item"><a href="index.html" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3l10 9h-3v8H5v-8H2l10-9z"/></svg></span>Home</a></li>
-      <li class="nav-item"><a href="timeline.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg></span>Timeline</a></li>
-      <li class="nav-item"><a href="ndp.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>Next Day Plan</a></li>
+      <li class="nav-item"><a data-page="home" class="active"><span class="nav-icon nav-icon--home"></span>Home</a></li>
+      <li class="nav-item"><a data-page="timeline"><span class="nav-icon nav-icon--timeline"></span>Timeline</a></li>
+      <li class="nav-item"><a data-page="ndp"><span class="nav-icon nav-icon--ndp"></span>Next Day Plan</a></li>
+      <li class="nav-item"><a data-page="ndc"><span class="nav-icon nav-icon--ndc"></span>NDC Allocation</a></li>
     </ul>
-    <div class="nav-build">Task Diagnostics Hub &middot; V5</div>
+    <div class="nav-build">Task Diagnostics Hub &middot; V6</div>
   </nav>
 
-  <!-- Theme toggle (top-right) -->
+  <!-- Theme toggle -->
   <button id="themeToggle" class="theme-toggle tooltip" data-tooltip="Dark mode" aria-label="Toggle theme">
     <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
     <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
   </button>
 
-  <!-- Hero -->
-  <section class="home-hero">
-    <h1>Task Diagnostics Hub</h1>
-    <p>Central hub for task diagnostics, timeline tracing, and NDC allocation tooling.</p>
-  </section>
+  <!-- Page iframes — each loads once and stays alive -->
+  <iframe id="frame-home"     class="page-frame is-active" src="home.html"     title="Home"></iframe>
+  <iframe id="frame-timeline" class="page-frame"           src="timeline.html" title="RCA Timeline"></iframe>
+  <iframe id="frame-ndp"      class="page-frame"           src="ndp.html"      title="Next Day Plan"></iframe>
+  <iframe id="frame-ndc"      class="page-frame"           src="ndc.html"      title="NDC Allocation"></iframe>
 
-  <!-- Card Navigation -->
-  <div class="home-cards-header">
-    <h2>Our Tools</h2>
-  </div>
-  <div class="home-cards">
-    <a href="timeline.html" class="home-card">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24" fill="var(--color-blue)"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg></div>
-      <h3>RCA Timeline</h3>
-      <p>Load snapshots and trace task changes across 15-min intervals by JIN ID.</p>
-    </a>
-    <a href="ndp.html" class="home-card">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24" fill="var(--color-blue)"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
-      <h3>Next Day Plan</h3>
-      <p>Build pre-plans, assess demand, and evaluate risk across your workstack.</p>
-    </a>
-    <!-- <a href="ndc.html" class="home-card">
-      <div class="home-card-icon"><svg viewBox="0 0 24 24" fill="var(--color-blue)"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></div>
-      <h3>NDC Allocation System</h3>
-      <p>Auto-allocate submitted tasks to specified Taskforce identifiers.</p>
-    </a> -->
-    <a href="https://teams.microsoft.com/l/app/?source=app-bar-share-entrypoint&titleId=T_f2987bce-b8cd-ed36-6c42-f1ccbaf52147" target="_blank" class="home-card">
-      <div class="home-card-icon"><svg viewBox="26 23 39 45" fill="var(--color-blue)"><path d="M 43.0,67.5 L 40.5,67.0 L 40.0,60.5 L 33.0,60.5 L 30.5,59.0 L 29.5,57.0 L 29.5,49.0 L 26.5,48.0 L 26.5,43.0 L 29.5,42.0 L 29.5,36.0 L 31.0,34.5 L 33.0,33.5 L 43.0,33.5 L 43.5,29.0 L 42.5,28.0 L 42.5,25.0 L 46.0,23.5 L 48.5,25.0 L 48.5,28.0 L 47.5,29.0 L 48.0,33.5 L 58.0,33.5 L 61.5,36.0 L 61.5,42.0 L 64.5,43.0 L 64.5,48.0 L 61.5,49.0 L 61.5,57.0 L 60.0,59.5 L 58.0,60.5 L 51.0,60.5 L 43.0,67.5 Z M 45.5,60.0 L 50.0,56.5 L 57.5,56.0 L 57.0,37.5 L 33.5,38.0 L 33.5,56.0 L 44.0,56.5 L 44.5,60.0 L 45.5,60.0 Z M 41.0,45.5 L 38.0,45.5 L 37.5,43.0 L 41.0,42.5 L 41.0,45.5 Z M 53.0,45.5 L 50.0,45.5 L 49.5,43.0 L 53.0,42.5 L 53.0,45.5 Z M 49.0,54.5 L 42.0,54.5 L 38.5,52.0 L 37.5,50.0 L 39.0,48.5 L 42.0,50.5 L 49.0,50.5 L 52.0,48.5 L 53.5,51.0 L 49.0,54.5 Z" fill-rule="evenodd"/></svg></div>
-      <h3>Patrik AI Assistant</h3>
-      <p>AI-powered support bot built with Microsoft Copilot Studio for your team.</p>
-    </a>
-  </div>
-
-  <footer class="home-footer">System support teams (BVK87 R)</footer>
-
+  <script src="js/icons.js"></script>
   <script src="shared-components/tooltip.js?v=6"></script>
-  <script src="shared-components/nav.js?v=6"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      ["home", "timeline", "ndp", "ndc"].forEach(function (key) {
+        const el = document.querySelector(".nav-icon--" + key);
+        if (el) el.innerHTML = iconSvg(key, { size: "20" });
+      });
+
+      const PAGES = ["home", "timeline", "ndp", "ndc"];
+      const SESSION_KEY = "active_page";
+
+      // ---- nav open/close ----
+      const trigger = document.querySelector(".nav-trigger");
+      const sidebar = document.querySelector(".nav-sidebar");
+      const overlay = document.querySelector(".nav-overlay");
+      const closeBtn = document.querySelector(".nav-close");
+
+      function openNav()  { sidebar.classList.add("open");    overlay.classList.add("open"); }
+      function closeNav() { sidebar.classList.remove("open"); overlay.classList.remove("open"); }
+
+      trigger.addEventListener("click", openNav);
+      closeBtn.addEventListener("click", closeNav);
+      overlay.addEventListener("click", closeNav);
+      document.addEventListener("keydown", e => { if (e.key === "Escape") closeNav(); });
+
+      // ---- page switching ----
+      function showPage(page) {
+        if (!PAGES.includes(page)) page = "home";
+
+        PAGES.forEach(p => {
+          document.getElementById("frame-" + p).classList.toggle("is-active", p === page);
+        });
+
+        document.querySelectorAll(".nav-item a").forEach(a => {
+          a.classList.toggle("active", a.dataset.page === page);
+        });
+
+        try { sessionStorage.setItem(SESSION_KEY, page); } catch (e) {}
+        closeNav();
+      }
+
+      // wire nav links
+      document.querySelectorAll(".nav-item a[data-page]").forEach(a => {
+        a.addEventListener("click", () => showPage(a.dataset.page));
+      });
+
+      // listen for navigation messages from iframes (e.g. home page cards)
+      window.addEventListener("message", e => {
+        if (e.data && e.data.type === "navigate") showPage(e.data.page);
+      });
+
+      // restore last active page
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (saved) showPage(saved);
+
+      // ---- theme toggle ----
+      const themeBtn = document.getElementById("themeToggle");
+      function updateThemeTooltip() {
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        themeBtn.setAttribute("data-tooltip", isDark ? "Light mode" : "Dark mode");
+      }
+      updateThemeTooltip();
+      themeBtn.addEventListener("click", () => {
+        const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+        updateThemeTooltip();
+        // Sync theme into each loaded iframe
+        PAGES.forEach(p => {
+          const frame = document.getElementById("frame-" + p);
+          try { frame.contentDocument.documentElement.setAttribute("data-theme", next); } catch (e) {}
+        });
+      });
+
+    })();
+  </script>
 </body>
 </html>
