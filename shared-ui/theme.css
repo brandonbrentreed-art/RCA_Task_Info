@@ -51,6 +51,15 @@
   --spacing-8: 32px;
   --spacing-10: 40px;
   --spacing-20: 80px;
+  --spacing-30: 120px;
+
+  /* Hero */
+  --size-hero-min: 400px;
+  --size-hero-max: 1536px;
+  --size-hero-text-max: 560px;  /* max-width for hero body copy */
+
+  /* Content containers */
+  --size-content-md: 1000px;    /* cards / mid-width content area */
 
   /* ===== Shape ===== */
   --radius: 4px;

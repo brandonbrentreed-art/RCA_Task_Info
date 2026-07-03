@@ -6,10 +6,10 @@
   <title>Home</title>
   <link rel="icon" href="assets/favicon-light.svg">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=6">
-  <link rel="stylesheet" href="shared-ui/typography.css?v=6">
-  <link rel="stylesheet" href="shared-ui/components.css?v=6">
-  <link rel="stylesheet" href="shared-ui/layout.css?v=6">
+  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
+  <link rel="stylesheet" href="shared-ui/typography.css?v=7">
+  <link rel="stylesheet" href="shared-ui/components.css?v=7">
+  <link rel="stylesheet" href="shared-ui/layout.css?v=7">
   <style>
     html, body {
       margin: 0;
@@ -23,15 +23,23 @@
       background: var(--color-page-bg);
       padding: var(--spacing-6);
       padding-top: var(--spacing-20);
+      box-sizing: border-box;
     }
 
     .home-hero {
       background: url('assets/Idenna_x_Open_Reach_screen_shots_300dpi-11.jpg') center/cover no-repeat;
       color: var(--color-white);
-      padding: var(--spacing-30) var(--spacing-6);
+      padding: var(--spacing-6);
       border-radius: var(--radius);
       text-align: left;
       position: relative;
+      min-height: var(--size-hero-min);
+      max-width: var(--size-hero-max);
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
     }
     .home-hero::before {
       content: '';
@@ -40,28 +48,28 @@
       background: var(--overlay-backdrop);
       border-radius: var(--radius);
     }
+    .home-hero-content {
+      position: relative;
+      z-index: 1;
+    }
     .home-hero h1 {
       font-size: var(--text-h1);
       font-weight: var(--font-weight-bold);
       margin: 0 0 var(--spacing-3);
-      position: relative;
-      z-index: 1;
       color: var(--color-white);
       cursor: default;
     }
     .home-hero p {
       font-size: var(--text-body1);
-      max-width: 560px;
+      max-width: var(--size-hero-text-max);
       margin: 0;
       line-height: var(--line-height);
-      position: relative;
-      z-index: 1;
       color: var(--color-white);
       cursor: default;
     }
 
     .home-cards-header {
-      max-width: 1000px;
+      max-width: var(--size-content-md);
       margin: var(--spacing-8) auto 0;
       padding: 0 var(--spacing-6);
     }
@@ -75,7 +83,7 @@
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: var(--spacing-6);
-      max-width: 1000px;
+      max-width: var(--size-content-md);
       margin: var(--spacing-4) auto var(--spacing-10);
       padding: 0 var(--spacing-6);
     }
@@ -133,8 +141,10 @@
 <body>
 
   <section class="home-hero">
-    <h1>Task Diagnostics Hub</h1>
-    <p>Central hub for task diagnostics, timeline tracing, and next day plan tooling.</p>
+    <div class="home-hero-content">
+      <h1>Task Diagnostics Hub</h1>
+      <p>Central hub for task diagnostics, timeline tracing, and next day plan tooling.</p>
+    </div>
   </section>
 
   <div class="home-cards-header">

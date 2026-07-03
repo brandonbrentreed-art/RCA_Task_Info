@@ -161,7 +161,7 @@
   justify-content: center;
   transition: background var(--transition-fast);
 }
-.table-action-remove:hover { background: rgba(211, 47, 47, 0.08); }
+.table-action-remove:hover { background: color-mix(in srgb, var(--color-error) 8%, transparent); }
 .table-action-remove svg { width: var(--size-icon-xs); height: var(--size-icon-xs); }
 
 /* -- Pagination -- */
