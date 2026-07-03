@@ -1,7 +1,7 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const fileInput = document.getElementById("fileInput");
+
   const jinInput = document.getElementById("jinInput");
   const clearBtn = document.getElementById("clearBtn");
   const resultsContainer = document.getElementById("results");
@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function lockInput() {
     jinInput.disabled = true;
-    jinInput.placeholder = "Load data first...";
+    jinInput.placeholder = "Fetch data first...";
   }
 
   function setToolbarState(enabled) {
@@ -208,29 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
       powFetchGo.disabled = false;
       powFetchGo.textContent = "Fetch";
     }
-  });
-
-  // Load data
-  fileInput.addEventListener("change", async (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
-
-    DataLoader.clear();
-    const texts = [];
-    let total = 0;
-    for (const file of files) {
-      const text = await file.text();
-      texts.push(text);
-      total += DataLoader.loadFromText(text);
-    }
-
-    // Persist to sessionStorage so data survives navigation
-    try { sessionStorage.setItem("rca_csv_data", JSON.stringify(texts)); } catch (e) { /* quota exceeded — silently skip */ }
-
-    dataLoaded = true;
-    unlockInput();
-    setToolbarState(true);
-    runSearch();
   });
 
   // Clear

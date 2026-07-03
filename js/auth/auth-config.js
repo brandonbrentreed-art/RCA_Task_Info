@@ -3,6 +3,6 @@
 window.__AUTH_CONFIG__ = {
   entraClientId: "dev",
   entraTenantId: "dev",
-  apiBaseUrl: "http://localhost:8080",
+  apiBaseUrl: "",
   devMode: true   // skips MSAL, injects a dummy token
 };
