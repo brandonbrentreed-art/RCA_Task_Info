@@ -20,4 +20,4 @@ def static_files(path):
 if __name__ == "__main__":
     print(f"\n  Dev server → http://localhost:8080")
     print(f"  DEV_MODE   : {os.environ['DEV_MODE']}\n")
-    app.run(host="0.0.0.0", port=8080, debug=True)
+    app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=True)
