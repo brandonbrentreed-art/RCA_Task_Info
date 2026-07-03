@@ -10,17 +10,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light');
   (function(){var h=new Date().getHours(),m=new Date().getMinutes();if(h>19||(h===19&&m>=30)||h<8)document.documentElement.classList.add('ndc-locked');})()</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=5">
-  <link rel="stylesheet" href="shared-ui/typography.css?v=5">
-  <link rel="stylesheet" href="shared-ui/components.css?v=5">
-  <link rel="stylesheet" href="shared-ui/layout.css?v=5">
-  <link rel="stylesheet" href="shared-ui/forms.css?v=5">
-  <link rel="stylesheet" href="css/styles.css?v=5">
-  <link rel="stylesheet" href="shared-components/nav.css?v=5">
-  <link rel="stylesheet" href="shared-components/table.css?v=5">
-  <link rel="stylesheet" href="shared-components/timeline.css?v=5">
-  <link rel="stylesheet" href="shared-components/tooltip.css?v=5">
-  <link rel="stylesheet" href="shared-components/notify.css?v=5">
+  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
+  <link rel="stylesheet" href="shared-ui/typography.css?v=7">
+  <link rel="stylesheet" href="shared-ui/components.css?v=7">
+  <link rel="stylesheet" href="shared-ui/layout.css?v=7">
+  <link rel="stylesheet" href="shared-ui/forms.css?v=7">
+  <link rel="stylesheet" href="css/styles.css?v=7">
+  <link rel="stylesheet" href="shared-components/nav.css?v=7">
+  <link rel="stylesheet" href="shared-components/table.css?v=7">
+  <link rel="stylesheet" href="shared-components/timeline.css?v=7">
+  <link rel="stylesheet" href="shared-components/tooltip.css?v=7">
+  <link rel="stylesheet" href="shared-components/notify.css?v=7">
   <style>
     .ndc-content { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--spacing-6); flex:1; overflow-y:auto; min-height:0; }
     .ndc-content.ndc-content--table { grid-template-columns:1fr; display:flex; flex-direction:column; overflow:hidden; }
@@ -53,13 +53,13 @@
     .ndc-upload-file span { color:var(--color-grey-light); font-size:var(--text-caption); cursor:default; }
     .ndc-upload-actions { display:flex; gap:var(--spacing-3); align-items:center; flex-shrink:0; }
     .ndc-row-remove { background:none; border:none; color:var(--color-error); cursor:pointer; padding:var(--spacing-1); border-radius:50%; display:flex; align-items:center; justify-content:center; transition:background var(--transition-fast); }
-    .ndc-row-remove:hover { background:rgba(211,47,47,0.08); }
+    .ndc-row-remove:hover { background: color-mix(in srgb, var(--color-error) 8%, transparent); }
     .ndc-row-remove svg { width:16px; height:16px; }
     .table-wrapper--flex .table tbody tr:hover .pivot-copy { opacity:1; }
     .ndc-edit-input { width:100%; padding:var(--spacing-1) var(--spacing-2); border:1px solid var(--color-grey-300); border-radius:var(--radius); font-family:var(--font-family); font-size:var(--text-body2); background:var(--color-white); color:var(--color-navy); text-transform:uppercase; }
     .ndc-edit-input:focus { outline:none; border-color:var(--color-blue); box-shadow:0 0 0 2px var(--focus-ring); }
     .ndc-edit-input--invalid { border-color:var(--color-error); }
-    .ndc-edit-input--invalid:focus { box-shadow:0 0 0 2px rgba(211,47,47,0.2); }
+    .ndc-edit-input--invalid:focus { box-shadow:0 0 0 2px color-mix(in srgb, var(--color-error) 20%, transparent); }
     .ndc-status-bar { display:flex; gap:var(--spacing-6); padding-top:var(--spacing-4); border-top:1px solid var(--color-divider); margin-top:auto; flex-shrink:0; cursor:default; }
     .ndc-status-item { display:flex; align-items:center; gap:var(--spacing-2); font-size:var(--text-body2); }
     .ndc-status-dot { width:10px; height:10px; border-radius:50%; }

@@ -9,20 +9,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=6">
-  <link rel="stylesheet" href="shared-ui/typography.css?v=6">
-  <link rel="stylesheet" href="shared-ui/components.css?v=6">
-  <link rel="stylesheet" href="shared-ui/forms.css?v=6">
-  <link rel="stylesheet" href="shared-ui/layout.css?v=6">
-  <link rel="stylesheet" href="css/styles.css?v=6">
-  <link rel="stylesheet" href="shared-components/nav.css?v=6">
-  <link rel="stylesheet" href="shared-components/tabs.css?v=6">
-  <link rel="stylesheet" href="shared-components/table.css?v=6">
-  <link rel="stylesheet" href="shared-components/tooltip.css?v=6">
-  <link rel="stylesheet" href="shared-components/modal.css?v=6">
-  <link rel="stylesheet" href="shared-components/loader.css?v=6">
-  <link rel="stylesheet" href="shared-components/notify.css?v=6">
-  <link rel="stylesheet" href="css/ndp.css?v=6">
+  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
+  <link rel="stylesheet" href="shared-ui/typography.css?v=7">
+  <link rel="stylesheet" href="shared-ui/components.css?v=7">
+  <link rel="stylesheet" href="shared-ui/forms.css?v=7">
+  <link rel="stylesheet" href="shared-ui/layout.css?v=7">
+  <link rel="stylesheet" href="css/styles.css?v=7">
+  <link rel="stylesheet" href="shared-components/nav.css?v=7">
+  <link rel="stylesheet" href="shared-components/tabs.css?v=7">
+  <link rel="stylesheet" href="shared-components/table.css?v=7">
+  <link rel="stylesheet" href="shared-components/tooltip.css?v=7">
+  <link rel="stylesheet" href="shared-components/modal.css?v=7">
+  <link rel="stylesheet" href="shared-components/loader.css?v=7">
+  <link rel="stylesheet" href="shared-components/notify.css?v=7">
+  <link rel="stylesheet" href="css/ndp.css?v=7">
 </head>
 <body>
 
@@ -68,7 +68,7 @@
         </div>
         <div class="flex gap-2 items-center">
           <div class="search-expand" id="ndpSearchExpand">
-            <button class="icon-btn search-toggle tooltip" data-tooltip="Search tasks" id="ndpSearchToggle">
+            <button class="icon-btn search-toggle tooltip" data-tooltip="Search tasks" id="ndpSearchToggle" disabled style="opacity:0.38;pointer-events:none">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             </button>
             <input class="search-input" type="text" id="ndpSearchInput" placeholder="Filter tasks...">

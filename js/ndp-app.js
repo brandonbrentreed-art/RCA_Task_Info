@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var loadBtn = document.getElementById("ndpLoadBtn");
   var clearBtn = document.getElementById("ndpClearBtn");
   var exportBtn = document.getElementById("ndpExportBtn");
+  var searchToggle = document.getElementById("ndpSearchToggle");
   var loaderCancel = document.getElementById("ndpLoaderCancel");
   var loaderGo = document.getElementById("ndpLoaderGo");
 
@@ -378,6 +379,9 @@ document.addEventListener("DOMContentLoaded", function () {
     clearBtn.style.opacity = "1";
     exportBtn.disabled = false;
     exportBtn.style.opacity = "1";
+    searchToggle.disabled = false;
+    searchToggle.style.opacity = "1";
+    searchToggle.style.pointerEvents = "auto";
     hideEmptyStates();
   }
 
@@ -386,6 +390,9 @@ document.addEventListener("DOMContentLoaded", function () {
     clearBtn.style.opacity = "0.38";
     exportBtn.disabled = true;
     exportBtn.style.opacity = "0.38";
+    searchToggle.disabled = true;
+    searchToggle.style.opacity = "0.38";
+    searchToggle.style.pointerEvents = "none";
   }
 
   function hideEmptyStates() {
