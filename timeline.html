@@ -78,6 +78,9 @@
           <button id="exportBtn" class="icon-btn tooltip" data-tooltip="Export Report">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
           </button>
+          <button id="fetchBtn" class="icon-btn tooltip" data-tooltip="Fetch Live Data">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          </button>
           <label class="icon-btn tooltip" data-tooltip="Load Data">
             <input type="file" id="fileInput" accept=".csv" multiple hidden>
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
@@ -104,6 +107,36 @@
     </div>
   </div>
 
+  <!-- Fetch Live Data Modal -->
+  <div class="modal-backdrop" id="powFetchModal">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Fetch Live Data</h3>
+        <button class="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:var(--text-body2);color:var(--color-grey);margin-bottom:var(--spacing-4)">Pull live pool of work from BigQuery. Data loads directly into the timeline.</p>
+        <div style="display:flex;flex-direction:column;gap:var(--spacing-4)">
+          <div>
+            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)">Zone Code <span style="color:var(--color-error)">*</span></label>
+            <input id="powZoneInput" class="input" type="text" placeholder="e.g. EAABDN" autocomplete="off" style="width:100%;box-sizing:border-box">
+          </div>
+          <div>
+            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)">Target Date <span style="font-size:var(--text-caption);color:var(--color-grey-light)">(optional — defaults to today)</span></label>
+            <input id="powDateInput" class="input" type="date" style="width:100%;box-sizing:border-box">
+          </div>
+          <p id="powFetchError" style="display:none;font-size:var(--text-caption);color:var(--color-error);margin:0"></p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-text" id="powFetchCancel" style="padding:var(--spacing-2) var(--spacing-4);border:none;background:none;cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2);color:var(--color-grey)">Cancel</button>
+        <button class="btn-primary" id="powFetchGo" style="padding:var(--spacing-2) var(--spacing-4);border:none;border-radius:var(--radius);cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2)">Fetch</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Task Detail Modal -->
   <div class="modal-backdrop" id="taskDetailModal">
     <div class="modal modal-full">
@@ -122,6 +155,10 @@
     </div>
   </div>
 
+  <script src="js/auth/auth-config.js"></script>
+  <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+  <script src="js/auth/auth.js"></script>
+  <script src="js/powData.js"></script>
   <script src="shared-components/tooltip.js?v=5"></script>
   <script src="shared-components/modal.js?v=5"></script>
   <script src="shared-components/search.js?v=6"></script>

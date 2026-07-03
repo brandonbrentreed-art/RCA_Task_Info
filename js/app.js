@@ -143,6 +143,73 @@ document.addEventListener("DOMContentLoaded", () => {
     URL.revokeObjectURL(url);
   }
 
+  // Fetch live data modal
+  const fetchBtn = document.getElementById("fetchBtn");
+  const powFetchModal = document.getElementById("powFetchModal");
+  const powZoneInput = document.getElementById("powZoneInput");
+  const powDateInput = document.getElementById("powDateInput");
+  const powFetchGo = document.getElementById("powFetchGo");
+  const powFetchCancel = document.getElementById("powFetchCancel");
+  const powFetchError = document.getElementById("powFetchError");
+
+  function openFetchModal() {
+    powZoneInput.value = "";
+    powDateInput.value = "";
+    powFetchError.style.display = "none";
+    powFetchGo.disabled = false;
+    powFetchGo.textContent = "Fetch";
+    powFetchModal.classList.add("open");
+    powZoneInput.focus();
+  }
+
+  function closeFetchModal() {
+    powFetchModal.classList.remove("open");
+  }
+
+  fetchBtn.addEventListener("click", openFetchModal);
+  powFetchCancel.addEventListener("click", closeFetchModal);
+  powFetchModal.querySelector(".modal-close").addEventListener("click", closeFetchModal);
+  powFetchModal.addEventListener("click", (e) => { if (e.target === powFetchModal) closeFetchModal(); });
+
+  powFetchGo.addEventListener("click", async () => {
+    const zone = powZoneInput.value.trim();
+    if (!zone) {
+      powFetchError.textContent = "Zone code is required.";
+      powFetchError.style.display = "block";
+      powZoneInput.focus();
+      return;
+    }
+    const date = powDateInput.value || null;
+    powFetchError.style.display = "none";
+    powFetchGo.disabled = true;
+    powFetchGo.textContent = "Fetching…";
+
+    try {
+      const result = await PowData.fetchPoolOfWork(zone, date);
+      if (!result.data || !result.data.length) {
+        powFetchError.textContent = "No records returned for that zone / date.";
+        powFetchError.style.display = "block";
+        powFetchGo.disabled = false;
+        powFetchGo.textContent = "Fetch";
+        return;
+      }
+      const csv = PowData.toCSV(result.data);
+      DataLoader.clear();
+      DataLoader.loadFromText(csv);
+      try { sessionStorage.setItem("rca_csv_data", JSON.stringify([csv])); } catch (e) {}
+      dataLoaded = true;
+      unlockInput();
+      setToolbarState(true);
+      closeFetchModal();
+      runSearch();
+    } catch (err) {
+      powFetchError.textContent = err.message || "Fetch failed. Check your connection and try again.";
+      powFetchError.style.display = "block";
+      powFetchGo.disabled = false;
+      powFetchGo.textContent = "Fetch";
+    }
+  });
+
   // Load data
   fileInput.addEventListener("change", async (e) => {
     const files = Array.from(e.target.files);

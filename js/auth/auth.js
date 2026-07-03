@@ -57,7 +57,9 @@ async function initAuth() {
 
 // Helper to call the backend API with auth
 async function apiCall(queryName, params = {}) {
-  const token = sessionStorage.getItem("entra_token");
+  const token = window.__AUTH_CONFIG__.devMode
+    ? "dev-bypass"
+    : sessionStorage.getItem("entra_token");
   if (!token) throw new Error("Not authenticated");
 
   const response = await fetch(`${window.__AUTH_CONFIG__.apiBaseUrl}/api/query`, {
