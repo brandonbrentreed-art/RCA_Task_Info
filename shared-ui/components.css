@@ -106,7 +106,7 @@
   color: var(--color-navy);
   border-radius: 50%;
   font-family: var(--font-family);
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   line-height: 1;
   cursor: pointer;
   margin-left: var(--spacing-1);

@@ -118,6 +118,9 @@
   color: var(--nav-text-muted);
   text-decoration: none;
   font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: 0.01071em;
+  line-height: 1.43;
   white-space: nowrap;
   border-radius: var(--radius);
   margin: 0 var(--spacing-2);
@@ -132,6 +135,7 @@
 .nav-item a.active {
   background: var(--nav-active);
   color: var(--nav-text);
+  font-weight: var(--font-weight-bold);
 }
 
 .nav-icon {

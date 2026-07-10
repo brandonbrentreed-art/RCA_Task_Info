@@ -11,6 +11,30 @@ var NDP = (function () {
   var JOBS_PER_TECH = 3;
   var MAX_CELL = 500;
   var SKIP_ROWS = 6;
+  var DRILL_PAGE_SIZE = 30;
+
+  // --- Export Theme (static colours for clipboard/screenshot/xlsx — cannot use CSS vars) ---
+  var EXPORT = {
+    font: "Calibri, sans-serif",
+    fontReport: "Roboto, Segoe UI, sans-serif",
+    fontSize: "11px",
+    headerBg: "#142032",
+    headerColor: "#fff",
+    headerRgb: "142032",
+    textRgb: "FFFFFF",
+    rowEven: "#fff",
+    rowOdd: "#F9FAFB",
+    border: "#E5E7EB",
+    borderLight: "#e0e0e0",
+    stripedBg: "#f5f5f5",
+    muted: "#57606A",
+    body: "#0D1117",
+    critical: { bg: "#FEE2E2", text: "#D32F2F", label: "#7F1D1D" },
+    high: { bg: "#FEF3C7", text: "#D97706", label: "#78350F" },
+    medium: { bg: "#F3F4F6", text: "inherit", label: "#57606A" },
+    low: { bg: "#D1FAE5", text: "#059669", label: "#064E3B" },
+    success: "#059669"
+  };
 
   // --- Workstack Types ---
   var WS_COPPER = "copper";
@@ -131,6 +155,8 @@ var NDP = (function () {
     JOBS_PER_TECH: JOBS_PER_TECH,
     MAX_CELL: MAX_CELL,
     SKIP_ROWS: SKIP_ROWS,
+    DRILL_PAGE_SIZE: DRILL_PAGE_SIZE,
+    EXPORT: EXPORT,
     WS_COPPER: WS_COPPER,
     WS_FIBRE: WS_FIBRE,
     TAGS: TAGS,

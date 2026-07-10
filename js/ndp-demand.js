@@ -119,12 +119,13 @@ var NdpDemand = (function () {
               var needed = techs - Math.ceil(appts / NDP.JOBS_PER_TECH);
               var color = needed > 0 ? "var(--color-green)" : needed < 0 ? "var(--color-error)" : "var(--color-grey)";
               var prefix = needed > 0 ? "+" : "";
+              var safeKey = NDP.escapeHtml(p.ouc + '|' + p.pwa);
               return '<tr>' +
                 '<td style="text-align:left;font-weight:var(--font-weight-medium)">' + NDP.escapeHtml(p.ouc) + '</td>' +
                 '<td style="text-align:left">' + NDP.escapeHtml(p.pwa) + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="AM" style="text-align:center;font-weight:500">' + p.am + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="PM" style="text-align:center;font-weight:500">' + p.pm + '</td>' +
-                '<td class="ndp-drill" data-key="' + p.ouc + '|' + p.pwa + '" data-slot="All Day" style="text-align:center;font-weight:500">' + p.allDay + '</td>' +
+                '<td class="ndp-drill" data-key="' + safeKey + '" data-slot="AM" style="text-align:center;font-weight:500">' + p.am + '</td>' +
+                '<td class="ndp-drill" data-key="' + safeKey + '" data-slot="PM" style="text-align:center;font-weight:500">' + p.pm + '</td>' +
+                '<td class="ndp-drill" data-key="' + safeKey + '" data-slot="All Day" style="text-align:center;font-weight:500">' + p.allDay + '</td>' +
                 '<td style="text-align:center">' + techs + '</td>' +
                 '<td style="text-align:center;font-weight:var(--font-weight-medium);color:' + color + '">' + prefix + needed + '</td>' +
               '</tr>';
@@ -359,7 +360,7 @@ var NdpDemand = (function () {
   }
 
   // --- Drilldown modal ---
-  var DRILL_PAGE_SIZE = 30;
+  var DRILL_PAGE_SIZE = NDP.DRILL_PAGE_SIZE;
 
   function showDrilldown(title, allRows, headers, idIdx, pwas) {
     var existing = document.getElementById("ndpDrillModal");

@@ -120,10 +120,10 @@ var NdpRisk = (function () {
     scored.forEach(function (item) { buckets[NDP.riskLevel(item.score)]++; });
 
     var colors = {
-      Critical: { c: "var(--color-error)", bg: "#FEE2E2" },
-      High: { c: "var(--color-warning)", bg: "#FEF3C7" },
+      Critical: { c: "var(--color-error)", bg: NDP.EXPORT.critical.bg },
+      High: { c: "var(--color-warning)", bg: NDP.EXPORT.high.bg },
       Medium: { c: "var(--color-grey)", bg: "var(--color-grey-100)" },
-      Low: { c: "var(--color-green)", bg: "#D1FAE5" }
+      Low: { c: "var(--color-green)", bg: NDP.EXPORT.low.bg }
     };
 
     ["Critical", "High", "Medium", "Low"].forEach(function (level) {
@@ -178,14 +178,15 @@ var NdpRisk = (function () {
       var visible = getVisible();
       if (!visible.length) { Notify.info("No rows to copy"); return; }
 
-      var html = '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;font-family:Calibri,sans-serif;font-size:11px">';
+      var E = NDP.EXPORT;
+      var html = '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;font-family:' + E.font + ';font-size:' + E.fontSize + '">';
       html += '<thead><tr>';
       TABLE_COLS.forEach(function (col) {
-        html += '<th style="background:#142032;color:#fff;padding:4px 8px;font-weight:500;text-align:center">' + col.label + '</th>';
+        html += '<th style="background:' + E.headerBg + ';color:' + E.headerColor + ';padding:4px 8px;font-weight:500;text-align:center">' + col.label + '</th>';
       });
       html += '</tr></thead><tbody>';
       visible.forEach(function (item, i) {
-        var bg = i % 2 === 0 ? '#fff' : '#F9FAFB';
+        var bg = i % 2 === 0 ? E.rowEven : E.rowOdd;
         html += '<tr>';
         TABLE_COLS.forEach(function (col) {
           var v = '';
@@ -258,50 +259,51 @@ var NdpRisk = (function () {
       });
 
       // Build offscreen report
+      var E = NDP.EXPORT;
       var report = document.createElement("div");
-      report.style.cssText = "position:fixed;top:-9999px;left:0;width:680px;padding:24px;background:#fff;font-family:Roboto,Segoe UI,sans-serif;color:#0D1117;";
+      report.style.cssText = "position:fixed;top:-9999px;left:0;width:680px;padding:24px;background:" + E.rowEven + ";font-family:" + E.fontReport + ";color:" + E.body + ";";
       document.body.appendChild(report);
 
       var dateStr = new Date().toLocaleDateString("en-GB", { weekday: "long", day: "2-digit", month: "short", year: "numeric" });
 
       report.innerHTML =
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #142032">' +
-          '<div><div style="font-size:15px;font-weight:600;color:#142032">Pre-Plan Risk Summary</div><div style="font-size:10px;color:#57606A;margin-top:2px">' + dateStr + '</div></div>' +
-          '<div style="font-size:10px;color:#57606A">' + totalJobs + ' tasks</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid ' + E.headerBg + '">' +
+          '<div><div style="font-size:15px;font-weight:600;color:' + E.headerBg + '">Pre-Plan Risk Summary</div><div style="font-size:10px;color:' + E.muted + ';margin-top:2px">' + dateStr + '</div></div>' +
+          '<div style="font-size:10px;color:' + E.muted + '">' + totalJobs + ' tasks</div>' +
         '</div>' +
         '<div style="display:flex;gap:8px;margin-bottom:12px">' +
-          '<div style="flex:1;background:#FEE2E2;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#D32F2F">' + buckets.Critical.length + '</div><div style="font-size:8px;color:#7F1D1D;text-transform:uppercase">Critical</div></div>' +
-          '<div style="flex:1;background:#FEF3C7;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:#D97706">' + buckets.High.length + '</div><div style="font-size:8px;color:#78350F;text-transform:uppercase">High</div></div>' +
-          '<div style="flex:1;background:#F3F4F6;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600">' + buckets.Medium.length + '</div><div style="font-size:8px;color:#57606A;text-transform:uppercase">Medium</div></div>' +
-          '<div style="flex:1;background:#D1FAE5;border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600;color:#059669">' + buckets.Low.length + '</div><div style="font-size:8px;color:#064E3B;text-transform:uppercase">Low</div></div>' +
+          '<div style="flex:1;background:' + E.critical.bg + ';border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:' + E.critical.text + '">' + buckets.Critical.length + '</div><div style="font-size:8px;color:' + E.critical.label + ';text-transform:uppercase">Critical</div></div>' +
+          '<div style="flex:1;background:' + E.high.bg + ';border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:700;color:' + E.high.text + '">' + buckets.High.length + '</div><div style="font-size:8px;color:' + E.high.label + ';text-transform:uppercase">High</div></div>' +
+          '<div style="flex:1;background:' + E.medium.bg + ';border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600">' + buckets.Medium.length + '</div><div style="font-size:8px;color:' + E.medium.label + ';text-transform:uppercase">Medium</div></div>' +
+          '<div style="flex:1;background:' + E.low.bg + ';border-radius:4px;padding:6px;text-align:center"><div style="font-size:16px;font-weight:600;color:' + E.low.text + '">' + buckets.Low.length + '</div><div style="font-size:8px;color:' + E.low.label + ';text-transform:uppercase">Low</div></div>' +
         '</div>';
 
       if (pwaList.length) {
         var t = '<table style="width:100%;border-collapse:collapse;font-size:10px"><thead><tr>';
-        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">PWA</th>';
-        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">OUC</th>';
-        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:center">Critical</th>';
-        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:center">High</th>';
-        t += '<th style="padding:4px 8px;background:#142032;color:#fff;font-weight:500;text-align:left">Scarce Skills</th>';
+        t += '<th style="padding:4px 8px;background:' + E.headerBg + ';color:' + E.headerColor + ';font-weight:500;text-align:left">PWA</th>';
+        t += '<th style="padding:4px 8px;background:' + E.headerBg + ';color:' + E.headerColor + ';font-weight:500;text-align:left">OUC</th>';
+        t += '<th style="padding:4px 8px;background:' + E.headerBg + ';color:' + E.headerColor + ';font-weight:500;text-align:center">Critical</th>';
+        t += '<th style="padding:4px 8px;background:' + E.headerBg + ';color:' + E.headerColor + ';font-weight:500;text-align:center">High</th>';
+        t += '<th style="padding:4px 8px;background:' + E.headerBg + ';color:' + E.headerColor + ';font-weight:500;text-align:left">Scarce Skills</th>';
         t += '</tr></thead><tbody>';
         pwaList.forEach(function (p, i) {
-          var bg = i % 2 === 0 ? "#fff" : "#F9FAFB";
+          var bg = i % 2 === 0 ? E.rowEven : E.rowOdd;
           var topSkills = Object.keys(p.skills).sort(function (a, b) { return p.skills[b] - p.skills[a]; }).slice(0, 3).join(", ");
           t += '<tr>';
-          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left;font-weight:600">' + NDP.escapeHtml(p.pwa) + '</td>';
-          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left">' + NDP.escapeHtml(p.ouc) + '</td>';
-          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:center;color:' + (p.critical ? '#D32F2F;font-weight:700' : '#57606A') + '">' + p.critical + '</td>';
-          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:center;color:' + (p.high ? '#D97706;font-weight:600' : '#57606A') + '">' + p.high + '</td>';
-          t += '<td style="padding:3px 8px;border-bottom:1px solid #E5E7EB;background:' + bg + ';text-align:left;color:#57606A">' + NDP.escapeHtml(topSkills) + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid ' + E.border + ';background:' + bg + ';text-align:left;font-weight:600">' + NDP.escapeHtml(p.pwa) + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid ' + E.border + ';background:' + bg + ';text-align:left">' + NDP.escapeHtml(p.ouc) + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid ' + E.border + ';background:' + bg + ';text-align:center;color:' + (p.critical ? E.critical.text + ';font-weight:700' : E.muted) + '">' + p.critical + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid ' + E.border + ';background:' + bg + ';text-align:center;color:' + (p.high ? E.high.text + ';font-weight:600' : E.muted) + '">' + p.high + '</td>';
+          t += '<td style="padding:3px 8px;border-bottom:1px solid ' + E.border + ';background:' + bg + ';text-align:left;color:' + E.muted + '">' + NDP.escapeHtml(topSkills) + '</td>';
           t += '</tr>';
         });
         t += '</tbody></table>';
         report.innerHTML += t;
       } else {
-        report.innerHTML += '<div style="padding:14px;text-align:center;color:#059669;font-weight:600">\u2705 No Critical or High risk items</div>';
+        report.innerHTML += '<div style="padding:14px;text-align:center;color:' + E.success + ';font-weight:600">\u2705 No Critical or High risk items</div>';
       }
 
-      html2canvas(report, { backgroundColor: "#ffffff", scale: 2 }).then(function (canvas) {
+      html2canvas(report, { backgroundColor: E.rowEven, scale: 2 }).then(function (canvas) {
         document.body.removeChild(report);
         canvas.toBlob(function (blob) {
           if (!blob) return;

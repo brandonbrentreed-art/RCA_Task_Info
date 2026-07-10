@@ -37,6 +37,7 @@
   --text-body1: 1rem;     /* 16px */
   --text-body2: 0.875rem; /* 14px */
   --text-caption: 0.75rem;/* 12px */
+  --text-micro: 0.625rem; /* 10px */
 
   --line-height: 1.5;
   --letter-spacing: 0.00938em;
