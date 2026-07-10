@@ -42,8 +42,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Restore data from sessionStorage if available
   try {
+    const source = sessionStorage.getItem("rca_csv_source");
     const stored = sessionStorage.getItem("rca_csv_data");
-    if (stored) {
+    if (source === "demo") {
+      // Re-fetch demo CSV (fast from cache)
+      fetch("assets/RCA_DEV.csv").then(r => r.text()).then(csv => {
+        DataLoader.clear();
+        DataLoader.loadFromText(csv);
+        dataLoaded = true;
+        unlockInput();
+        setToolbarState(true);
+        const storedIds = sessionStorage.getItem("rca_active_ids");
+        if (storedIds) {
+          activeIds = JSON.parse(storedIds);
+          renderChips();
+          runSearch();
+        }
+      }).catch(() => {});
+    } else if (stored) {
       const texts = JSON.parse(stored);
       DataLoader.clear();
       texts.forEach(t => DataLoader.loadFromText(t));
@@ -145,6 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Fetch live data modal
   const fetchBtn = document.getElementById("fetchBtn");
+  const demoBtn = document.getElementById("demoBtn");
   const powFetchModal = document.getElementById("powFetchModal");
   const powZoneInput = document.getElementById("powZoneInput");
   const powDateInput = document.getElementById("powDateInput");
@@ -167,6 +184,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   fetchBtn.addEventListener("click", openFetchModal);
+
+  // Load demo data from bundled CSV
+  demoBtn.addEventListener("click", async () => {
+    demoBtn.disabled = true;
+    demoBtn.textContent = "Loading\u2026";
+    try {
+      const res = await fetch("assets/RCA_DEV.csv");
+      if (!res.ok) throw new Error("Failed to load demo file");
+      const csv = await res.text();
+      DataLoader.clear();
+      await DataLoader.loadFromTextAsync(csv);
+      try { sessionStorage.setItem("rca_csv_source", "demo"); } catch (e) {}
+      dataLoaded = true;
+      unlockInput();
+      setToolbarState(true);
+      closeFetchModal();
+      if (typeof Notify !== "undefined") Notify.success("Demo data loaded \u2014 " + DataLoader.getSnapshots().length + " snapshots", 3000);
+    } catch (err) {
+      if (typeof Notify !== "undefined") Notify.error(err.message || "Failed to load demo data");
+    } finally {
+      demoBtn.disabled = false;
+      demoBtn.textContent = "Load Demo";
+    }
+  });
   powFetchCancel.addEventListener("click", closeFetchModal);
   powFetchModal.querySelector(".modal-close").addEventListener("click", closeFetchModal);
   powFetchModal.addEventListener("click", (e) => { if (e.target === powFetchModal) closeFetchModal(); });
@@ -223,7 +264,7 @@ document.addEventListener("DOMContentLoaded", () => {
     dataLoaded = false;
     lockInput();
     setToolbarState(false);
-    try { sessionStorage.removeItem("rca_csv_data"); sessionStorage.removeItem("rca_active_ids"); } catch (e) {}
+    try { sessionStorage.removeItem("rca_csv_data"); sessionStorage.removeItem("rca_csv_source"); sessionStorage.removeItem("rca_active_ids"); } catch (e) {}
   });
 
   // Render on Enter only
