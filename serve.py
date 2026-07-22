@@ -1,23 +1,21 @@
-"""Dev server — Flask serves static files + API on port 8080 (single origin)."""
-import sys
+"""Dev server — serves static files on port 8080 using Python built-ins only."""
+import http.server
 import os
+import threading
+import webbrowser
 
+PORT = 8080
 ROOT = os.path.dirname(os.path.abspath(__file__))
-API_DIR = os.path.join(ROOT, "cloud_functions", "fun-trigger-by-pow", "api")
-sys.path.insert(0, API_DIR)
 
-os.environ.setdefault("DEV_MODE", "true")
+class Handler(http.server.SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=ROOT, **kwargs)
 
-from flask import Flask, send_from_directory
-from main import app, require_auth, run_query
-
-# Serve all static files from the project root
-@app.route("/", defaults={"path": "index.html"})
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory(ROOT, path)
+    def log_message(self, format, *args):
+        pass  # suppress per-request noise
 
 if __name__ == "__main__":
-    print(f"\n  Dev server → http://localhost:8080")
-    print(f"  DEV_MODE   : {os.environ['DEV_MODE']}\n")
-    app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=True)
+    with http.server.HTTPServer(("127.0.0.1", PORT), Handler) as httpd:
+        print(f"\n  Dev server → http://localhost:{PORT}\n")
+        threading.Timer(1, lambda: webbrowser.open(f"http://localhost:{PORT}")).start()
+        httpd.serve_forever()

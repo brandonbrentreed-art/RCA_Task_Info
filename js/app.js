@@ -147,7 +147,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const fetchBtn = document.getElementById("fetchBtn");
   const powFetchModal = document.getElementById("powFetchModal");
   const powZoneInput = document.getElementById("powZoneInput");
-  const powDateInput = document.getElementById("powDateInput");
+  const powDateInput  = document.getElementById("powDateInput");
+  const powDatePicker = document.getElementById("powDatePicker");
+  if (powDatePicker) {
+    powDatePicker.addEventListener("change", function () {
+      powDateInput.value = powDatePicker.value;
+    });
+  }
   const powFetchGo = document.getElementById("powFetchGo");
   const powFetchCancel = document.getElementById("powFetchCancel");
   const powFetchError = document.getElementById("powFetchError");

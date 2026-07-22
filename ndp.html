@@ -9,25 +9,25 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
-  <link rel="stylesheet" href="shared-ui/typography.css?v=7">
-  <link rel="stylesheet" href="shared-ui/components.css?v=7">
-  <link rel="stylesheet" href="shared-ui/forms.css?v=7">
-  <link rel="stylesheet" href="shared-ui/layout.css?v=7">
-  <link rel="stylesheet" href="css/styles.css?v=7">
-  <link rel="stylesheet" href="shared-components/nav.css?v=7">
-  <link rel="stylesheet" href="shared-components/tabs.css?v=7">
-  <link rel="stylesheet" href="shared-components/table.css?v=7">
-  <link rel="stylesheet" href="shared-components/tooltip.css?v=7">
-  <link rel="stylesheet" href="shared-components/modal.css?v=7">
-  <link rel="stylesheet" href="shared-components/loader.css?v=7">
-  <link rel="stylesheet" href="shared-components/notify.css?v=7">
-  <link rel="stylesheet" href="css/ndp.css?v=7">
+  <link rel="stylesheet" href="shared-ui/theme.css">
+  <link rel="stylesheet" href="shared-ui/typography.css">
+  <link rel="stylesheet" href="shared-ui/components.css">
+  <link rel="stylesheet" href="shared-ui/forms.css">
+  <link rel="stylesheet" href="shared-ui/layout.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="shared-components/nav.css">
+  <link rel="stylesheet" href="shared-components/tabs.css">
+  <link rel="stylesheet" href="shared-components/table.css">
+  <link rel="stylesheet" href="shared-components/tooltip.css">
+  <link rel="stylesheet" href="shared-components/modal.css">
+  <link rel="stylesheet" href="shared-components/loader.css">
+  <link rel="stylesheet" href="shared-components/notify.css">
+  <link rel="stylesheet" href="css/ndp.css">
 </head>
 <body>
 
   <!-- Hamburger trigger -->
-  <button class="nav-trigger" aria-label="Open menu">
+  <button class="nav-trigger" aria-label="Open menu" data-tooltip="Open menu">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
   </button>
 
@@ -37,7 +37,7 @@
   <!-- Sidebar -->
   <nav class="nav-sidebar">
     <div class="nav-brand">
-      <button class="nav-close" aria-label="Close menu">
+      <button class="nav-close" aria-label="Close menu" data-tooltip="Close menu">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
       </button>
       <svg class="nav-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 420" role="img" aria-label="openreach wordmark"><text x="40" y="295" fill="currentColor" font-family="Arial, Helvetica, sans-serif" font-size="285" font-weight="400" letter-spacing="0" text-rendering="geometricPrecision">openreach</text></svg>
@@ -129,7 +129,7 @@
     <div class="modal">
       <div class="modal-header">
         <h3>Load Data</h3>
-        <button class="modal-close" aria-label="Close">
+        <button class="modal-close" aria-label="Close" data-tooltip="Close">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </div>
@@ -202,31 +202,31 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-text" id="ndpLoaderCancel" style="padding:var(--spacing-2) var(--spacing-4);border:none;background:none;cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2);color:var(--color-grey)">Cancel</button>
-        <button class="btn-primary" id="ndpLoaderGo" disabled style="padding:var(--spacing-2) var(--spacing-4);border:none;border-radius:var(--radius);cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2)">Load Plan</button>
+        <button class="btn btn-text" id="ndpLoaderCancel">Cancel</button>
+        <button class="btn btn-primary" id="ndpLoaderGo" disabled>Load Plan</button>
       </div>
     </div>
   </div>
 
-  <script src="shared-components/tooltip.js?v=6"></script>
-  <script src="shared-components/modal.js?v=6"></script>
-  <script src="shared-components/search.js?v=6"></script>
-  <script src="shared-components/table.js?v=6"></script>
-  <script src="shared-components/notify.js?v=6"></script>
+  <script src="shared-components/tooltip.js"></script>
+  <script src="shared-components/modal.js"></script>
+  <script src="shared-components/search.js"></script>
+  <script src="shared-components/table.js"></script>
+  <script src="shared-components/notify.js"></script>
   <script src="js/lib/xlsx-js-style.min.js"></script>
   <script src="js/lib/html2canvas.min.js"></script>
-  <script src="js/data/constants.js?v=6"></script>
-  <script src="js/ndp-tf-parser.js?v=6"></script>
-  <script src="js/data/column-map.js?v=6"></script>
-  <script src="js/data/derisk-filters.js?v=6"></script>
-  <script src="js/data/directory-map.js?v=6"></script>
-  <script src="js/data/tech-db.js?v=6"></script>
-  <script src="js/ndp-enrich.js?v=6"></script>
-  <script src="js/ndp-data.js?v=6"></script>
-  <script src="js/ndp-plan.js?v=6"></script>
-  <script src="js/ndp-demand.js?v=6"></script>
-  <script src="js/ndp-risk.js?v=6"></script>
-  <script src="js/ndp-app.js?v=6"></script>
-  <script src="shared-components/nav.js?v=6"></script>
+  <script src="js/data/constants.js"></script>
+  <script src="js/ndp-tf-parser.js"></script>
+  <script src="js/data/column-map.js"></script>
+  <script src="js/data/derisk-filters.js"></script>
+  <script src="js/data/directory-map.js"></script>
+  <script src="js/data/tech-db.js"></script>
+  <script src="js/ndp-enrich.js"></script>
+  <script src="js/ndp-data.js"></script>
+  <script src="js/ndp-plan.js"></script>
+  <script src="js/ndp-demand.js"></script>
+  <script src="js/ndp-risk.js"></script>
+  <script src="js/ndp-app.js"></script>
+  <script src="shared-components/nav.js"></script>
 </body>
 </html>

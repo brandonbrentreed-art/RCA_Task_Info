@@ -299,8 +299,12 @@ var NdpData = (function () {
       reader.onload = function (evt) {
         var data = new Uint8Array(evt.target.result);
         var wb;
-        try { wb = XLSX.read(data, { type: "array", cellDates: true }); }
-        catch (e) { cb(false, "Failed to parse file"); return; }
+        try {
+          var _warn = console.warn; console.warn = function () {};
+          wb = XLSX.read(data, { type: "array", cellDates: true });
+          console.warn = _warn;
+        }
+        catch (e) { console.warn = _warn; cb(false, "Failed to parse file"); return; }
 
         if (state.workstack === "fibre") {
           // Fibre: look for BTTW_Data or KCI2_DATA_NEW sheets

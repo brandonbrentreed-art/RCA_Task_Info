@@ -9,23 +9,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
-  <link rel="stylesheet" href="shared-ui/typography.css?v=7">
-  <link rel="stylesheet" href="shared-ui/components.css?v=7">
-  <link rel="stylesheet" href="shared-ui/layout.css?v=7">
-  <link rel="stylesheet" href="shared-ui/forms.css?v=7">
-  <link rel="stylesheet" href="css/styles.css?v=7">
-  <link rel="stylesheet" href="shared-components/nav.css?v=7">
-  <link rel="stylesheet" href="shared-components/table.css?v=7">
-  <link rel="stylesheet" href="shared-components/timeline.css?v=7">
-  <link rel="stylesheet" href="shared-components/tooltip.css?v=7">
-  <link rel="stylesheet" href="shared-components/loader.css?v=7">
-  <link rel="stylesheet" href="shared-components/modal.css?v=7">
+  <link rel="stylesheet" href="shared-ui/theme.css">
+  <link rel="stylesheet" href="shared-ui/typography.css">
+  <link rel="stylesheet" href="shared-ui/components.css">
+  <link rel="stylesheet" href="shared-ui/layout.css">
+  <link rel="stylesheet" href="shared-ui/forms.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="shared-components/nav.css">
+  <link rel="stylesheet" href="shared-components/table.css">
+  <link rel="stylesheet" href="shared-components/timeline.css">
+  <link rel="stylesheet" href="shared-components/tooltip.css">
+  <link rel="stylesheet" href="shared-components/loader.css">
+  <link rel="stylesheet" href="shared-components/modal.css">
 </head>
 <body>
 
   <!-- Hamburger trigger -->
-  <button class="nav-trigger" aria-label="Open menu">
+  <button class="nav-trigger" aria-label="Open menu" data-tooltip="Open menu">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
   </button>
 
@@ -35,7 +35,7 @@
   <!-- Sidebar -->
   <nav class="nav-sidebar">
     <div class="nav-brand">
-      <button class="nav-close" aria-label="Close menu">
+      <button class="nav-close" aria-label="Close menu" data-tooltip="Close menu">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
       </button>
       <svg class="nav-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 420" role="img" aria-label="openreach wordmark"><text x="40" y="295" fill="currentColor" font-family="Arial, Helvetica, sans-serif" font-size="285" font-weight="400" letter-spacing="0" text-rendering="geometricPrecision">openreach</text></svg>
@@ -108,7 +108,7 @@
     <div class="modal modal-sm">
       <div class="modal-header">
         <h3>Fetch Live Data</h3>
-        <button class="modal-close" aria-label="Close">
+        <button class="modal-close" aria-label="Close" data-tooltip="Close">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </div>
@@ -116,19 +116,25 @@
         <p style="font-size:var(--text-body2);color:var(--color-grey);margin-bottom:var(--spacing-4)">Pull live pool of work from BigQuery. Data loads directly into the timeline.</p>
         <div style="display:flex;flex-direction:column;gap:var(--spacing-4)">
           <div>
-            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)">Zone Code <span style="color:var(--color-error)">*</span></label>
+            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)" data-tooltip="Enter the zone code to query, e.g. EAABDN">Zone Code <span style="color:var(--color-error)">*</span></label>
             <input id="powZoneInput" class="input" type="text" placeholder="e.g. EAABDN" autocomplete="off" style="width:100%;box-sizing:border-box">
           </div>
           <div>
-            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)">Target Date <span style="font-size:var(--text-caption);color:var(--color-grey-light)">(optional — defaults to today)</span></label>
-            <input id="powDateInput" class="input" type="date" style="width:100%;box-sizing:border-box">
+            <label style="display:block;font-size:var(--text-caption);color:var(--color-grey);margin-bottom:var(--spacing-1)" data-tooltip="Defaults to today if left blank">Target Date <span style="font-size:var(--text-caption);color:var(--color-grey-light)">(optional — defaults to today)</span></label>
+            <div style="display:flex;align-items:center;gap:var(--spacing-2)">
+              <input id="powDateInput" class="input" type="text" placeholder="YYYY-MM-DD" pattern="\d{4}-\d{2}-\d{2}" maxlength="10" autocomplete="off" style="flex:1;box-sizing:border-box">
+              <input id="powDatePicker" type="date" style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" tabindex="-1">
+              <button type="button" class="icon-btn" data-tooltip="Pick a date" onclick="document.getElementById('powDatePicker').showPicker()" style="flex-shrink:0">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg>
+              </button>
+            </div>
           </div>
           <p id="powFetchError" style="display:none;font-size:var(--text-caption);color:var(--color-error);margin:0"></p>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn-text" id="powFetchCancel" style="padding:var(--spacing-2) var(--spacing-4);border:none;background:none;cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2);color:var(--color-grey)">Cancel</button>
-        <button class="btn-primary" id="powFetchGo" style="padding:var(--spacing-2) var(--spacing-4);border:none;border-radius:var(--radius);cursor:pointer;font-family:var(--font-family);font-size:var(--text-body2)">Fetch</button>
+        <button class="btn btn-text" id="powFetchCancel">Cancel</button>
+        <button class="btn btn-primary" id="powFetchGo">Fetch</button>
       </div>
     </div>
   </div>
@@ -143,7 +149,7 @@
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
           </button>
         </div>
-        <button class="modal-close" aria-label="Close">
+        <button class="modal-close" aria-label="Close" data-tooltip="Close">
           <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </div>
@@ -155,14 +161,14 @@
   <script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
   <script src="js/auth/auth.js"></script>
   <script src="js/powData.js"></script>
-  <script src="shared-components/tooltip.js?v=5"></script>
-  <script src="shared-components/modal.js?v=5"></script>
-  <script src="shared-components/search.js?v=6"></script>
-  <script src="shared-components/pagination.js?v=5"></script>
-  <script src="js/dataLoader.js?v=5"></script>
-  <script src="js/timelineEngine.js?v=5"></script>
-  <script src="js/timelineRenderer.js?v=5"></script>
-  <script src="shared-components/nav.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="shared-components/tooltip.js"></script>
+  <script src="shared-components/modal.js"></script>
+  <script src="shared-components/search.js"></script>
+  <script src="shared-components/pagination.js"></script>
+  <script src="js/dataLoader.js"></script>
+  <script src="js/timelineEngine.js"></script>
+  <script src="js/timelineRenderer.js"></script>
+  <script src="shared-components/nav.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

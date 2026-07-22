@@ -1,1 +1,5 @@
 cloud_functions/fun-trigger-by-pow/api/__pycache__/
+
+# Sensitive data files — staff names and PINs
+js/data/tech-db.json
+js/data/directory-map.json
