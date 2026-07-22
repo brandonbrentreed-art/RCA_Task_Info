@@ -261,7 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
   clearBtn.addEventListener("click", () => {
     jinInput.value = "";
     searchFilter.value = "";
-    searchExpand.classList.remove("active");
+    searchExpand.classList.remove("active", "has-value");
+    filterRows();
     activeIds = [];
     renderChips();
     resultsContainer.innerHTML = "";
