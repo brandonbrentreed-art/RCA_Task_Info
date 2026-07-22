@@ -4,25 +4,52 @@ const DataLoader = (() => {
   let snapshots = [];
   let index = null; // Map<JIN_ID, sorted rows[]>
 
-  function parseCSV(text) {
-    const lines = text.split("\n");
-    const headerLine = lines[0];
-    if (!headerLine) return [];
-    const headers = headerLine.split(",");
-    const hLen = headers.length;
-    for (let i = 0; i < hLen; i++) headers[i] = headers[i].trim();
+  // Pre-allocate header index for fast column access
+  let _headers = [];
+  let _jinCol = -1;
+  let _recordTimeCol = -1;
 
-    const rows = new Array(lines.length - 1);
-    let count = 0;
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line) continue;
+  function parseCSV(text) {
+    const nlCode = 10; // \n
+    const len = text.length;
+
+    // Find header line end
+    let hEnd = text.indexOf("\n");
+    if (hEnd === -1) hEnd = len;
+    const headerLine = text.substring(0, hEnd);
+    _headers = headerLine.split(",");
+    const hLen = _headers.length;
+    for (let i = 0; i < hLen; i++) {
+      _headers[i] = _headers[i].trim();
+      if (_headers[i] === "JIN_ID") _jinCol = i;
+      if (_headers[i] === "RECORD_TIME_BT" || _headers[i] === "RECORD_TIME") _recordTimeCol = i;
+    }
+
+    // Parse rows — avoid creating substrings where possible
+    const rows = [];
+    let pos = hEnd + 1;
+
+    while (pos < len) {
+      // Find line end
+      let lineEnd = text.indexOf("\n", pos);
+      if (lineEnd === -1) lineEnd = len;
+
+      // Skip empty lines
+      if (lineEnd === pos || (lineEnd === pos + 1 && text.charCodeAt(pos) === 13)) {
+        pos = lineEnd + 1;
+        continue;
+      }
+
+      const line = text.substring(pos, lineEnd);
       const values = line.split(",");
       const row = {};
-      for (let j = 0; j < hLen; j++) row[headers[j]] = (values[j] || "").trim();
-      rows[count++] = row;
+      for (let j = 0; j < hLen; j++) {
+        row[_headers[j]] = values[j] !== undefined ? values[j].trim() : "";
+      }
+      rows.push(row);
+      pos = lineEnd + 1;
     }
-    rows.length = count;
+
     return rows;
   }
 
@@ -42,13 +69,10 @@ const DataLoader = (() => {
     );
   }
 
-  function invalidateIndex() {
-    index = null;
-  }
-
   function buildIndex() {
     index = new Map();
-    for (let i = 0; i < snapshots.length; i++) {
+    const len = snapshots.length;
+    for (let i = 0; i < len; i++) {
       const row = snapshots[i];
       const id = (row.JIN_ID || "").toUpperCase();
       if (!id) continue;
@@ -58,6 +82,7 @@ const DataLoader = (() => {
     }
     // Sort each group by record time
     index.forEach((rows) => {
+      if (rows.length < 2) return;
       rows.sort((a, b) => {
         const da = parseDate(a.RECORD_TIME_BT || a.RECORD_TIME);
         const db = parseDate(b.RECORD_TIME_BT || b.RECORD_TIME);
@@ -69,9 +94,44 @@ const DataLoader = (() => {
 
   function loadFromText(text) {
     const rows = parseCSV(text);
-    snapshots = snapshots.concat(rows);
-    invalidateIndex();
+    if (snapshots.length === 0) {
+      snapshots = rows;
+    } else {
+      snapshots = snapshots.concat(rows);
+    }
+    index = null;
     return rows.length;
+  }
+
+  /**
+   * Async chunked load — parses in batches to keep UI responsive.
+   * Returns a Promise that resolves with row count.
+   */
+  function loadFromTextAsync(text, onProgress) {
+    return new Promise((resolve) => {
+      const rows = parseCSV(text);
+      const total = rows.length;
+      const CHUNK = 8000;
+      let offset = 0;
+
+      function processChunk() {
+        const end = Math.min(offset + CHUNK, total);
+        for (let i = offset; i < end; i++) {
+          snapshots.push(rows[i]);
+        }
+        offset = end;
+        if (onProgress) onProgress(offset, total);
+
+        if (offset < total) {
+          setTimeout(processChunk, 0);
+        } else {
+          index = null;
+          resolve(total);
+        }
+      }
+
+      processChunk();
+    });
   }
 
   function loadMultiple(texts) {
@@ -99,9 +159,24 @@ const DataLoader = (() => {
     return results;
   }
 
-  function getAllSnapshots() {
+  function getSnapshots() {
     return snapshots;
   }
 
-  return { loadFromText, loadMultiple, clear, queryByJinIds, getAllSnapshots, parseDate };
+  function getUniqueJinIds() {
+    if (!index) buildIndex();
+    return Array.from(index.keys());
+  }
+
+  return {
+    loadFromText,
+    loadFromTextAsync,
+    loadMultiple,
+    clear,
+    queryByJinIds,
+    getAllSnapshots: getSnapshots,
+    getSnapshots,
+    getUniqueJinIds,
+    parseDate
+  };
 })();

@@ -242,7 +242,7 @@
 }
 
 .ndp-scarcity__pwa {
-  font-size: 10px;
+  font-size: var(--text-micro);
   color: var(--color-grey-light);
   white-space: nowrap;
   overflow: hidden;
@@ -491,7 +491,7 @@
   position: absolute;
   left: var(--spacing-1);
   top: -8px;
-  font-size: 9px;
+  font-size: var(--text-micro);
   color: var(--color-grey-light);
   line-height: 1;
 }

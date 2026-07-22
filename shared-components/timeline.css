@@ -121,14 +121,14 @@
 }
 
 .pivot-row-meta {
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   color: var(--color-grey-light);
   font-weight: var(--font-weight-regular);
   letter-spacing: 0.02em;
 }
 
 .pivot-corner-sub {
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   font-weight: var(--font-weight-regular);
   color: var(--color-grey-light);
 }
@@ -154,7 +154,7 @@
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius);
   color: var(--color-white);
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   font-weight: var(--font-weight-medium);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -166,12 +166,12 @@
 .pivot-tech {
   font-weight: var(--font-weight-medium);
   color: var(--color-navy);
-  font-size: 0.6875rem;
+  font-size: var(--text-caption);
 }
 
 /* Pin Status */
 .pivot-pin {
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   color: var(--color-grey);
   font-style: italic;
 }
@@ -179,13 +179,13 @@
 /* Est Start */
 .pivot-wm {
   color: var(--color-green);
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   font-weight: var(--font-weight-medium);
 }
 
 /* SLA */
 .pivot-sla {
-  font-size: 0.625rem;
+  font-size: var(--text-micro);
   font-weight: var(--font-weight-medium);
 }
 

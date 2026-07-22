@@ -5,6 +5,20 @@
 // Handles: tab switching, loader dialog, toolbar state
 // ============================================================
 
+// Safe DOM-based loader overlay (avoids insertAdjacentHTML with strings)
+function createLoaderOverlay(text) {
+  var overlay = document.createElement("div");
+  overlay.className = "loader-overlay";
+  var spinner = document.createElement("div");
+  spinner.className = "loader-spinner";
+  var span = document.createElement("span");
+  span.className = "loader-text";
+  span.textContent = text || "Loading...";
+  overlay.appendChild(spinner);
+  overlay.appendChild(span);
+  return overlay;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   // --- Tab switching ---
   var tabs = document.querySelectorAll(".tabs__tab");
@@ -186,7 +200,7 @@ document.addEventListener("DOMContentLoaded", function () {
     hideEmptyStates();
     document.querySelectorAll(".tab-panel").forEach(function (p) {
       if (!p.querySelector(".loader-overlay")) {
-        p.insertAdjacentHTML("afterbegin", '<div class="loader-overlay"><div class="loader-spinner"></div><span class="loader-text">Building plan...</span></div>');
+        p.insertBefore(createLoaderOverlay("Building plan..."), p.firstChild);
       }
     });
     closeModal("ndpLoaderModal");
@@ -289,7 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!riskHeaders || !riskRows || !riskRows.length) return;
 
       var border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
-      var hdrS = { font: { bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: "142032" } } };
+      var hdrS = { font: { bold: true, color: { rgb: NDP.EXPORT.textRgb } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: NDP.EXPORT.headerRgb } } };
       var cellS = { alignment: { horizontal: "center", vertical: "center" }, border: border };
 
       // Sheet 1: Assignments (Task ID + Tech Pin)
@@ -429,7 +443,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     hideEmptyStates();
     document.querySelectorAll(".tab-panel").forEach(function (p) {
-      p.insertAdjacentHTML("afterbegin", '<div class="loader-overlay"><div class="loader-spinner"></div><span class="loader-text">Loading...</span></div>');
+      p.insertBefore(createLoaderOverlay("Loading..."), p.firstChild);
     });
     setTimeout(function () {
       document.querySelectorAll(".tab-panel .loader-overlay").forEach(function (el) { el.remove(); });

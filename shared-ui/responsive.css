@@ -1,0 +1,121 @@
+/* ===== Responsive Breakpoints ===== */
+/* MUI breakpoints: xs=0, sm=600, md=900, lg=1200, xl=1536 */
+
+/* --- Tablet and below (< 900px) --- */
+@media (max-width: 899px) {
+  body {
+    padding: var(--spacing-4);
+    padding-top: var(--spacing-10);
+  }
+
+  /* Reduce hero minimum height */
+  .home-hero {
+    min-height: 280px;
+  }
+
+  /* Stack toolbar actions */
+  header {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  /* Tabs scroll horizontally */
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Modal full-width on tablet */
+  .modal {
+    width: 95vw;
+    max-width: none;
+  }
+}
+
+/* --- Mobile (< 600px) --- */
+@media (max-width: 599px) {
+  :root {
+    --spacing-20: 56px;
+    --size-hero-min: 220px;
+    --size-nav-width: 100vw;
+  }
+
+  body {
+    padding: var(--spacing-3);
+    padding-top: var(--spacing-10);
+  }
+
+  /* Hero text scales down */
+  .home-hero h1 {
+    font-size: var(--text-h2);
+  }
+
+  .home-hero p {
+    font-size: var(--text-body2);
+  }
+
+  /* Cards single column */
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
+
+  /* Table horizontal scroll */
+  .table-wrapper,
+  .table-wrapper--flex {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Compact table cells */
+  .table th,
+  .table td {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--text-caption);
+  }
+
+  /* Search expands full width */
+  .search-expand.active .search-input {
+    width: 100%;
+  }
+
+  /* Pagination compact */
+  .pagination-footer {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    font-size: var(--text-caption);
+  }
+
+  /* NDP toolbar stacks */
+  .ndp-toolbar {
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+  }
+
+  /* Modal takes full screen on mobile */
+  .modal {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+  }
+
+  .modal-full {
+    border-radius: 0;
+  }
+}
+
+/* --- Large screens (> 1200px) --- */
+@media (min-width: 1200px) {
+  body {
+    padding: var(--spacing-8);
+    padding-top: var(--spacing-20);
+  }
+}
+
+/* --- Extra large (> 1536px) --- */
+@media (min-width: 1536px) {
+  body {
+    padding: var(--spacing-10);
+    padding-top: var(--spacing-20);
+  }
+}
