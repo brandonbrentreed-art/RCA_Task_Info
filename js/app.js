@@ -140,10 +140,10 @@ document.addEventListener("DOMContentLoaded", () => {
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
       <head><meta charset="UTF-8">
       <style>
-        table { border-collapse: collapse; font-family: ${NDP.EXPORT.font}; font-size: 11pt; }
-        th { background: ${NDP.EXPORT.headerBg}; color: #${NDP.EXPORT.textRgb}; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
-        td { padding: 6px 12px; border-bottom: 1px solid ${NDP.EXPORT.borderLight}; white-space: nowrap; }
-        tr:nth-child(even) td { background: ${NDP.EXPORT.stripedBg}; }
+        table { border-collapse: collapse; font-family: Roboto, Arial, sans-serif; font-size: 11pt; }
+        th { background: #142032; color: #FFFFFF; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
+        td { padding: 6px 12px; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+        tr:nth-child(even) td { background: #f5f7fa; }
       </style>
       </head>
       <body>
@@ -157,6 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     a.download = `RCA_Summary_${new Date().toISOString().slice(0, 10)}.xls`;
     a.click();
     URL.revokeObjectURL(url);
+    if (typeof Notify !== "undefined") Notify.success("Report exported", 2000);
   }
 
   // Fetch live data modal
