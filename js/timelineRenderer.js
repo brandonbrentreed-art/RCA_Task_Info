@@ -129,17 +129,8 @@ const TimelineRenderer = (() => {
       // Handle copy button clicks
       const copyBtn = e.target.closest(".pivot-copy");
       if (copyBtn) {
-        const copyId = copyBtn.dataset.copyId;
-        navigator.clipboard.writeText(copyId).then(() => {
-          copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-          copyBtn.classList.add("pivot-copy--done");
-          setTimeout(() => {
-            copyBtn.classList.add("pivot-copy--fade");
-            setTimeout(() => {
-              copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
-              copyBtn.classList.remove("pivot-copy--done", "pivot-copy--fade");
-            }, 200);
-          }, 600);
+        navigator.clipboard.writeText(copyBtn.dataset.copyId).then(() => {
+          Notify.success("Copied — " + copyBtn.dataset.copyId, 2000);
         });
         return;
       }
@@ -241,10 +232,7 @@ const TimelineRenderer = (() => {
     const copyBtn = document.getElementById("taskDetailCopy");
     copyBtn.onclick = () => {
       navigator.clipboard.writeText(buildSummary()).then(() => {
-        copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-        setTimeout(() => {
-          copyBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
-        }, 600);
+        Notify.success("Summary copied", 2000);
       });
     };
 
