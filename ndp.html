@@ -1,22 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Task Diagnostics Hub — Next Day Plan</title>
-  <link rel="icon" href="assets/favicon-light.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <script>document.documentElement.setAttribute('data-theme',localStorage.getItem('theme')||'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css">
-  <link rel="stylesheet" href="shared-ui/typography.css">
-  <link rel="stylesheet" href="shared-ui/components.css">
-  <link rel="stylesheet" href="shared-ui/forms.css">
-  <link rel="stylesheet" href="shared-ui/layout.css">
-  <link rel="stylesheet" href="shared-ui/responsive.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="shared-components/nav.css">
+  <!-- include: partials/head.html -->
   <link rel="stylesheet" href="shared-components/tabs.css">
   <link rel="stylesheet" href="shared-components/table.css">
   <link rel="stylesheet" href="shared-components/tooltip.css">
@@ -27,36 +13,7 @@
 </head>
 <body>
 
-  <!-- Hamburger trigger -->
-  <button class="nav-trigger" aria-label="Open menu" data-tooltip="Open menu">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-  </button>
-
-  <!-- Overlay -->
-  <div class="nav-overlay"></div>
-
-  <!-- Sidebar -->
-  <nav class="nav-sidebar">
-    <div class="nav-brand">
-      <button class="nav-close" aria-label="Close menu" data-tooltip="Close menu">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-      </button>
-      <svg class="nav-brand-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 420" role="img" aria-label="openreach wordmark"><text x="40" y="295" fill="currentColor" font-family="Arial, Helvetica, sans-serif" font-size="285" font-weight="400" letter-spacing="0" text-rendering="geometricPrecision">openreach</text></svg>
-    </div>
-    <ul class="nav-items">
-      <li class="nav-item"><a href="index.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 3l10 9h-3v8H5v-8H2l10-9z"/></svg></span>Home Page</a></li>
-      <li class="nav-item"><a href="timeline.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm3.3 14.71L11 14.17V7h2v6.41l3.71 2.21-.42 1.09z"/></svg></span>RCA Timeline</a></li>
-      <li class="nav-item"><a href="ndp.html" class="active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>Next Day Plan</a></li>
-      <li class="nav-item"><a href="ndc.html"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg></span>NDC Allocation</a></li>
-    </ul>
-    <div class="nav-build">Client Build &middot; 1.2</div>
-  </nav>
-
-  <!-- Theme toggle (top-right) -->
-  <button id="themeToggle" class="theme-toggle tooltip" data-tooltip="Dark mode" aria-label="Toggle theme">
-    <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" fill="currentColor"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
-    <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-  </button>
+  <!-- include: partials/nav.html -->
 
   <!-- Main Content -->
   <div class="main-content">
@@ -225,6 +182,8 @@
   <script src="js/ndp-enrich.js"></script>
   <script src="js/ndp-data.js"></script>
   <script src="js/ndp-plan.js"></script>
+  <script src="js/ndp-demand-data.js"></script>
+  <script src="js/ndp-demand-ui.js"></script>
   <script src="js/ndp-demand.js"></script>
   <script src="js/ndp-risk.js"></script>
   <script src="js/ndp-app.js"></script>
