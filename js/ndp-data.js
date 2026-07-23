@@ -53,7 +53,9 @@ var NdpData = (function () {
       if (rows.length < 2) { cb(false, "File appears empty"); return; }
       state.techHeaders = rows[0];
       state.techRows = rows.slice(1);
-      try { sessionStorage.setItem(STORE.TECHS, JSON.stringify({ headers: state.techHeaders, rows: state.techRows })); } catch (e) {}
+      setTimeout(function () {
+        try { sessionStorage.setItem(STORE.TECHS, JSON.stringify({ headers: state.techHeaders, rows: state.techRows })); } catch (e) {}
+      }, 0);
       cb(true, state.techRows.length + " techs loaded");
     });
   }
@@ -82,7 +84,10 @@ var NdpData = (function () {
   // Enrich taskforce rows and persist to session
   function enrichAndStore() {
     enrichTaskforce();
-    try { sessionStorage.setItem(STORE.TASKFORCE, JSON.stringify({ headers: state.taskforceHeaders, rows: state.taskforceRows })); } catch (e) {}
+    // Defer sessionStorage write — JSON serialisation of large datasets is slow
+    setTimeout(function () {
+      try { sessionStorage.setItem(STORE.TASKFORCE, JSON.stringify({ headers: state.taskforceHeaders, rows: state.taskforceRows })); } catch (e) {}
+    }, 0);
   }
 
   // --- Enrich taskforce rows with OUC/PWA from directory map ---
@@ -183,7 +188,9 @@ var NdpData = (function () {
     // Enrich plan with ageing data from enrichment file
     enrichPlanWithAgeing();
 
-    try { sessionStorage.setItem(STORE.PLAN_STATE, JSON.stringify({ headers: outHeaders, rows: outRows })); } catch (e) {}
+    setTimeout(function () {
+      try { sessionStorage.setItem(STORE.PLAN_STATE, JSON.stringify({ headers: outHeaders, rows: outRows })); } catch (e) {}
+    }, 0);
     return outRows.length;
   }
 

@@ -170,7 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Defer heavy parsing + enrichment off the paste event
     setTimeout(function () {
-      var result = TF_PARSER.parseHtml(html) || TF_PARSER.parseText(text);
+      var result = (html && html.trim().length > 50 ? TF_PARSER.parseHtml(html) : null)
+               || (text && text.trim().length > 50 ? TF_PARSER.parseText(text) : null);
 
       if (result && result.headers && result.rows.length) {
         NdpData.state.taskforceHeaders = result.headers;
