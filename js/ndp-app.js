@@ -161,33 +161,22 @@ document.addEventListener("DOMContentLoaded", function () {
   pasteArea.addEventListener("paste", function (e) {
     e.preventDefault();
 
-    // Grab clipboard data synchronously (only available during the event)
-    var html = e.clipboardData ? e.clipboardData.getData("text/html") : "";
-    var text = e.clipboardData ? e.clipboardData.getData("text/plain") : "";
+    var result = TF_PARSER.parseFromPaste(e);
 
-    pasteArea.value = "Parsing\u2026";
-    pasteArea.style.color = "";
-
-    // Defer heavy parsing + enrichment off the paste event
-    setTimeout(function () {
-      var result = (html && html.trim().length > 50 ? TF_PARSER.parseHtml(html) : null)
-               || (text && text.trim().length > 50 ? TF_PARSER.parseText(text) : null);
-
-      if (result && result.headers && result.rows.length) {
-        NdpData.state.taskforceHeaders = result.headers;
-        NdpData.state.taskforceRows = result.rows;
-        if (typeof COL_MAP !== "undefined") COL_MAP.resolvePositional(NdpData.state.taskforceHeaders);
-        NdpData.enrichAndStore();
-        state.taskforce = true;
-        markStep("ndpStepTaskforce", true);
-        pasteArea.value = result.rows.length + " tasks loaded \u2714";
-        pasteArea.style.color = "var(--color-green)";
-        checkReady();
-      } else {
-        pasteArea.value = "No Taskforce data found \u2014 copy from Taskforce and try again";
-        pasteArea.style.color = "var(--color-error)";
-      }
-    }, 0);
+    if (result && result.headers && result.rows.length) {
+      NdpData.state.taskforceHeaders = result.headers;
+      NdpData.state.taskforceRows = result.rows;
+      if (typeof COL_MAP !== "undefined") COL_MAP.resolvePositional(NdpData.state.taskforceHeaders);
+      NdpData.enrichAndStore();
+      state.taskforce = true;
+      markStep("ndpStepTaskforce", true);
+      pasteArea.value = result.rows.length + " tasks loaded \u2714";
+      pasteArea.style.color = "var(--color-green)";
+      checkReady();
+    } else {
+      pasteArea.value = "No Taskforce data found — copy from Taskforce and try again";
+      pasteArea.style.color = "var(--color-error)";
+    }
   });
 
   // --- Enrichment upload ---
