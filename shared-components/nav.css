@@ -117,10 +117,10 @@
   padding: var(--spacing-3) var(--spacing-4);
   color: var(--nav-text-muted);
   text-decoration: none;
-  font-size: var(--text-body2);
-  font-weight: var(--font-weight-medium);
-  letter-spacing: 0.01071em;
-  line-height: 1.43;
+  font-size: var(--text-body1);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--letter-spacing);
+  line-height: var(--line-height);
   white-space: nowrap;
   border-radius: var(--radius);
   margin: 0 var(--spacing-2);
@@ -135,7 +135,7 @@
 .nav-item a.active {
   background: var(--nav-active);
   color: var(--nav-text);
-  font-weight: var(--font-weight-bold);
+  font-weight: var(--font-weight-medium);
 }
 
 .nav-icon {
@@ -156,6 +156,9 @@
   border-top: 1px solid var(--nav-border);
   margin-top: auto;
   font-size: var(--text-caption);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.66;
+  letter-spacing: 0.03333em;
   color: var(--nav-text-muted);
   cursor: default;
   text-align: center;

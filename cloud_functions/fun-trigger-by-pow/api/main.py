@@ -92,7 +92,8 @@ SELECT
   FORMAT_TIMESTAMP('%d/%m/%Y %H:%M', commitment_ts, 'Europe/London')                   AS COMMITMENT_TIME_BT,
 
   CASE
-    WHEN task_status = 'AWI' THEN 'Pinned'
+    WHEN task_status = 'ISS' THEN 'Pinned'
+    WHEN task_status = 'AWI' THEN 'Pre-Pinned'
     WHEN prepin_ind = 'Y'    THEN 'Pre-Pinned'
     WHEN wm_pin IS NULL OR wm_pin = 'NONE' THEN 'No Pin'
     ELSE 'Has Pin'

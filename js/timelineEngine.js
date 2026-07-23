@@ -10,6 +10,18 @@ const TimelineEngine = (() => {
 
   function pad2(n) { return n < 10 ? "0" + n : "" + n; }
 
+  function derivePinStatus(row) {
+    var status = (row.TASK_STATUS || "").toUpperCase();
+    if (status === "ISS") return "Pinned";
+    if (status === "AWI") return "Pre-Pinned";
+    if ((row.PRE_PINNED || "").toUpperCase() === "Y") return "Pre-Pinned";
+    var pin = row.PIN_STATUS || "";
+    if (pin) return pin;
+    var wmPin = row.WM_PIN || "";
+    if (!wmPin || wmPin.toUpperCase() === "NONE") return "No Pin";
+    return "Has Pin";
+  }
+
   function formatTime(date) {
     return pad2(date.getHours()) + ":" + pad2(date.getMinutes());
   }
@@ -71,7 +83,7 @@ const TimelineEngine = (() => {
         priority: latest.PRIORITY_SCORE,
         importance: latest.IMPORTANCE_SCORE,
         appointmentSlot: latest.APPOINTMENT_SLOT,
-        pinStatus: latest.PIN_STATUS || "",
+        pinStatus: derivePinStatus(latest),
         taskState: latest.TASK_STATE || "",
         colocated: latest.COLOCATED_INDICATOR || "",
         prePinned: latest.PRE_PINNED || "",
