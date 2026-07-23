@@ -374,9 +374,6 @@
   box-sizing: border-box;
 }
 
-
-
-
 /* -- Drilldown cell hover -- */
 .ndp-drill {
   cursor: pointer;
@@ -392,7 +389,6 @@
   position: relative;
 }
 
-
 /* -- Plan action buttons -- */
 #ndpPlanAdd:hover,
 #ndpPlanDelete:hover:not(:disabled) {
@@ -404,8 +400,6 @@
 [data-theme="dark"] .ndp-drill:hover {
   background: var(--hover-primary);
 }
-
-
 
 /* -- Demand chart labels -- */
 .ndp-demand-col__label {
@@ -433,12 +427,16 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.ndp-demand-ouc:hover {
+  color: var(--color-blue);
 }
 
 .ndp-demand-oucs .ndp-demand-ouc + .ndp-demand-ouc {
   border-left: 1px solid var(--color-divider);
 }
-
 
 /* -- Demand chart legend (clickable toggles) -- */
 .ndp-demand-legend {
@@ -476,7 +474,6 @@
   opacity: 0.3;
 }
 
-
 /* -- Demand chart grid lines (volume scale) -- */
 .ndp-demand-grid {
   position: absolute;
@@ -499,7 +496,6 @@
 .ndp-demand-col {
   z-index: 1;
 }
-
 
 /* -- PWA filter buttons (drilldown modal) -- */
 .ndp-pwa-filter {
@@ -525,17 +521,6 @@
   background: var(--color-blue);
   color: var(--color-white);
 }
-
-/* -- OUC labels clickable -- */
-.ndp-demand-ouc {
-  cursor: pointer;
-}
-
-.ndp-demand-ouc:hover {
-  color: var(--color-blue);
-}
-
-
 
 /* -- Searchable filter dropdown -- */
 .ndp-filter-wrap {

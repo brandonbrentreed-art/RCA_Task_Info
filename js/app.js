@@ -83,10 +83,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  function updateSearchState() {
-    searchExpand.classList.toggle("has-value", searchFilter.value.length > 0);
-  }
-
   // Export summary report
   exportBtn.addEventListener("click", exportReport);
 
@@ -165,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const demoBtn = document.getElementById("demoBtn");
   const powFetchModal = document.getElementById("powFetchModal");
   const powZoneInput = document.getElementById("powZoneInput");
-  const powDateInput  = document.getElementById("powDateInput");
+  const powDateInput = document.getElementById("powDateInput");
   const powDatePicker = document.getElementById("powDatePicker");
   if (powDatePicker) {
     powDatePicker.addEventListener("change", function () {
@@ -372,11 +368,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function debounce(fn, ms) {
-    let timer;
-    return (...args) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn(...args), ms);
-    };
-  }
 });
+

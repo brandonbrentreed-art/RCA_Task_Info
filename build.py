@@ -110,8 +110,10 @@ def set_active_nav(nav_html, page_filename):
 
 def build():
     # Read partials
-    head_partial = open(os.path.join(ROOT, 'partials', 'head.html'), encoding='utf-8').read()
-    nav_partial_template = open(os.path.join(ROOT, 'partials', 'nav.html'), encoding='utf-8').read()
+    with open(os.path.join(ROOT, 'partials', 'head.html'), encoding='utf-8') as f:
+        head_partial = f.read()
+    with open(os.path.join(ROOT, 'partials', 'nav.html'), encoding='utf-8') as f:
+        nav_partial_template = f.read()
 
     # Create dist
     if os.path.exists(DIST):
@@ -131,7 +133,8 @@ def build():
             sys.stdout.write('SKIP (not found): ' + page + '\n')
             continue
 
-        html = open(src_path, encoding='utf-8').read()
+        with open(src_path, encoding='utf-8') as f:
+            html = f.read()
 
         # 1. Inject head partial
         html = inject_partial(html, 'partials/head.html', head_partial)
@@ -144,7 +147,8 @@ def build():
         html = inject_hashes(html, ROOT)
 
         out_path = os.path.join(DIST, page)
-        open(out_path, 'w', encoding='utf-8').write(html)
+        with open(out_path, 'w', encoding='utf-8') as f:
+            f.write(html)
         built.append(page)
         sys.stdout.write('Built:  dist/' + page + '\n')
 
@@ -154,13 +158,15 @@ def build():
             sys.stdout.write('SKIP (not found): ' + page + '\n')
             continue
 
-        html = open(src_path, encoding='utf-8').read()
+        with open(src_path, encoding='utf-8') as f:
+            html = f.read()
 
         # Hash injection only — no partials
         html = inject_hashes(html, ROOT)
 
         out_path = os.path.join(DIST, page)
-        open(out_path, 'w', encoding='utf-8').write(html)
+        with open(out_path, 'w', encoding='utf-8') as f:
+            f.write(html)
         built.append(page)
         sys.stdout.write('Built:  dist/' + page + '\n')
 

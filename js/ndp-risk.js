@@ -328,7 +328,6 @@ var NdpRisk = (function () {
       return activeRisks[NDP.riskLevel(item.score)];
     });
     if (searchQuery) {
-      var headers = NdpData.state.planHeaders;
       filtered = filtered.filter(function (item) {
         for (var i = 0; i < item.row.length; i++) {
           if ((item.row[i] || "").toUpperCase().indexOf(searchQuery) !== -1) return true;

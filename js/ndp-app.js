@@ -415,12 +415,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  function showEmptyStates() {
-    document.querySelectorAll(".ndp-empty").forEach(function (el) {
-      el.style.display = "";
-    });
-  }
-
   // --- Restore session (if data already loaded) ---
   // Always sync workstack toggle from persisted preference
   var savedWs = localStorage.getItem(NDP.STORE.WS_TYPE);

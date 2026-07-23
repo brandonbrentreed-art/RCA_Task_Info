@@ -1,3 +1,5 @@
+"use strict";
+
 // auth-config.js
 // DEV: pointing at local Flask API — no real Entra token needed
 window.__AUTH_CONFIG__ = {

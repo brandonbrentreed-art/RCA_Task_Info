@@ -1,3 +1,5 @@
+"use strict";
+
 // auth.js - Entra ID authentication via MSAL.js
 // Users authenticate with BT SSO. The access token is sent to the backend API
 // which validates it and runs BigQuery queries as the service account.
