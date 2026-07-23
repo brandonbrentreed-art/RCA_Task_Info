@@ -155,7 +155,7 @@
   padding: var(--spacing-3) var(--spacing-4);
   border-top: 1px solid var(--nav-border);
   margin-top: auto;
-  font-size: var(--text-caption);
+  font-size: var(--text-body2);
   font-weight: var(--font-weight-regular);
   line-height: 1.66;
   letter-spacing: 0.03333em;
