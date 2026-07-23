@@ -301,10 +301,12 @@ var NdpData = (function () {
         var wb;
         try {
           var _warn = console.warn; console.warn = function () {};
+          var _error = console.error; console.error = function () {};
           wb = XLSX.read(data, { type: "array", cellDates: true });
           console.warn = _warn;
+          console.error = _error;
         }
-        catch (e) { console.warn = _warn; cb(false, "Failed to parse file"); return; }
+        catch (e) { console.warn = _warn; console.error = _error; cb(false, "Failed to parse file"); return; }
 
         if (state.workstack === "fibre") {
           // Fibre: look for BTTW_Data or KCI2_DATA_NEW sheets

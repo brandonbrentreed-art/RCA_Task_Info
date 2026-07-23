@@ -287,7 +287,9 @@
           return o;
         });
       } else {
+        var _err = console.error; console.error = function () {};
         var wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        console.error = _err;
         dataRows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
       }
       uploadedRows = dataRows.map(function (r, i) {
