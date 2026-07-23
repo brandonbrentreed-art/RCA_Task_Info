@@ -2,19 +2,30 @@
 bump-build.py — increments the Client Build minor version across all nav files.
 Run before committing: python bump-build.py
 """
-import re, sys
+import re
+import sys
 
 FILES = ["index.html", "timeline.html", "ndp.html", "ndc.html"]
-PATTERN = re.compile(r"Client Build &middot; (\d+)\.(\d+)")
+VERSION_RE = re.compile(r"Client Build &middot; (\d+)\.(\d+)")
+
+
+def read(path):
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def write(path, text):
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(text)
+
 
 def bump():
     current = None
-    for f in FILES:
+    for path in FILES:
         try:
-            text = open(f, encoding="utf-8").read()
+            m = VERSION_RE.search(read(path))
         except FileNotFoundError:
             continue
-        m = PATTERN.search(text)
         if m:
             current = (int(m.group(1)), int(m.group(2)))
             break
@@ -24,21 +35,20 @@ def bump():
         sys.exit(1)
 
     major, minor = current
-    new_minor = minor + 1
-    new_label = f"Client Build &middot; {major}.{new_minor}"
-    old_pattern = re.compile(r"Client Build &middot; \d+\.\d+")
+    new_label = f"Client Build &middot; {major}.{minor + 1}"
 
-    for f in FILES:
+    for path in FILES:
         try:
-            text = open(f, encoding="utf-8").read()
+            text = read(path)
         except FileNotFoundError:
             continue
-        updated = old_pattern.sub(new_label, text)
+        updated = VERSION_RE.sub(new_label, text)
         if updated != text:
-            open(f, "w", encoding="utf-8").write(updated)
-            print(f"  {f}  →  {new_label}")
+            write(path, updated)
+            print(f"  {path}  ->  {new_label}")
 
-    print(f"\nBuild bumped: {major}.{minor} → {major}.{new_minor}")
+    print(f"\nBuild bumped: {major}.{minor} -> {major}.{minor + 1}")
+
 
 if __name__ == "__main__":
     bump()
