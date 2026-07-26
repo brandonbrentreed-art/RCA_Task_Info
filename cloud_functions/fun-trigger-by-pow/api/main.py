@@ -8,7 +8,8 @@ import jwt
 from jwt import PyJWKClient
 
 app = Flask(__name__)
-CORS(app, origins=["*"], supports_credentials=True)
+_ALLOWED_ORIGINS = [o.strip() for o in os.environ.get("ALLOWED_ORIGINS", "http://localhost:8080").split(",") if o.strip()]
+CORS(app, origins=_ALLOWED_ORIGINS, supports_credentials=True)
 
 ENTRA_TENANT_ID = os.environ.get("ENTRA_TENANT_ID", "")
 ENTRA_CLIENT_ID = os.environ.get("ENTRA_CLIENT_ID", "")
@@ -47,6 +48,8 @@ def require_auth(f):
     return decorated
 
 
+GCP_PROJECT = os.environ.get("GCP_PROJECT", "or-tfconfig-dec-exp-prod")
+
 impersonate_sa = os.environ.get("GOOGLE_IMPERSONATE_SERVICE_ACCOUNT")
 if impersonate_sa:
     from google.auth import impersonated_credentials, default as google_default
@@ -56,7 +59,7 @@ if impersonate_sa:
         target_principal=impersonate_sa,
         target_scopes=["https://www.googleapis.com/auth/bigquery"],
     )
-    bq_client = bigquery.Client(credentials=creds, project="or-tfconfig-dec-exp-prod")
+    bq_client = bigquery.Client(credentials=creds, project=GCP_PROJECT)
 else:
     bq_client = bigquery.Client()
 
@@ -160,7 +163,7 @@ def run_query():
         return jsonify({"data": rows, "count": len(rows)})
     except Exception as e:
         print(f"BigQuery error: {e}")
-        return jsonify({"error": "Query failed", "detail": str(e)}), 500
+        return jsonify({"error": "Query failed"}), 500
 
 
 if __name__ == "__main__":

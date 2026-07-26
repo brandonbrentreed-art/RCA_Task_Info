@@ -3,14 +3,9 @@
 const DataLoader = (() => {
   let snapshots = [];
   let index = null; // Map<JIN_ID, sorted rows[]>
-
-  // Pre-allocate header index for fast column access
   let _headers = [];
-  let _jinCol = -1;
-  let _recordTimeCol = -1;
 
   function parseCSV(text) {
-    const nlCode = 10; // \n
     const len = text.length;
 
     // Find header line end
@@ -21,8 +16,6 @@ const DataLoader = (() => {
     const hLen = _headers.length;
     for (let i = 0; i < hLen; i++) {
       _headers[i] = _headers[i].trim();
-      if (_headers[i] === "JIN_ID") _jinCol = i;
-      if (_headers[i] === "RECORD_TIME_BT" || _headers[i] === "RECORD_TIME") _recordTimeCol = i;
     }
 
     // Parse rows — avoid creating substrings where possible
@@ -94,11 +87,7 @@ const DataLoader = (() => {
 
   function loadFromText(text) {
     const rows = parseCSV(text);
-    if (snapshots.length === 0) {
-      snapshots = rows;
-    } else {
-      snapshots = snapshots.concat(rows);
-    }
+    snapshots = snapshots.concat(rows);
     index = null;
     return rows.length;
   }
@@ -174,7 +163,6 @@ const DataLoader = (() => {
     loadMultiple,
     clear,
     queryByJinIds,
-    getAllSnapshots: getSnapshots,
     getSnapshots,
     getUniqueJinIds,
     parseDate

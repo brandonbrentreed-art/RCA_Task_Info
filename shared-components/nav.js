@@ -8,41 +8,56 @@ function initNav() {
 
   if (!trigger || !sidebar) return;
 
+  const TRANSITION_MS = parseInt(
+    getComputedStyle(document.documentElement).getPropertyValue("--transition-standard") || "250",
+    10
+  );
+  let isAnimating = false;
+
   function openNav() {
+    if (isAnimating) return;
+    isAnimating = true;
     sidebar.classList.add("open");
     if (overlay) overlay.classList.add("open");
+    setTimeout(() => { isAnimating = false; }, TRANSITION_MS);
   }
 
   function closeNav() {
+    if (isAnimating) return;
+    isAnimating = true;
     sidebar.classList.remove("open");
     if (overlay) overlay.classList.remove("open");
+    setTimeout(() => { isAnimating = false; }, TRANSITION_MS);
   }
 
   trigger.addEventListener("click", openNav);
-  if (close) close.addEventListener("click", closeNav);
+  if (close) close.addEventListener("click", (e) => { e.stopPropagation(); closeNav(); });
   if (overlay) overlay.addEventListener("click", closeNav);
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && sidebar.classList.contains("open")) closeNav();
   });
 
-  // Suppress URL preview on all links and handle navigation via JS
+  // Keep href intact for native browser features (right-click, keyboard nav).
+  // Use preventDefault + JS navigation for the page-transition animation.
   document.querySelectorAll("a[href]").forEach((link) => {
     const href = link.getAttribute("href");
     if (!href) return;
-    if (link.classList.contains("active") || href === "#") { link.removeAttribute("href"); link.style.cursor = href === "#" ? "pointer" : "default"; return; }
+    if (link.classList.contains("active") || href === "#") {
+      link.style.cursor = href === "#" ? "pointer" : "default";
+      return;
+    }
     const isExternal = link.getAttribute("target") === "_blank" || href.startsWith("mailto:") || href.startsWith("http");
-    link.dataset.href = href;
-    link.removeAttribute("href");
     link.style.cursor = "pointer";
     link.addEventListener("click", (e) => {
       e.preventDefault();
       if (isExternal) {
         if (href.startsWith("mailto:")) {
-          if (typeof Notify !== 'undefined') Notify.info('Opening email client...', 2000);
+          if (typeof Notify !== "undefined") Notify.info("Opening email client...", 2000);
           window.location.href = href;
+        } else {
+          window.open(href, "_blank");
         }
-        else { window.open(href, "_blank"); }
       } else {
         document.body.classList.add("page-exit");
         setTimeout(() => { window.location.href = href; }, 200);
@@ -76,28 +91,29 @@ if (document.readyState === "loading") {
 
 function init() {
   // Restore scroll position from previous visit
-  var scrollKey = "scroll_" + location.pathname;
-  var savedScroll = sessionStorage.getItem(scrollKey);
+  const scrollKey = "scroll_" + location.pathname;
+  const savedScroll = sessionStorage.getItem(scrollKey);
   if (savedScroll) {
-    requestAnimationFrame(function () {
-      var main = document.querySelector(".table-scroll, .results-area, main, #app");
+    requestAnimationFrame(() => {
+      const main = document.querySelector(".table-scroll, .results-area, main, #app");
       if (main) main.scrollTop = parseInt(savedScroll, 10);
     });
   }
+
   // Save scroll position on navigate away
-  window.addEventListener("beforeunload", function () {
-    var main = document.querySelector(".table-scroll, .results-area, main, #app");
+  window.addEventListener("beforeunload", () => {
+    const main = document.querySelector(".table-scroll, .results-area, main, #app");
     if (main) {
       try { sessionStorage.setItem(scrollKey, main.scrollTop); } catch (e) {}
     }
   });
 
-  document.body.style.opacity = "0";
-  requestAnimationFrame(() => {
-    document.body.style.transition = "opacity 200ms ease";
-    document.body.style.opacity = "1";
-  });
+  // Init nav and theme first so they are interactive immediately
   initNav();
   initThemeToggle();
-}
 
+  // Page fade-in after nav is ready — use a class so it doesn't block interaction
+  requestAnimationFrame(() => {
+    document.body.classList.add("page-enter");
+  });
+}

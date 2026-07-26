@@ -104,23 +104,43 @@ def set_active_nav(nav_html, page_filename):
     return nav_html
 
 
+def build_page(page, root, dist, inject_partials, head_partial=None, nav_partial_template=None):
+    src_path = os.path.join(root, page)
+    if not os.path.exists(src_path):
+        sys.stdout.write('SKIP (not found): ' + page + '\n')
+        return False
+
+    with open(src_path, encoding='utf-8') as f:
+        html = f.read()
+
+    if inject_partials:
+        html = inject_partial(html, 'partials/head.html', head_partial)
+        nav_html = set_active_nav(nav_partial_template, page)
+        html = inject_partial(html, 'partials/nav.html', nav_html)
+
+    html = inject_hashes(html, root)
+
+    with open(os.path.join(dist, page), 'w', encoding='utf-8') as f:
+        f.write(html)
+
+    sys.stdout.write('Built:  dist/' + page + '\n')
+    return True
+
+
 # ---------------------------------------------------------------------------
 # Build
 # ---------------------------------------------------------------------------
 
 def build():
-    # Read partials
     with open(os.path.join(ROOT, 'partials', 'head.html'), encoding='utf-8') as f:
         head_partial = f.read()
     with open(os.path.join(ROOT, 'partials', 'nav.html'), encoding='utf-8') as f:
         nav_partial_template = f.read()
 
-    # Create dist
     if os.path.exists(DIST):
         shutil.rmtree(DIST, ignore_errors=True)
     os.makedirs(DIST, exist_ok=True)
 
-    # Copy asset directories
     for d in COPY_DIRS:
         src = os.path.join(ROOT, d)
         if os.path.exists(src):
@@ -128,47 +148,12 @@ def build():
 
     built = []
     for page in PARTIAL_PAGES:
-        src_path = os.path.join(ROOT, page)
-        if not os.path.exists(src_path):
-            sys.stdout.write('SKIP (not found): ' + page + '\n')
-            continue
-
-        with open(src_path, encoding='utf-8') as f:
-            html = f.read()
-
-        # 1. Inject head partial
-        html = inject_partial(html, 'partials/head.html', head_partial)
-
-        # 2. Inject nav partial with correct active link
-        nav_html = set_active_nav(nav_partial_template, page)
-        html = inject_partial(html, 'partials/nav.html', nav_html)
-
-        # 3. Content-hash all local asset URLs
-        html = inject_hashes(html, ROOT)
-
-        out_path = os.path.join(DIST, page)
-        with open(out_path, 'w', encoding='utf-8') as f:
-            f.write(html)
-        built.append(page)
-        sys.stdout.write('Built:  dist/' + page + '\n')
+        if build_page(page, ROOT, DIST, inject_partials=True, head_partial=head_partial, nav_partial_template=nav_partial_template):
+            built.append(page)
 
     for page in PLAIN_PAGES:
-        src_path = os.path.join(ROOT, page)
-        if not os.path.exists(src_path):
-            sys.stdout.write('SKIP (not found): ' + page + '\n')
-            continue
-
-        with open(src_path, encoding='utf-8') as f:
-            html = f.read()
-
-        # Hash injection only — no partials
-        html = inject_hashes(html, ROOT)
-
-        out_path = os.path.join(DIST, page)
-        with open(out_path, 'w', encoding='utf-8') as f:
-            f.write(html)
-        built.append(page)
-        sys.stdout.write('Built:  dist/' + page + '\n')
+        if build_page(page, ROOT, DIST, inject_partials=False):
+            built.append(page)
 
     sys.stdout.write('\nDone. ' + str(len(built)) + ' page(s) built into dist/\n')
 

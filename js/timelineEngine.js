@@ -2,33 +2,25 @@
 
 const TimelineEngine = (() => {
   const INTERVAL_MS = 15 * 60 * 1000;
-  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   function bucketKey(date) {
     return Math.floor(date.getTime() / INTERVAL_MS) * INTERVAL_MS;
   }
 
-  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
-
   function derivePinStatus(row) {
-    var status = (row.TASK_STATUS || "").toUpperCase();
+    const status = (row.TASK_STATUS || "").toUpperCase();
     if (status === "ISS") return "Pinned";
     if (status === "AWI") return "Pre-Pinned";
     if ((row.PRE_PINNED || "").toUpperCase() === "Y") return "Pre-Pinned";
-    var pin = row.PIN_STATUS || "";
+    const pin = row.PIN_STATUS || "";
     if (pin) return pin;
-    var wmPin = row.WM_PIN || "";
+    const wmPin = row.WM_PIN || "";
     if (!wmPin || wmPin.toUpperCase() === "NONE") return "No Pin";
     return "Has Pin";
   }
 
-  function formatTime(date) {
-    return pad2(date.getHours()) + ":" + pad2(date.getMinutes());
-  }
-
-  function formatDate(date) {
-    return pad2(date.getDate()) + " " + MONTHS[date.getMonth()] + " " + date.getFullYear();
-  }
+  function formatTime(date) { return Utils.formatTime(date); }
+  function formatDate(date) { return Utils.formatDate(date); }
 
   function buildTimeline(rows) {
     // Bucket by 15-min key (numeric timestamp)

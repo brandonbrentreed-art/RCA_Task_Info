@@ -76,10 +76,10 @@
   </button>
 
   <!-- Page iframes — each loads once and stays alive -->
-  <iframe id="frame-home"     class="page-frame is-active" src="home.html"     title="Home"></iframe>
-  <iframe id="frame-timeline" class="page-frame"           src="timeline.html" title="RCA Timeline"></iframe>
-  <iframe id="frame-ndp"      class="page-frame"           src="ndp.html"      title="Next Day Plan"></iframe>
-  <iframe id="frame-ndc"      class="page-frame"           src="ndc.html"      title="NDC Allocation"></iframe>
+  <iframe id="frame-home"     class="page-frame is-active" title="Home"></iframe>
+  <iframe id="frame-timeline" class="page-frame"           title="RCA Timeline"></iframe>
+  <iframe id="frame-ndp"      class="page-frame"           title="Next Day Plan"></iframe>
+  <iframe id="frame-ndc"      class="page-frame"           title="NDC Allocation"></iframe>
 
   <script src="js/icons.js"></script>
   <script src="shared-components/tooltip.js?v=6"></script>
@@ -94,6 +94,15 @@
 
       const PAGES = ["home", "timeline", "ndp", "ndc"];
       const SESSION_KEY = "active_page";
+      const PAGE_SRCS = { home: "home.html", timeline: "timeline.html", ndp: "ndp.html", ndc: "ndc.html" };
+      const loaded = new Set();
+
+      function ensureLoaded(page) {
+        if (loaded.has(page)) return;
+        const frame = document.getElementById("frame-" + page);
+        frame.src = PAGE_SRCS[page];
+        loaded.add(page);
+      }
 
       // ---- nav open/close ----
       const trigger = document.querySelector(".nav-trigger");
@@ -112,6 +121,7 @@
       // ---- page switching ----
       function showPage(page) {
         if (!PAGES.includes(page)) page = "home";
+        ensureLoaded(page);
 
         PAGES.forEach(p => {
           document.getElementById("frame-" + p).classList.toggle("is-active", p === page);
@@ -135,9 +145,9 @@
         if (e.data && e.data.type === "navigate") showPage(e.data.page);
       });
 
-      // restore last active page
+      // restore last active page or default to home
       const saved = sessionStorage.getItem(SESSION_KEY);
-      if (saved) showPage(saved);
+      showPage(saved || "home");
 
       // ---- theme toggle ----
       const themeBtn = document.getElementById("themeToggle");

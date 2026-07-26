@@ -178,11 +178,11 @@
       <h3>NDC Allocation</h3>
       <p>Auto-allocate submitted tasks to Taskforce identifiers via Sporticus Services.</p>
     </div>
-    <a class="home-card" href="https://teams.microsoft.com/l/app/?source=app-bar-share-entrypoint&titleId=T_f2987bce-b8cd-ed36-6c42-f1ccbaf52147" target="_blank" rel="noopener noreferrer">
+    <div class="home-card" data-page="patrik">
       <div class="home-card-icon" data-icon="patrik"></div>
       <h3>Patrik AI Assistant</h3>
       <p>AI-powered support bot built with Microsoft Copilot Studio for your team.</p>
-    </a>
+    </div>
   </div>
 
   <footer class="home-footer">System support teams (BVK87 R)</footer>
@@ -194,7 +194,11 @@
     });
     document.querySelectorAll(".home-card[data-page]").forEach(function (card) {
       card.addEventListener("click", function () {
-        window.parent.postMessage({ type: "navigate", page: card.dataset.page }, "*");
+        if (card.dataset.page === "patrik") {
+          window.open("https://teams.microsoft.com/l/app/?source=app-bar-share-entrypoint&titleId=T_f2987bce-b8cd-ed36-6c42-f1ccbaf52147", "_blank", "noopener,noreferrer");
+        } else {
+          window.parent.postMessage({ type: "navigate", page: card.dataset.page }, "*");
+        }
       });
     });
   </script>

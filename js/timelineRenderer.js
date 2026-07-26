@@ -10,30 +10,20 @@ const TimelineRenderer = (() => {
     ISS: "var(--color-navy)",
   };
 
-  const PIVOT_PAGE_SIZE_OPTIONS = [30, 60, 90];
-  const DETAIL_PAGE_SIZE_OPTIONS = [30, 60, 90];
-  const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const PAGE_SIZE_OPTIONS = [30, 60, 90];
 
-  let pivotState = { page: 0, pageSize: 30, timelinesMap: null, container: null };
+  let pivotState = { page: 0, pageSize: PAGE_SIZE_OPTIONS[0], timelinesMap: null, container: null, sortedTs: null };
 
   function statusColour(status) {
     return STATUS_COLOURS[status] || "var(--color-grey-300)";
-  }
-
-  function pad2(n) { return n < 10 ? "0" + n : "" + n; }
-
-  function fmtHeaderDate(dt) {
-    return pad2(dt.getDate()) + " " + MONTHS_SHORT[dt.getMonth()];
-  }
-
-  function fmtHeaderTime(dt) {
-    return pad2(dt.getHours()) + ":" + pad2(dt.getMinutes());
   }
 
   function renderAll(timelinesMap, container) {
     pivotState.timelinesMap = timelinesMap;
     pivotState.container = container;
     pivotState.page = 0;
+    pivotState.pageSize = PAGE_SIZE_OPTIONS[0];
+    pivotState.sortedTs = null;
     renderPivotPage();
   }
 
@@ -49,13 +39,17 @@ const TimelineRenderer = (() => {
 
     const pagedIds = ids.slice(page * pageSize, (page + 1) * pageSize);
 
-    // Collect timestamps for visible tasks
-    const tsSet = new Set();
-    for (let i = 0; i < pagedIds.length; i++) {
-      const intervals = timelinesMap[pagedIds[i]].intervals;
-      for (let j = 0; j < intervals.length; j++) tsSet.add(intervals[j].timestamp.getTime());
+    // Collect timestamps for visible tasks — cache per page slice
+    const cacheKey = page + "-" + pageSize;
+    if (!pivotState.sortedTs || pivotState.sortedTs.key !== cacheKey) {
+      const tsSet = new Set();
+      for (let i = 0; i < pagedIds.length; i++) {
+        const intervals = timelinesMap[pagedIds[i]].intervals;
+        for (let j = 0; j < intervals.length; j++) tsSet.add(intervals[j].timestamp.getTime());
+      }
+      pivotState.sortedTs = { key: cacheKey, ts: Array.from(tsSet).sort((a, b) => a - b) };
     }
-    const sortedTs = Array.from(tsSet).sort((a, b) => a - b);
+    const sortedTs = pivotState.sortedTs.ts;
     const tsCount = sortedTs.length;
 
     // Build HTML as array for speed
@@ -68,7 +62,7 @@ const TimelineRenderer = (() => {
     // Header cells
     for (let i = 0; i < tsCount; i++) {
       const dt = new Date(sortedTs[i]);
-      html.push('<div class="pivot-cell pivot-header"><span>', fmtHeaderDate(dt), '</span><span>', fmtHeaderTime(dt), '</span></div>');
+      html.push('<div class="pivot-cell pivot-header"><span>', Utils.fmtHeaderDate(dt), '</span><span>', Utils.fmtHeaderTime(dt), '</span></div>');
     }
 
     // Build a quick lookup: timestamp -> index for each task
@@ -95,7 +89,7 @@ const TimelineRenderer = (() => {
         html.push('<span class="pivot-status" style="background:', statusColour(entry.status), '">', entry.status, '</span>');
         html.push('<span class="pivot-tech">', entry.techId || "\u2014", '</span>');
         html.push('<span class="pivot-pin">', entry.pinStatus || "\u2014", '</span>');
-        html.push('<span class="pivot-wm">', entry.estimatedStart && entry.estimatedStart !== "31/12/9999 00:00" ? "Start Time: " + entry.estimatedStart : "\u2014", '</span>');
+        html.push('<span class="pivot-wm">', entry.estimatedStart && entry.estimatedStart !== Utils.SENTINEL_DATE ? "Start Time: " + entry.estimatedStart : "\u2014", '</span>');
         if (hasChanges) {
           html.push('<div class="pivot-changes">');
           for (let ch = 0; ch < entry.changes.length; ch++) {
@@ -138,9 +132,9 @@ const TimelineRenderer = (() => {
 
     // Pagination
     const pagination = Pagination.create(
-      ids.length, page, pageSize, PIVOT_PAGE_SIZE_OPTIONS,
+      ids.length, page, pageSize, PAGE_SIZE_OPTIONS,
       (p) => { pivotState.page = p; renderPivotPage(); },
-      (s) => { pivotState.pageSize = s; pivotState.page = 0; renderPivotPage(); }
+      (s) => { pivotState.pageSize = s; pivotState.page = 0; pivotState.sortedTs = null; renderPivotPage(); }
     );
     wrapper.appendChild(pagination);
 
@@ -203,7 +197,7 @@ const TimelineRenderer = (() => {
         html.push('<td>', entry.taskState || '\u2014', '</td>');
         html.push('<td>', entry.techId || '\u2014', '</td>');
         html.push('<td>', entry.pinStatus || '\u2014', '</td>');
-        html.push('<td>', entry.estimatedStart && entry.estimatedStart !== '31/12/9999 00:00' ? entry.estimatedStart : '\u2014', '</td>');
+        html.push('<td>', entry.estimatedStart && entry.estimatedStart !== Utils.SENTINEL_DATE ? entry.estimatedStart : '\u2014', '</td>');
         html.push('<td>', entry.skillCode || '\u2014', '</td>');
         html.push('<td>', entry.priority || '\u2014', '</td>');
         html.push('<td>', entry.importance || '\u2014', '</td>');
@@ -220,7 +214,7 @@ const TimelineRenderer = (() => {
 
       const tableWrapper = body.querySelector(".detail-table-wrapper");
       const pagination = Pagination.create(
-        intervals.length, page, pageSize, DETAIL_PAGE_SIZE_OPTIONS,
+        intervals.length, page, pageSize, PAGE_SIZE_OPTIONS,
         (p) => { detailState.page = p; renderDetailPage(); },
         (s) => { detailState.pageSize = s; detailState.page = 0; renderDetailPage(); }
       );

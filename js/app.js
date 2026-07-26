@@ -1,5 +1,8 @@
 "use strict";
 
+const INPUT_PLACEHOLDER_READY = "Paste JIN IDs — e.g. B1-26636097A B6-27209822A";
+const INPUT_PLACEHOLDER_LOCKED = "Fetch data first...";
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const jinInput = document.getElementById("jinInput");
@@ -9,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchToggle = document.querySelector(".search-toggle");
   const searchExpand = document.querySelector(".search-expand");
   const searchFilter = document.getElementById("searchFilter");
-  const searchClear = document.getElementById("searchClear");
   const exportBtn = document.getElementById("exportBtn");
 
   let dataLoaded = false;
@@ -17,47 +19,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function unlockInput() {
     jinInput.disabled = false;
-    jinInput.placeholder = "Paste JIN IDs — e.g. B1-26636097A B6-27209822A";
+    jinInput.placeholder = INPUT_PLACEHOLDER_READY;
   }
 
   function lockInput() {
     jinInput.disabled = true;
-    jinInput.placeholder = "Fetch data first...";
+    jinInput.placeholder = INPUT_PLACEHOLDER_LOCKED;
   }
 
+  const toolbarBtns = [searchToggle, exportBtn, clearBtn];
+
   function setToolbarState(enabled) {
-    searchToggle.disabled = !enabled;
-    exportBtn.disabled = !enabled;
-    clearBtn.disabled = !enabled;
-    searchToggle.style.opacity = enabled ? "1" : "0.38";
-    exportBtn.style.opacity = enabled ? "1" : "0.38";
-    clearBtn.style.opacity = enabled ? "1" : "0.38";
-    searchToggle.style.pointerEvents = enabled ? "auto" : "none";
-    exportBtn.style.pointerEvents = enabled ? "auto" : "none";
-    clearBtn.style.pointerEvents = enabled ? "auto" : "none";
+    toolbarBtns.forEach(btn => {
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? "1" : "0.38";
+      btn.style.pointerEvents = enabled ? "auto" : "none";
+    });
   }
 
   lockInput();
   setToolbarState(false);
+
+  function restoreActiveIds() {
+    try {
+      const storedIds = sessionStorage.getItem("rca_active_ids");
+      if (storedIds) {
+        activeIds = JSON.parse(storedIds);
+        renderChips();
+        runSearch();
+      }
+    } catch (e) {}
+  }
 
   // Restore data from sessionStorage if available
   try {
     const source = sessionStorage.getItem("rca_csv_source");
     const stored = sessionStorage.getItem("rca_csv_data");
     if (source === "demo") {
-      // Re-fetch demo CSV (fast from cache)
       fetch("assets/RCA_DEV.csv").then(r => r.text()).then(csv => {
         DataLoader.clear();
         DataLoader.loadFromText(csv);
         dataLoaded = true;
         unlockInput();
         setToolbarState(true);
-        const storedIds = sessionStorage.getItem("rca_active_ids");
-        if (storedIds) {
-          activeIds = JSON.parse(storedIds);
-          renderChips();
-          runSearch();
-        }
+        restoreActiveIds();
       }).catch(() => {});
     } else if (stored) {
       const texts = JSON.parse(stored);
@@ -66,22 +71,11 @@ document.addEventListener("DOMContentLoaded", () => {
       dataLoaded = true;
       unlockInput();
       setToolbarState(true);
-
-      const storedIds = sessionStorage.getItem("rca_active_ids");
-      if (storedIds) {
-        activeIds = JSON.parse(storedIds);
-        renderChips();
-        runSearch();
-      }
+      restoreActiveIds();
     }
   } catch (e) {}
 
-  // Search expand — handled by shared component
-  initSearch({
-    onInput: function (query) {
-      filterRows();
-    }
-  });
+  initSearch({ onInput: () => filterRows() });
 
   // Export summary report
   exportBtn.addEventListener("click", exportReport);
@@ -124,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         last ? last.pinStatus : "",
         last ? last.taskState : "",
         last ? (last.techId || "NONE") : "",
-        last && last.estimatedStart !== "31/12/9999 00:00" ? last.estimatedStart : "",
+        last && last.estimatedStart !== Utils.SENTINEL_DATE ? last.estimatedStart : "",
         statusChanges,
         techChanges,
         wmChanges,
@@ -137,9 +131,9 @@ document.addEventListener("DOMContentLoaded", () => {
       <head><meta charset="UTF-8">
       <style>
         table { border-collapse: collapse; font-family: Roboto, Arial, sans-serif; font-size: 11pt; }
-        th { background: #142032; color: #FFFFFF; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
-        td { padding: 6px 12px; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
-        tr:nth-child(even) td { background: #f5f7fa; }
+        th { background: ${NDP.EXPORT.headerBg}; color: ${NDP.EXPORT.headerColor}; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
+        td { padding: 6px 12px; border-bottom: 1px solid ${NDP.EXPORT.borderLight}; white-space: nowrap; }
+        tr:nth-child(even) td { background: ${NDP.EXPORT.stripedBg}; }
       </style>
       </head>
       <body>
@@ -233,8 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!result.data || !result.data.length) {
         powFetchError.textContent = "No records returned for that zone / date.";
         powFetchError.style.display = "block";
-        powFetchGo.disabled = false;
-        powFetchGo.textContent = "Fetch";
         return;
       }
       const csv = PowData.toCSV(result.data);
@@ -249,6 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       powFetchError.textContent = err.message || "Fetch failed. Check your connection and try again.";
       powFetchError.style.display = "block";
+    } finally {
       powFetchGo.disabled = false;
       powFetchGo.textContent = "Fetch";
     }
@@ -268,7 +261,11 @@ document.addEventListener("DOMContentLoaded", () => {
     dataLoaded = false;
     lockInput();
     setToolbarState(false);
-    try { sessionStorage.removeItem("rca_csv_data"); sessionStorage.removeItem("rca_csv_source"); sessionStorage.removeItem("rca_active_ids"); } catch (e) {}
+    try {
+      sessionStorage.removeItem("rca_csv_data");
+      sessionStorage.removeItem("rca_csv_source");
+      sessionStorage.removeItem("rca_active_ids");
+    } catch (e) {}
   });
 
   // Render on Enter only
@@ -341,16 +338,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function runSearch() {
+    try { sessionStorage.setItem("rca_active_ids", JSON.stringify(activeIds)); } catch (e) {}
+
     if (!dataLoaded || !activeIds.length) {
       resultsContainer.innerHTML = "";
       resultsContainer.classList.remove("results-ready");
-      // Persist active IDs
-      try { sessionStorage.setItem("rca_active_ids", JSON.stringify(activeIds)); } catch (e) {}
       return;
     }
-
-    // Persist active IDs
-    try { sessionStorage.setItem("rca_active_ids", JSON.stringify(activeIds)); } catch (e) {}
 
     showLoader();
 

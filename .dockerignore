@@ -1,0 +1,29 @@
+# Dependencies / caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Built output — rebuilt inside the container
+dist/
+
+# Dev-only files — not needed for the static build
+cloud_functions/
+serve.py
+bump-build.py
+Launch.bat
+
+# Dev data — should not ship in the image
+assets/RCA_DEV.csv
+
+# Docs
+*.md
+Architecture.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Sensitive data
+js/data/tech-db.json
+js/data/directory-map.json

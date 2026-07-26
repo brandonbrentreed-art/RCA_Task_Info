@@ -53,15 +53,7 @@
 
   // Use mouseover/mouseout for delegation (they bubble unlike mouseenter/mouseleave)
   document.addEventListener("mouseover", function(e) {
-    var el = e.target.closest ? e.target.closest("[data-tooltip]") : null;
-    if (!el) {
-      // Check parentNode chain for IE/older browser fallback
-      var node = e.target;
-      while (node && node !== document) {
-        if (node.getAttribute && node.getAttribute("data-tooltip")) { el = node; break; }
-        node = node.parentNode;
-      }
-    }
+    var el = e.target.closest("[data-tooltip]") || null;
     if (el && el !== currentEl) showTip(el);
   });
 

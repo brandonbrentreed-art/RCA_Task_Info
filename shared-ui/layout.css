@@ -63,6 +63,20 @@
 .hidden { display: none; }
 .overflow-hidden { overflow: hidden; }
 
+/* -- Suppress browser URL preview on hover for all anchors --
+   Links are handled via JS navigation throughout the app.
+   This prevents the status bar from showing raw hrefs on hover. */
+a {
+  -webkit-user-drag: none;
+}
+a[href]:not([target="_blank"]) {
+  pointer-events: auto;
+}
+/* Override <a> default status bar hint — works in all modern browsers */
+a::after {
+  content: none !important;
+}
+
 /* -- Text align -- */
 .text-left { text-align: left; }
 .text-center { text-align: center; }

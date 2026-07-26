@@ -6,9 +6,9 @@
 // Uses apiCall() from auth.js for authenticated requests.
 // ============================================================
 
-var PowData = (function () {
-  var STORE_KEY = "pow_last_query";
-  var _lastResult = null;
+const PowData = (() => {
+  const STORE_KEY = "pow_last_query";
+  let _lastResult = null;
 
   /**
    * Fetch pool of work from backend API.
@@ -21,10 +21,10 @@ var PowData = (function () {
       return Promise.reject(new Error("Zone code is required"));
     }
 
-    var params = { zone_code: zoneCode.trim().toUpperCase() };
+    const params = { zone_code: zoneCode.trim().toUpperCase() };
     if (targetDate) params.target_date = targetDate;
 
-    return apiCall("pool_of_work", params).then(function (result) {
+    return apiCall("pool_of_work", params).then((result) => {
       _lastResult = result;
       try {
         sessionStorage.setItem(STORE_KEY, JSON.stringify({
@@ -38,38 +38,31 @@ var PowData = (function () {
     });
   }
 
-  /**
-   * Get cached result from last API call.
-   */
   function getLastResult() {
     return _lastResult;
   }
 
   /**
    * Convert API response rows to CSV text for DataLoader compatibility.
-   * This bridges the live API data into the existing timeline engine.
+   * Bridges live API data into the existing timeline engine.
    */
   function toCSV(rows) {
     if (!rows || !rows.length) return "";
-    var headers = Object.keys(rows[0]);
-    var lines = [headers.join(",")];
-    for (var i = 0; i < rows.length; i++) {
-      var vals = [];
-      for (var j = 0; j < headers.length; j++) {
-        var v = rows[i][headers[j]];
-        vals.push(v == null ? "" : String(v));
-      }
+    const headers = Object.keys(rows[0]);
+    const lines = [headers.join(",")];
+    for (let i = 0; i < rows.length; i++) {
+      const vals = headers.map(h => {
+        const v = rows[i][h];
+        return v == null ? "" : String(v);
+      });
       lines.push(vals.join(","));
     }
     return lines.join("\n");
   }
 
-  /**
-   * Restore last query metadata from session.
-   */
   function restoreLastQuery() {
     try {
-      var stored = sessionStorage.getItem(STORE_KEY);
+      const stored = sessionStorage.getItem(STORE_KEY);
       return stored ? JSON.parse(stored) : null;
     } catch (e) {
       return null;
@@ -81,11 +74,5 @@ var PowData = (function () {
     try { sessionStorage.removeItem(STORE_KEY); } catch (e) {}
   }
 
-  return {
-    fetchPoolOfWork: fetchPoolOfWork,
-    getLastResult: getLastResult,
-    toCSV: toCSV,
-    restoreLastQuery: restoreLastQuery,
-    clear: clear
-  };
+  return { fetchPoolOfWork, getLastResult, toCSV, restoreLastQuery, clear };
 })();

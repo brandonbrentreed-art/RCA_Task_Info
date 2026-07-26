@@ -33,11 +33,15 @@
   z-index: 199;
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--transition-standard);
+  visibility: hidden;
+  transition: opacity var(--transition-standard), visibility 0s linear var(--transition-standard);
+  will-change: opacity;
 }
 .nav-overlay.open {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+  transition: opacity var(--transition-standard), visibility 0s linear 0s;
 }
 
 /* Sidebar - off-canvas left */
@@ -54,6 +58,7 @@
   z-index: 200;
   transform: translateX(-100%);
   transition: transform var(--transition-standard);
+  will-change: transform;
 }
 .nav-sidebar.open { transform: translateX(0); }
 
