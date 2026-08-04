@@ -81,72 +81,51 @@ document.addEventListener("DOMContentLoaded", () => {
   exportBtn.addEventListener("click", exportReport);
 
   function exportReport() {
-    if (!dataLoaded || !activeIds.length) return;
+    if (!dataLoaded || !activeIds.length || typeof XLSX === "undefined") return;
 
     const timelines = TimelineEngine.buildMultipleTimelines(activeIds);
-    const headers = ["Task ID", "Skill", "Task Type", "Exchange", "Appt Slot", "Commitment", "Care Level", "CUG", "Current Status", "Pin Status", "Task State", "Current Tech", "Est Start", "Status Changes", "Tech Changes", "WM Changes", "Pin Changes"];
-    const rows = [];
+    const border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
+    const hdrS = { font: { bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, border, fill: { fgColor: { rgb: "142032" } } };
+    const cellS = { alignment: { horizontal: "center", vertical: "center" }, border };
 
+    const HEADERS = ["Task ID", "Task Type", "Exchange", "Zone", "Care Level", "Skill", "Appt Slot", "Commitment", "CUG", "Intervals", "Total Changes", "Final Status", "Final Tech"];
+
+    const data = [HEADERS];
     Object.keys(timelines).forEach((id) => {
       const { intervals, taskInfo } = timelines[id];
-      const last = intervals[intervals.length - 1];
-
-      let statusChanges = 0;
-      let techChanges = 0;
-      let wmChanges = 0;
-      let pinChanges = 0;
-
-      intervals.forEach((entry) => {
-        entry.changes.forEach((c) => {
-          if (c.field === "Status") statusChanges++;
-          if (c.field === "Tech") techChanges++;
-          if (c.field === "WM") wmChanges++;
-          if (c.field === "Pin") pinChanges++;
-        });
-      });
-
-      rows.push([
+      const totalChanges = intervals.reduce((n, e) => n + e.changes.length, 0);
+      const last = intervals[intervals.length - 1] || {};
+      data.push([
         id,
-        taskInfo.skillCode,
-        taskInfo.taskType,
-        taskInfo.exchangeGroup,
-        taskInfo.appointmentSlot,
-        taskInfo.commitmentTime,
-        taskInfo.careLevel,
-        taskInfo.cugId,
-        last ? last.status : "",
-        last ? last.pinStatus : "",
-        last ? last.taskState : "",
-        last ? (last.techId || "NONE") : "",
-        last && last.estimatedStart !== Utils.SENTINEL_DATE ? last.estimatedStart : "",
-        statusChanges,
-        techChanges,
-        wmChanges,
-        pinChanges
+        taskInfo.taskType || "",
+        taskInfo.exchangeGroup || "",
+        taskInfo.zoneCode || "",
+        taskInfo.careLevel || "",
+        taskInfo.skillCode || "",
+        taskInfo.appointmentSlot || "",
+        taskInfo.commitmentTime || "",
+        taskInfo.cugId && taskInfo.cugId !== "NONE" ? taskInfo.cugId : "",
+        intervals.length,
+        totalChanges,
+        last.status || "",
+        last.techId || ""
       ]);
     });
 
-    const html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head><meta charset="UTF-8">
-      <style>
-        table { border-collapse: collapse; font-family: Roboto, Arial, sans-serif; font-size: 11pt; }
-        th { background: ${NDP.EXPORT.headerBg}; color: ${NDP.EXPORT.headerColor}; font-weight: bold; padding: 8px 12px; text-align: left; white-space: nowrap; }
-        td { padding: 6px 12px; border-bottom: 1px solid ${NDP.EXPORT.borderLight}; white-space: nowrap; }
-        tr:nth-child(even) td { background: ${NDP.EXPORT.stripedBg}; }
-      </style>
-      </head>
-      <body>
-      <table>${"<tr>" + headers.map((h) => `<th>${h}</th>`).join("") + "</tr>"}${rows.map((r) => "<tr>" + r.map((v) => `<td>${v}</td>`).join("") + "</tr>").join("")}</table>
-      </body></html>`;
-
-    const blob = new Blob([html], { type: "application/vnd.ms-excel" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `RCA_Summary_${new Date().toISOString().slice(0, 10)}.xls`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    ws["!cols"] = HEADERS.map((_, c) => ({
+      wch: Math.min(80, Math.max(...data.map(row => String(row[c] ?? "").length)) + 2)
+    }));
+    const range = XLSX.utils.decode_range(ws["!ref"]);
+    for (let R = range.s.r; R <= range.e.r; R++) {
+      for (let C = range.s.c; C <= range.e.c; C++) {
+        const a = XLSX.utils.encode_cell({ r: R, c: C });
+        if (ws[a]) ws[a].s = R === 0 ? hdrS : cellS;
+      }
+    }
+    XLSX.utils.book_append_sheet(wb, ws, "RCA Summary");
+    XLSX.writeFile(wb, `RCA_Summary_${new Date().toISOString().slice(0, 10)}.xlsx`);
     if (typeof Notify !== "undefined") Notify.success("Report exported", 2000);
   }
 

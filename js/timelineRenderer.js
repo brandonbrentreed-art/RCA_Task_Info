@@ -141,6 +141,28 @@ const TimelineRenderer = (() => {
     container.appendChild(wrapper);
   }
 
+  function buildTaskSummary(id, timeline) {
+    const { intervals, taskInfo } = timeline;
+    const changes = [];
+    for (let i = 0; i < intervals.length; i++) {
+      const entry = intervals[i];
+      for (let j = 0; j < entry.changes.length; j++) {
+        const c = entry.changes[j];
+        changes.push(c.field + ": " + (c.from || "\u2014") + " \u2192 " + (c.to || "\u2014") + " (at " + entry.time + ")");
+      }
+    }
+    let text = "Task: " + id + "\n";
+    text += "Type: " + taskInfo.taskType + " | Exchange: " + taskInfo.exchangeGroup + " | Zone: " + taskInfo.zoneCode + " | Care Level: " + taskInfo.careLevel + "\n";
+    text += "Skill: " + taskInfo.skillCode + " | Appt: " + taskInfo.appointmentSlot + " | Commitment: " + taskInfo.commitmentTime + "\n";
+    if (changes.length) {
+      for (let i = 0; i < changes.length; i++) text += changes[i] + "\n";
+    } else {
+      text += "No changes detected\n";
+    }
+    text += "Intervals: " + intervals.length + " | Changes: " + changes.length;
+    return text;
+  }
+
   function openTaskDetail(id, timeline) {
     const { intervals, taskInfo } = timeline;
     const title = document.getElementById("taskDetailTitle");
@@ -148,26 +170,12 @@ const TimelineRenderer = (() => {
 
     title.textContent = "Task Detail \u2014 " + id;
 
-    function buildSummary() {
-      const changes = [];
-      for (let i = 0; i < intervals.length; i++) {
-        const entry = intervals[i];
-        for (let j = 0; j < entry.changes.length; j++) {
-          const c = entry.changes[j];
-          changes.push(c.field + ": " + (c.from || '\u2014') + " \u2192 " + (c.to || '\u2014') + " (at " + entry.time + ")");
-        }
-      }
-      let text = "Task: " + id + "\n";
-      text += "Type: " + taskInfo.taskType + " | Exchange: " + taskInfo.exchangeGroup + " | Zone: " + taskInfo.zoneCode + " | Care Level: " + taskInfo.careLevel + "\n";
-      text += "Skill: " + taskInfo.skillCode + " | Appt: " + taskInfo.appointmentSlot + " | Commitment: " + taskInfo.commitmentTime + "\n";
-      if (changes.length) {
-        for (let i = 0; i < changes.length; i++) text += changes[i] + "\n";
-      } else {
-        text += "No changes detected\n";
-      }
-      text += "Intervals: " + intervals.length + " | Changes: " + changes.length;
-      return text;
-    }
+    const copyBtn = document.getElementById("taskDetailCopy");
+    copyBtn.onclick = () => {
+      navigator.clipboard.writeText(buildTaskSummary(id, timeline)).then(() => {
+        Notify.success("Summary copied", 2000);
+      });
+    };
 
     let detailState = { page: 0, pageSize: 30 };
 
@@ -222,13 +230,6 @@ const TimelineRenderer = (() => {
     }
 
     renderDetailPage();
-
-    const copyBtn = document.getElementById("taskDetailCopy");
-    copyBtn.onclick = () => {
-      navigator.clipboard.writeText(buildSummary()).then(() => {
-        Notify.success("Summary copied", 2000);
-      });
-    };
 
     openModal("taskDetailModal");
   }
