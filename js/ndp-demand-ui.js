@@ -129,17 +129,16 @@ var NdpDemandUI = (function () {
   // Called after every applyOverflow() rebuild — barsEl is replaced via outerHTML
   // so old listeners are garbage-collected with the old element. lastIdx resets
   // to -1 in each new closure, so no stale state carries over between rebuilds.
-  function wireChartTooltip(pwaRows, minutesByPwa, techsByPwa) {
+  // isOverflow: function() returning bool — reads current overflow state from caller.
+  function wireChartTooltip(pwaRows, minutesByPwa, techsByPwa, isOverflow) {
     var barsEl = document.getElementById('ndpDemandBars');
     if (!barsEl) return;
     var tip = getRichTip();
     var lastIdx = -1;
 
     barsEl.addEventListener('mousemove', function (e) {
-      // Walk up from target — if we land in a gap between cols, keep last col visible
       var col = e.target.closest('.ndp-demand-col');
       if (!col) {
-        // Still inside barsEl but in a gap — just reposition, don't hide
         if (tip.style.display === 'block') {
           var tw = tip.offsetWidth;
           var th = tip.offsetHeight;
@@ -157,7 +156,6 @@ var NdpDemandUI = (function () {
       var p = pwaRows[idx];
       if (!p) { tip.style.display = 'none'; lastIdx = -1; return; }
 
-      // Rebuild content on every column entry (lastIdx guards column change)
       if (idx !== lastIdx) {
         lastIdx = idx;
 
@@ -171,28 +169,54 @@ var NdpDemandUI = (function () {
         var future = segs.future ? p.future : 0;
         var demand = tail + due + future;
 
-        var ratio      = capacity ? (demand / capacity).toFixed(2) : '\u2014';
+        var diff      = demand - capacity;
+        var diffColor = diff > 0 ? 'var(--color-error)' : diff < 0 ? 'var(--color-green)' : 'var(--color-grey)';
+        var diffText  = diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1);
         var shortLabel = p.pwa.replace(/^[A-Z]{2}-/, '').replace(/-19$/, '');
-        var diff       = demand - capacity;
-        var diffColor  = diff > 0 ? 'var(--color-error)' : diff < 0 ? 'var(--color-green)' : 'var(--color-grey)';
-        var diffText   = diff > 0 ? '+' + diff.toFixed(1) : diff.toFixed(1);
+
+        var resourceRow;
+        if (isOverflow && isOverflow() && diff < 0) {
+          // Spare capacity — show in people terms
+          var spare     = -diff;
+          var spareMins = Math.round(spare * NDP.AVG_JOB_MINS);
+          var spareTechs = Math.floor(spareMins / NDP.ROSTER_DAY_MINS);
+          var techLabel = spareTechs === 1 ? '1 person' : spareTechs + ' people';
+          resourceRow =
+            '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:rgba(84,136,199,0.45)"></span><span>Spare capacity</span><span class="ndp-chart-tip__val" style="color:var(--color-green)">' + spare.toFixed(1) + ' jobs</span></div>' +
+            '<div class="ndp-chart-tip__row" style="color:var(--color-grey-light);font-size:0.9em"><span></span><span>~' + spareMins + ' mins \u00b7 could spare ' + techLabel + '</span></div>';
+        } else if (isOverflow && isOverflow() && diff > 0) {
+          // Over capacity — show shortfall in people terms
+          var over      = diff;
+          var overMins  = Math.round(over * NDP.AVG_JOB_MINS);
+          var overTechs = Math.ceil(overMins / NDP.ROSTER_DAY_MINS);
+          var needLabel = overTechs === 1 ? '1 person' : overTechs + ' people';
+          resourceRow =
+            '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:rgba(84,136,199,0.45)"></span><span>Over capacity</span><span class="ndp-chart-tip__val" style="color:var(--color-error)">+' + over.toFixed(1) + ' jobs</span></div>' +
+            '<div class="ndp-chart-tip__row" style="color:var(--color-grey-light);font-size:0.9em"><span></span><span>~' + overMins + ' mins \u00b7 needs ' + needLabel + '</span></div>';
+        } else {
+          // Normal view — show raw capacity
+          var ratio = capacity ? (demand / capacity).toFixed(2) : '\u2014';
+          resourceRow =
+            '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:rgba(84,136,199,0.45)"></span><span>Resource</span><span class="ndp-chart-tip__val">' + capacity.toFixed(1) + ' jobs</span></div>' +
+            '<div class="ndp-chart-tip__row" style="color:var(--color-grey-light);font-size:0.9em"><span></span><span>' + techs + ' techs \u00b7 ' + netMins + ' mins</span></div>';
+        }
+
+        var titleSuffix = (isOverflow && isOverflow()) ? '' : ' <span class="ndp-chart-tip__ratio">(' + (capacity ? (demand / capacity).toFixed(2) : '\u2014') + ')</span>';
 
         tip.innerHTML =
-          '<div class="ndp-chart-tip__title">' + NDP.escapeHtml(shortLabel) + ' <span class="ndp-chart-tip__ratio">(' + ratio + ')</span></div>' +
+          '<div class="ndp-chart-tip__title">' + NDP.escapeHtml(shortLabel) + titleSuffix + '</div>' +
           '<div class="ndp-chart-tip__rows">' +
             '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:#bdbdbd"></span><span>Tail</span><span class="ndp-chart-tip__val">' + tail + '</span></div>' +
             '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:#5488C7"></span><span>Due</span><span class="ndp-chart-tip__val">' + due + '</span></div>' +
             '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:#43B072"></span><span>Future</span><span class="ndp-chart-tip__val">' + future + '</span></div>' +
             '<div class="ndp-chart-tip__divider"></div>' +
             '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:#5488C7;opacity:0.6"></span><span>Demand</span><span class="ndp-chart-tip__val">' + demand + '</span></div>' +
-            '<div class="ndp-chart-tip__row"><span class="ndp-chart-tip__swatch" style="background:rgba(84,136,199,0.45)"></span><span>Resource</span><span class="ndp-chart-tip__val">' + capacity.toFixed(1) + ' jobs</span></div>' +
-            '<div class="ndp-chart-tip__row" style="color:var(--color-grey-light);font-size:0.9em"><span></span><span>' + techs + ' techs \u00b7 ' + netMins + ' mins</span></div>' +
+            resourceRow +
             '<div class="ndp-chart-tip__divider"></div>' +
             '<div class="ndp-chart-tip__row ndp-chart-tip__row--diff"><span>Balance</span><span class="ndp-chart-tip__val" style="color:' + diffColor + ';font-weight:600">' + diffText + '</span></div>' +
           '</div>';
       }
 
-      // Follow cursor — top-right of cursor, flip if near edges
       var tw = tip.offsetWidth;
       var th = tip.offsetHeight;
       var x = e.clientX + 14;

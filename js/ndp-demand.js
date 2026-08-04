@@ -164,9 +164,7 @@ var NdpDemand = (function () {
       '</div>';
 
     panel.insertAdjacentHTML("beforeend", html);
-    NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
-
-    // --- Row click → highlight OUC in table + chart ---
+    NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa, function () { return overflowActive; });
     var activeOuc = null;
     var tableBody = panel.querySelector(".ndp-pivot tbody");
     if (tableBody) {
@@ -285,7 +283,7 @@ var NdpDemand = (function () {
 
       if (!overflowActive) {
         barsEl.outerHTML = '<div class="ndp-demand-bars is-transitioning" id="ndpDemandBars">' + buildGridLines(chartScaleMax) + buildCols(pwaRows, minutesByPwa, chartScaleMax) + '</div>';
-        NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
+        NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa, function () { return overflowActive; });
         return;
       }
 
@@ -339,7 +337,7 @@ var NdpDemand = (function () {
       }).join("");
 
       barsEl.outerHTML = '<div class="ndp-demand-bars is-transitioning" id="ndpDemandBars">' + buildGridLines(scaleMax) + cols + '</div>';
-      NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
+      NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa, function () { return overflowActive; });
     }
 
     // --- OUC label click → drilldown with PWA filter ---
