@@ -64,23 +64,23 @@
     document.getElementById('btnUpload').addEventListener('click', function () { if (!isCutoff()) fileInput.click(); });
     document.getElementById('btnCurrent').addEventListener('click', function () { tablePage = 0; showTable('Current Requests', sampleCurrent); });
     document.getElementById('btnCompleted').addEventListener('click', function () { tablePage = 0; showTable('Completed Requests', sampleCompleted); });
-    document.getElementById('downloadTemplate').addEventListener('click', function (e) {
-      e.preventDefault();
-      if (typeof XLSX === 'undefined') { Notify.warning('Template library still loading, try again in a moment.', 2000); return; }
-      var wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID', 'Tech ID']]), 'Template');
-      XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
-    });
     content.querySelectorAll('a[href]').forEach(function (link) {
       var href = link.getAttribute('href');
       link.dataset.href = href;
       link.removeAttribute('href');
       link.style.cursor = 'pointer';
       if (href.startsWith('mailto:')) {
-        link.addEventListener('click', function (e) { e.preventDefault(); if (typeof Notify !== 'undefined') Notify.info('Opening email client...', 2000); window.location.href = href; });
+        link.addEventListener('click', function (e) { e.preventDefault(); if (typeof Notify !== 'undefined') Notify.info('Opening email client...', 2000); setTimeout(function () { window.open(href, '_blank'); }, 1500); });
       } else if (link.getAttribute('target') === '_blank' || href.startsWith('http')) {
         link.addEventListener('click', function (e) { e.preventDefault(); window.open(href, '_blank'); });
       }
+    });
+    document.getElementById('downloadTemplate').addEventListener('click', function (e) {
+      e.preventDefault();
+      if (typeof XLSX === 'undefined') return;
+      var wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID', 'Tech ID']]), 'Template');
+      XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
     });
     var btn = document.querySelector('.search-toggle');
     btn.disabled = true;
@@ -270,7 +270,6 @@
   var fileInput = document.createElement('input');
   fileInput.type = 'file'; fileInput.accept = '.csv,.xls,.xlsx'; fileInput.hidden = true;
   document.body.appendChild(fileInput);
-  document.getElementById('btnUpload').addEventListener('click', function () { if (!isCutoff()) fileInput.click(); });
   fileInput.addEventListener('change', function () {
     var file = fileInput.files[0]; if (!file) return;
     if (typeof XLSX === 'undefined' && !file.name.endsWith('.csv')) { Notify.warning('Excel library still loading, try again in a moment.', 2000); fileInput.value = ''; return; }
@@ -303,9 +302,6 @@
     if (file.name.endsWith('.csv')) reader.readAsText(file); else reader.readAsArrayBuffer(file);
     fileInput.value = '';
   });
-
-  document.getElementById('btnCurrent').addEventListener('click', function () { tablePage = 0; showTable('Current Requests', sampleCurrent); });
-  document.getElementById('btnCompleted').addEventListener('click', function () { tablePage = 0; showTable('Completed Requests', sampleCompleted); });
 
   // Search
   var searchToggle = document.querySelector('.search-toggle');
@@ -351,15 +347,8 @@
       else { uploadBtn.classList.remove('tooltip'); uploadBtn.removeAttribute('data-tooltip'); }
     }
   }
-  updateClock();
   setInterval(updateClock, 1000);
 
-  // Download template
-  document.getElementById('downloadTemplate').addEventListener('click', function (e) {
-    e.preventDefault();
-    if (typeof XLSX === 'undefined') { Notify.warning('Template library still loading, try again in a moment.', 2000); return; }
-    var wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['Task ID', 'Tech ID']]), 'Template');
-    XLSX.writeFile(wb, 'NDC_Allocation_Template.xlsx');
-  });
+  // Init
+  showDefault();
 })();

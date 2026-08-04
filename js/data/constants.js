@@ -8,7 +8,8 @@
 
 var NDP = (function () {
   // --- Magic Numbers ---
-  var JOBS_PER_TECH = 3;
+  var AVG_JOB_MINS = 163;         // average job duration in minutes (490 min day ÷ 3 jobs)
+  var ROSTER_DAY_MINS = 490;      // standard working day: 08:00–16:10
   var MAX_CELL = 500;
   var SKIP_ROWS = 6;
   var DRILL_PAGE_SIZE = 30;
@@ -152,7 +153,8 @@ var NDP = (function () {
   }
 
   return {
-    JOBS_PER_TECH: JOBS_PER_TECH,
+    AVG_JOB_MINS: AVG_JOB_MINS,
+    ROSTER_DAY_MINS: ROSTER_DAY_MINS,
     MAX_CELL: MAX_CELL,
     SKIP_ROWS: SKIP_ROWS,
     DRILL_PAGE_SIZE: DRILL_PAGE_SIZE,

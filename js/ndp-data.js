@@ -27,7 +27,24 @@ var NdpData = (function () {
     enrichAgeIdx: -1
   };
 
-  // --- Parse CSV text (auto-detect delimiter) ---
+  // --- Parse CSV text (auto-detect delimiter, handles RFC 4180 quoted fields) ---
+  function splitCsvLine(line, delim) {
+    var result = [], cur = "", inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var c = line[i];
+      if (c === '"') {
+        if (inQ && line[i + 1] === '"') { cur += '"'; i++; } // escaped quote
+        else { inQ = !inQ; }
+      } else if (c === delim && !inQ) {
+        result.push(cur.trim()); cur = "";
+      } else {
+        cur += c;
+      }
+    }
+    result.push(cur.trim());
+    return result;
+  }
+
   function parseCsv(text) {
     var lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
     var delim = ",";
@@ -41,7 +58,7 @@ var NdpData = (function () {
     for (var j = 0; j < lines.length; j++) {
       var line = lines[j].trim();
       if (!line) continue;
-      rows.push(line.split(delim).map(function (c) { return c.replace(/^"|"$/g, "").trim(); }));
+      rows.push(splitCsvLine(line, delim));
     }
     return rows;
   }
@@ -85,22 +102,19 @@ var NdpData = (function () {
     try { sessionStorage.setItem(STORE.TASKFORCE, JSON.stringify({ headers: state.taskforceHeaders, rows: state.taskforceRows })); } catch (e) {}
   }
 
-  // --- Enrich taskforce rows with OUC/PWA from directory map ---
-  function enrichTaskforce() {
-    var headers = state.taskforceHeaders;
-    var rows = state.taskforceRows;
+  // --- Enrich rows with OUC/PWA/TAG/Slot (works on any headers+rows pair) ---
+  function enrichRows(headers, rows) {
     var ws = state.workstack;
 
-    // Ensure enrichment columns exist
     function ensureCol(name) {
       var idx = headers.indexOf(name);
       if (idx === -1) { headers.push(name); idx = headers.length - 1; }
       return idx;
     }
 
-    var oucIdx = ensureCol("OUC");
-    var pwaIdx = ensureCol("PWA");
-    var tagIdx = ensureCol("TAG");
+    var oucIdx  = ensureCol("OUC");
+    var pwaIdx  = ensureCol("PWA");
+    var tagIdx  = ensureCol("TAG");
     var slotIdx = ensureCol("Appt Slot");
 
     var gcIdx = headers.indexOf("Group Code");
@@ -108,6 +122,7 @@ var NdpData = (function () {
 
     var startByIdx = headers.indexOf("Start by");
     if (startByIdx === -1 && typeof COL_MAP !== "undefined") startByIdx = COL_MAP.findSourceIdx(headers, "Start by");
+
     var apptDateIdx = headers.indexOf("Task appointment window start date");
     if (apptDateIdx === -1) {
       for (var ai = 0; ai < headers.length; ai++) {
@@ -118,33 +133,33 @@ var NdpData = (function () {
     rows.forEach(function (row) {
       while (row.length < headers.length) row.push("");
 
-      // OUC/PWA from directory map
       if (gcIdx !== -1 && typeof _dm !== "undefined" && !row[oucIdx]) {
         var gc = (row[gcIdx] || "").trim().toUpperCase();
         if (gc) {
           var info = _dm.lookup(ws, gc);
-          if (info) {
-            row[oucIdx] = info.ouc;
-            row[pwaIdx] = info.pwa;
-          }
+          if (info) { row[oucIdx] = info.ouc; row[pwaIdx] = info.pwa; }
         }
       }
 
-      // TAG from date
-      if (!row[tagIdx]) {
-        var dateVal = startByIdx !== -1 ? row[startByIdx] : "";
-        if (dateVal) row[tagIdx] = NDP.deriveTag(dateVal);
-      }
+      if (!row[tagIdx] && startByIdx !== -1 && row[startByIdx])
+        row[tagIdx] = NDP.deriveTag(row[startByIdx]);
 
-      // Appt Slot
-      if (!row[slotIdx] && apptDateIdx !== -1 && row[apptDateIdx]) {
+      if (!row[slotIdx] && apptDateIdx !== -1 && row[apptDateIdx])
         row[slotIdx] = NDP.deriveApptSlot(row[apptDateIdx]);
-      }
     });
+  }
+
+  // --- Enrich taskforce rows with OUC/PWA from directory map ---
+  function enrichTaskforce() {
+    enrichRows(state.taskforceHeaders, state.taskforceRows);
   }
 
   // --- Build plan from Taskforce using de-risk gate ---
   function buildPlan() {
+    if (typeof deriskGateRow === "undefined") {
+      console.warn("ndp-data.js: derisk-filters.js not loaded — buildPlan aborted");
+      return 0;
+    }
     var tfHeaders = state.taskforceHeaders;
     var tfRows = state.taskforceRows;
     var outHeaders = DERISK_COLUMNS.map(function (c) { return c.name; });
@@ -155,7 +170,7 @@ var NdpData = (function () {
     if (idIdx === -1 && typeof COL_MAP !== "undefined") idIdx = COL_MAP.findSourceIdx(tfHeaders, "Unique Task ID");
 
     tfRows.forEach(function (row) {
-      var mapped = mapTaskforceRowToDerisk(row, tfHeaders, outHeaders);
+      var mapped = NdpEnrich.mapRow(row, tfHeaders, outHeaders);
       if (!mapped) return;
       if (!deriskGateRow(mapped, outHeaders)) return;
 
@@ -249,13 +264,19 @@ var NdpData = (function () {
         var en = JSON.parse(enrich);
         state.enrichHeaders = en.headers;
         state.enrichRows = en.rows;
-        // Re-resolve column indices
-        for (var ei = 0; ei < state.enrichHeaders.length; ei++) {
-          var eh = String(state.enrichHeaders[ei] || "").toLowerCase().trim();
-          if (eh === "wm jin" || eh === "unique task id" || eh === "job no" || eh === "jin" || eh === "css jin") state.enrichIdIdx = ei;
-          if (state.enrichSlaIdx === -1 && (eh === "sla" || eh.indexOf("sla outcome") !== -1)) state.enrichSlaIdx = ei;
-          if (state.enrichDwellIdx === -1 && (eh === "fault dwell" || eh === "fault_dwell" || eh === "dwell")) state.enrichDwellIdx = ei;
-          if (state.enrichAgeIdx === -1 && (eh === "ageing" || eh === "aging" || eh === "age" || eh === "order_age_cat" || eh === "crd_tail_age_group")) state.enrichAgeIdx = ei;
+        // Use compact indices written at save time if present (fibre path)
+        if (typeof en.origIdIdx === "number" && typeof en.origAgeIdx === "number") {
+          state.enrichIdIdx = en.origIdIdx;
+          state.enrichAgeIdx = en.origAgeIdx;
+        } else {
+          // Re-resolve column indices by scanning header names (copper path)
+          for (var ei = 0; ei < state.enrichHeaders.length; ei++) {
+            var eh = String(state.enrichHeaders[ei] || "").toLowerCase().trim();
+            if (eh === "wm jin" || eh === "unique task id" || eh === "job no" || eh === "jin" || eh === "css jin") state.enrichIdIdx = ei;
+            if (state.enrichSlaIdx === -1 && (eh === "sla" || eh.indexOf("sla outcome") !== -1)) state.enrichSlaIdx = ei;
+            if (state.enrichDwellIdx === -1 && (eh === "fault dwell" || eh === "fault_dwell" || eh === "dwell")) state.enrichDwellIdx = ei;
+            if (state.enrichAgeIdx === -1 && (eh === "ageing" || eh === "aging" || eh === "age" || eh === "order_age_cat" || eh === "crd_tail_age_group")) state.enrichAgeIdx = ei;
+          }
         }
       }
 
@@ -311,59 +332,59 @@ var NdpData = (function () {
         if (state.workstack === "fibre") {
           // Fibre: look for BTTW_Data or KCI2_DATA_NEW sheets
           var bttwSheets = ["BTTW_Data", "KCI2_DATA_NEW", "BTTW", "KCI2"];
-          var found = false;
+          var foundFibre = false;
           for (var si = 0; si < bttwSheets.length; si++) {
-            var ws = wb.Sheets[bttwSheets[si]];
-            if (!ws) continue;
-            var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: true });
-            if (rows.length >= 2 && rows[0].length > 2) {
-              processEnrichRows(rows[0], rows.slice(1), cb);
-              found = true;
+            var fibreWs = wb.Sheets[bttwSheets[si]];
+            if (!fibreWs) continue;
+            var fibreRows = XLSX.utils.sheet_to_json(fibreWs, { header: 1, defval: "", raw: true });
+            if (fibreRows.length >= 2 && fibreRows[0].length > 2) {
+              processEnrichRows(fibreRows[0], fibreRows.slice(1), cb);
+              foundFibre = true;
               break;
             }
           }
           // Fallback: try any sheet with usable headers
-          if (!found) {
+          if (!foundFibre) {
             for (var fi = 0; fi < wb.SheetNames.length; fi++) {
-              var fws = wb.Sheets[wb.SheetNames[fi]];
-              var frows = XLSX.utils.sheet_to_json(fws, { header: 1, defval: "", raw: true });
-              if (frows.length >= 2 && frows[0].length > 2) {
-                processEnrichRows(frows[0], frows.slice(1), cb);
-                found = true;
+              var fallbackWs = wb.Sheets[wb.SheetNames[fi]];
+              var fallbackRows = XLSX.utils.sheet_to_json(fallbackWs, { header: 1, defval: "", raw: true });
+              if (fallbackRows.length >= 2 && fallbackRows[0].length > 2) {
+                processEnrichRows(fallbackRows[0], fallbackRows.slice(1), cb);
+                foundFibre = true;
                 break;
               }
             }
           }
-          if (!found) cb(false, "No BTTW/KCI2 sheet found");
+          if (!foundFibre) cb(false, "No BTTW/KCI2 sheet found");
         } else {
           // Copper: find sheet with recognisable headers (TailsReport)
-          var found2 = false;
+          var foundCopper = false;
           for (var ci = 0; ci < wb.SheetNames.length; ci++) {
-            var cws = wb.Sheets[wb.SheetNames[ci]];
-            var crows = XLSX.utils.sheet_to_json(cws, { header: 1, defval: "", raw: false });
-            if (crows.length < 2) continue;
-            var testHeaders = crows[0].map(function (h) { return String(h || "").toLowerCase().trim(); });
+            var copperWs = wb.Sheets[wb.SheetNames[ci]];
+            var copperRows = XLSX.utils.sheet_to_json(copperWs, { header: 1, defval: "", raw: false });
+            if (copperRows.length < 2) continue;
+            var testHeaders = copperRows[0].map(function (h) { return String(h || "").toLowerCase().trim(); });
             var hasId = testHeaders.some(function (h) { return h === "wm jin" || h === "serviceid" || h === "unique task id" || h === "job no" || h === "jin"; });
             var hasAge = testHeaders.some(function (h) { return h === "ageing" || h === "aging"; });
             if (hasId || hasAge) {
-              processEnrichRows(crows[0], crows.slice(1), cb);
-              found2 = true;
+              processEnrichRows(copperRows[0], copperRows.slice(1), cb);
+              foundCopper = true;
               break;
             }
           }
-          if (!found2) {
+          if (!foundCopper) {
             // Fallback: first sheet with enough columns
             for (var di = 0; di < wb.SheetNames.length; di++) {
-              var dws = wb.Sheets[wb.SheetNames[di]];
-              var drows = XLSX.utils.sheet_to_json(dws, { header: 1, defval: "", raw: false });
-              if (drows.length >= 2 && drows[0].length > 2) {
-                processEnrichRows(drows[0], drows.slice(1), cb);
-                found2 = true;
+              var defaultWs = wb.Sheets[wb.SheetNames[di]];
+              var defaultRows = XLSX.utils.sheet_to_json(defaultWs, { header: 1, defval: "", raw: false });
+              if (defaultRows.length >= 2 && defaultRows[0].length > 2) {
+                processEnrichRows(defaultRows[0], defaultRows.slice(1), cb);
+                foundCopper = true;
                 break;
               }
             }
           }
-          if (!found2) cb(false, "No usable sheet found");
+          if (!foundCopper) cb(false, "No usable sheet found");
         }
       };
       reader.readAsArrayBuffer(file);
@@ -498,6 +519,7 @@ var NdpData = (function () {
     parseCsv: parseCsv,
     loadTechSheet: loadTechSheet,
     loadTaskforce: loadTaskforce,
+    enrichRows: enrichRows,
     enrichAndStore: enrichAndStore,
     loadEnrichment: loadEnrichment,
     buildPlan: buildPlan,

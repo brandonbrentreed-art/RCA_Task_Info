@@ -88,17 +88,38 @@ var NdpDemand = (function () {
 
     pwaRows = Object.keys(pwaMap).sort().map(function (k) { return pwaMap[k]; });
 
-    // Tech count from tech sheet
-    var techsByPwa = {};
+    // Resource from tech sheet — net available minutes per PWA + tech count for display.
+    // Uses CALENDARIZED PWA if set, falls back to IDEPLOY PWA per row.
+    // Only counts techs with net available minutes > 0 (ROSTER + OVERTIME - ABSENCE).
+    var minutesByPwa = {};   // sum of net mins per PWA  → drives capacity
+    var techsByPwa   = {};   // count of available techs → display only (Techs column)
     if (NdpData.state.techRows.length) {
-      var thIdx = NdpData.state.techHeaders.indexOf("CALENDARIZED PWA");
-      if (thIdx === -1) thIdx = NdpData.state.techHeaders.indexOf("IDEPLOY PWA");
-      if (thIdx !== -1) {
-        NdpData.state.techRows.forEach(function (row) {
-          var pwa = (row[thIdx] || "").trim();
-          if (pwa) techsByPwa[pwa] = (techsByPwa[pwa] || 0) + 1;
-        });
-      }
+      var th = NdpData.state.techHeaders;
+      var calIdx  = th.indexOf("CALENDARIZED PWA");
+      var ideIdx  = th.indexOf("IDEPLOY PWA");
+      var rosIdx  = th.indexOf("ROSTER MINS");
+      var absIdx  = th.indexOf("ABSENCE MINS");
+      var otIdx   = th.indexOf("OVERTIME MINS");
+
+      NdpData.state.techRows.forEach(function (row) {
+        var pwa = (calIdx !== -1 ? (row[calIdx] || "").trim() : "") ||
+                  (ideIdx !== -1 ? (row[ideIdx] || "").trim() : "");
+        if (!pwa) return;
+
+        var roster   = rosIdx !== -1 ? (parseFloat(row[rosIdx]) || 0) : 0;
+        var absence  = absIdx !== -1 ? (parseFloat(row[absIdx]) || 0) : 0;
+        var overtime = otIdx  !== -1 ? (parseFloat(row[otIdx])  || 0) : 0;
+        var netMins  = roster + overtime - absence;
+        if (netMins <= 0) return;
+
+        minutesByPwa[pwa] = (minutesByPwa[pwa] || 0) + netMins;
+        techsByPwa[pwa]   = (techsByPwa[pwa]   || 0) + 1;
+      });
+    }
+
+    // capacity in jobs = total available minutes / avg job duration
+    function capacityJobs(pwa) {
+      return minutesByPwa[pwa] ? minutesByPwa[pwa] / NDP.AVG_JOB_MINS : 0;
     }
 
     // Render table + chart
@@ -117,7 +138,8 @@ var NdpDemand = (function () {
             pwaRows.map(function (p) {
               var techs = techsByPwa[p.pwa] || 0;
               var appts = p.am + p.pm + p.allDay;
-              var needed = techs - Math.ceil(appts / NDP.JOBS_PER_TECH);
+              var cap   = capacityJobs(p.pwa);
+              var needed = cap - appts;
               var color = needed > 0 ? "var(--color-green)" : needed < 0 ? "var(--color-error)" : "var(--color-grey)";
               var prefix = needed > 0 ? "+" : "";
               var safeKey = NDP.escapeHtml(p.ouc + '|' + p.pwa);
@@ -128,7 +150,7 @@ var NdpDemand = (function () {
                 '<td class="ndp-drill" data-key="' + safeKey + '" data-slot="PM" style="text-align:center;font-weight:500">' + p.pm + '</td>' +
                 '<td class="ndp-drill" data-key="' + safeKey + '" data-slot="All Day" style="text-align:center;font-weight:500">' + p.allDay + '</td>' +
                 '<td style="text-align:center">' + techs + '</td>' +
-                '<td style="text-align:center;font-weight:var(--font-weight-medium);color:' + color + '">' + prefix + needed + '</td>' +
+                '<td style="text-align:center;font-weight:var(--font-weight-medium);color:' + color + '">' + prefix + needed.toFixed(1) + '</td>' +
               '</tr>';
             }).join("") +
             '</tbody>' +
@@ -138,10 +160,11 @@ var NdpDemand = (function () {
       buildSecondaryTable(pwaRows, techsByPwa, rows, headers, oucIdx, tagIdx, extraTagList) +
     '</div>' +
       '<div class="ndp-demand-chart" id="ndpDemandChart">' +
-        buildChart(pwaRows, techsByPwa) +
+        buildChart(pwaRows, minutesByPwa) +
       '</div>';
 
     panel.insertAdjacentHTML("beforeend", html);
+    NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
 
     // --- Row click → highlight OUC in table + chart ---
     var activeOuc = null;
@@ -201,7 +224,7 @@ var NdpDemand = (function () {
         var bars = document.getElementById("ndpDemandBars");
         if (!bars) return;
         bars.querySelectorAll(".ndp-demand-col__seg--" + seg).forEach(function (el) {
-          el.style.display = active ? "" : "none";
+          el.classList.toggle("ndp-demand-col__seg--hidden", !active);
         });
         // Recalculate overflow if active
         if (overflowActive) applyOverflow();
@@ -213,7 +236,7 @@ var NdpDemand = (function () {
     var overflowActive = false;
     // Calculate scaleMax here so overflow handler has access
     var maxDemand = Math.max.apply(null, pwaRows.map(function (p) { return p.tail + p.due + p.future; })) || 1;
-    var maxResource = Math.max.apply(null, pwaRows.map(function (p) { return (techsByPwa[p.pwa] || 0) * NDP.JOBS_PER_TECH; })) || 1;
+    var maxResource = Math.max.apply(null, pwaRows.map(function (p) { return capacityJobs(p.pwa); })) || 1;
     var chartScaleMax = Math.max(maxDemand, maxResource) || 1;
     if (overflowBtn) {
       overflowBtn.addEventListener("click", function () {
@@ -229,95 +252,94 @@ var NdpDemand = (function () {
       var barsEl = document.getElementById("ndpDemandBars");
       if (!barsEl) return;
 
-      // Check which legend segments are currently active
-      var legendEl = document.getElementById("ndpDemandLegend");
-      var activeTail = legendEl ? legendEl.querySelector('[data-seg="tail"].is-active') !== null : true;
-      var activeDue = legendEl ? legendEl.querySelector('[data-seg="due"].is-active') !== null : true;
-      var activeFuture = legendEl ? legendEl.querySelector('[data-seg="future"].is-active') !== null : true;
+      // Fade out → rebuild → fade in
+      barsEl.classList.add("is-transitioning");
+      setTimeout(function () {
+        _applyOverflow();
+        // Reapply any legend-toggled-off hidden classes to the new DOM
+        var legendEl = document.getElementById("ndpDemandLegend");
+        if (legendEl) {
+          ["tail", "due", "future"].forEach(function (seg) {
+            var isActive = legendEl.querySelector('[data-seg="' + seg + '"].is-active') !== null;
+            if (!isActive) {
+              var newBars = document.getElementById("ndpDemandBars");
+              if (newBars) {
+                newBars.querySelectorAll(".ndp-demand-col__seg--" + seg).forEach(function (el) {
+                  el.classList.add("ndp-demand-col__seg--hidden");
+                });
+              }
+            }
+          });
+        }
+        var newBarsEl = document.getElementById("ndpDemandBars");
+        if (newBarsEl) {
+          newBarsEl.offsetHeight;
+          newBarsEl.classList.remove("is-transitioning");
+        }
+      }, 180);
+    }
+
+    function _applyOverflow() {
+      var barsEl = document.getElementById("ndpDemandBars");
+      if (!barsEl) return;
 
       if (!overflowActive) {
-        // Restore: rebuild with normal bars
-        barsEl.outerHTML = '<div class="ndp-demand-bars" id="ndpDemandBars">' + buildGridLines(chartScaleMax) + buildCols(pwaRows, techsByPwa, chartScaleMax) + '</div>';
+        barsEl.outerHTML = '<div class="ndp-demand-bars is-transitioning" id="ndpDemandBars">' + buildGridLines(chartScaleMax) + buildCols(pwaRows, minutesByPwa, chartScaleMax) + '</div>';
+        NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
         return;
       }
 
-      // Calculate max excess for scaling
-      var maxExcess = 1;
+      var legendEl = document.getElementById("ndpDemandLegend");
+      var activeTail   = !legendEl || legendEl.querySelector('[data-seg="tail"].is-active')   !== null;
+      var activeDue    = !legendEl || legendEl.querySelector('[data-seg="due"].is-active')    !== null;
+      var activeFuture = !legendEl || legendEl.querySelector('[data-seg="future"].is-active') !== null;
+
+      // Scale = max excess (either side) across all PWAs using only active segments
+      var scaleMax = 1;
       pwaRows.forEach(function (p) {
-        var demand = 0;
-        if (activeTail) demand += p.tail;
-        if (activeDue) demand += p.due;
-        if (activeFuture) demand += p.future;
-        var capacity = (techsByPwa[p.pwa] || 0) * NDP.JOBS_PER_TECH;
-        var diff = Math.abs(demand - capacity);
-        if (diff > maxExcess) maxExcess = diff;
+        var demand = (activeTail ? p.tail : 0) + (activeDue ? p.due : 0) + (activeFuture ? p.future : 0);
+        var excess = Math.abs(demand - capacityJobs(p.pwa));
+        if (excess > scaleMax) scaleMax = excess;
       });
 
-      // Build overflow bars
       var oucSeen = {};
-      var overflowCols = pwaRows.map(function (p) {
+      var cols = pwaRows.map(function (p) {
         var isFirstInGroup = !oucSeen[p.ouc];
         oucSeen[p.ouc] = true;
 
-        var demand = 0;
-        if (activeTail) demand += p.tail;
-        if (activeDue) demand += p.due;
-        if (activeFuture) demand += p.future;
-        var techs = techsByPwa[p.pwa] || 0;
-        var capacity = techs * NDP.JOBS_PER_TECH;
-        var diff = demand - capacity;
-        var absDiff = Math.abs(diff);
-        var h = absDiff ? Math.max(2, Math.round(absDiff / maxExcess * 100)) : 0;
+        var demand = (activeTail ? p.tail : 0) + (activeDue ? p.due : 0) + (activeFuture ? p.future : 0);
+        var cap  = capacityJobs(p.pwa);
+        var diff = demand - cap;
 
-        var seg = '';
-        var tip = '';
+        var demandSegs = '<div class="ndp-demand-col__seg" style="height:1px;min-height:0;background:var(--color-grey-200)"></div>';
+        var resourceSeg = '<div class="ndp-demand-col__seg" style="height:1px;min-height:0;background:var(--color-grey-200)"></div>';
+
         if (diff > 0) {
-          // More demand than resource — show excess broken down by active segments
-          tip = NDP.escapeHtml(p.pwa) + ' \u2014 ' + diff + ' task' + (diff !== 1 ? 's' : '') + ' over capacity';
-          // Distribute excess proportionally across active segments
-          var excessRemaining = diff;
-          var excessSegs = '';
-          if (activeFuture && p.future && excessRemaining > 0) {
-            var futureShare = Math.min(p.future, excessRemaining);
-            var fH = Math.max(1, Math.round(futureShare / maxExcess * 100));
-            excessSegs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--future" data-tooltip="Future: ' + futureShare + '" style="height:' + fH + '%"></div>';
-            excessRemaining -= futureShare;
-          }
-          if (activeDue && p.due && excessRemaining > 0) {
-            var dueShare = Math.min(p.due, excessRemaining);
-            var dH = Math.max(1, Math.round(dueShare / maxExcess * 100));
-            excessSegs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--due" data-tooltip="Due: ' + dueShare + '" style="height:' + dH + '%"></div>';
-            excessRemaining -= dueShare;
-          }
-          if (activeTail && p.tail && excessRemaining > 0) {
-            var tailShare = Math.min(p.tail, excessRemaining);
-            var tH = Math.max(1, Math.round(tailShare / maxExcess * 100));
-            excessSegs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--tail" data-tooltip="Tail: ' + tailShare + '" style="height:' + tH + '%"></div>';
-          }
-          seg = excessSegs;
+          var segs = '';
+          var remaining = diff;
+          if (activeFuture && p.future && remaining > 0) { var s = Math.min(p.future, remaining); segs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--future" data-tooltip="Future excess: ' + s + '" style="height:' + Math.round(s / scaleMax * 100) + '%"></div>'; remaining -= s; }
+          if (activeDue    && p.due    && remaining > 0) { var s = Math.min(p.due,    remaining); segs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--due" data-tooltip="Due excess: ' + s + '" style="height:' + Math.round(s / scaleMax * 100) + '%"></div>'; remaining -= s; }
+          if (activeTail   && p.tail   && remaining > 0) { var s = Math.min(p.tail,   remaining); segs += '<div class="ndp-demand-col__seg ndp-demand-col__seg--tail" data-tooltip="Tail excess: ' + s + '" style="height:' + Math.round(s / scaleMax * 100) + '%"></div>'; }
+          demandSegs = segs;
         } else if (diff < 0) {
-          // More resource than demand
-          var spareSlots = absDiff;
-          var spareTechs = Math.floor(spareSlots / NDP.JOBS_PER_TECH);
-          tip = NDP.escapeHtml(p.pwa) + ' \u2014 ' + spareSlots + ' spare slots (' + spareTechs + ' tech' + (spareTechs !== 1 ? 's' : '') + ' spare)';
-          seg = '<div class="ndp-demand-col__seg ndp-demand-col__seg--resource" data-tooltip="' + tip + '" style="height:' + h + '%;border-radius:2px"></div>';
-        } else {
-          // Balanced
-          tip = NDP.escapeHtml(p.pwa) + ' \u2014 Balanced';
-          seg = '<div class="ndp-demand-col__seg" data-tooltip="' + tip + '" style="height:2%;background:var(--color-grey-200);border-radius:2px"></div>';
+          var spare = -diff;
+          var spareMins = Math.round(spare * NDP.AVG_JOB_MINS);
+          resourceSeg = '<div class="ndp-demand-col__seg ndp-demand-col__seg--resource" data-tooltip="' + NDP.escapeHtml(p.pwa) + ' \u2014 ' + spare.toFixed(1) + ' spare slots (~' + spareMins + ' mins)" style="height:' + Math.round(Math.abs(diff) / scaleMax * 100) + '%"></div>';
         }
 
         var shortLabel = p.pwa.replace(/^[A-Z]{2}-/, "").replace(/-19$/, "");
 
         return '<div class="ndp-demand-col' + (isFirstInGroup ? ' ndp-demand-col--group-start' : '') + '">' +
           '<div class="ndp-demand-col__pair">' +
-            '<div class="ndp-demand-col__bar">' + seg + '</div>' +
+            '<div class="ndp-demand-col__bar">' + demandSegs + '</div>' +
+            '<div class="ndp-demand-col__bar ndp-demand-col__bar--resource">' + resourceSeg + '</div>' +
           '</div>' +
           '<span class="ndp-demand-col__label">' + NDP.escapeHtml(shortLabel) + '</span>' +
         '</div>';
       }).join("");
 
-      barsEl.outerHTML = '<div class="ndp-demand-bars" id="ndpDemandBars">' + buildGridLines(maxExcess) + overflowCols + '</div>';
+      barsEl.outerHTML = '<div class="ndp-demand-bars is-transitioning" id="ndpDemandBars">' + buildGridLines(scaleMax) + cols + '</div>';
+      NdpDemandUI.wireChartTooltip(pwaRows, minutesByPwa, techsByPwa);
     }
 
     // --- OUC label click → drilldown with PWA filter ---
@@ -410,9 +432,9 @@ var NdpDemand = (function () {
               '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' +
             '</button>' +
           '</div>' +
-          '<div class="modal-body" style="display:flex;flex-direction:column;min-height:0">' +
+          '<div class="modal-body" style="display:flex;flex-direction:column;min-height:0;overflow:hidden;padding:var(--content-inset)">' +
             pwaFilterHtml +
-            '<div class="table-wrapper--flex">' +
+            '<div class="table-wrapper--flex" style="flex:1;min-height:0;display:flex;flex-direction:column">' +
               '<div class="table-scroll">' +
                 '<table class="table">' +
                   '<thead><tr>' +

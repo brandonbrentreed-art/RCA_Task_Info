@@ -92,7 +92,7 @@ var NdpPlan = (function () {
         buildFilterDropdowns() +
         '<div style="margin-left:auto;display:flex;gap:var(--spacing-2);align-items:center">' +
           '<button class="btn-outlined" id="ndpPlanAdd" style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">+ Add</button>' +
-          '<button class="btn-outlined" id="ndpPlanDelete" disabled style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius);opacity:0.38">✕ Delete</button>' +
+          '<button class="btn-outlined" id="ndpPlanDelete" disabled style="font-size:var(--text-caption);padding:var(--spacing-1) var(--spacing-3);border:1px solid var(--color-grey-300);border-radius:var(--radius)">✕ Delete</button>' +
         '</div>' +
       '</div>' +
       '<div class="table-wrapper--flex" id="ndpPlanTable">' +
@@ -343,7 +343,6 @@ var NdpPlan = (function () {
     var hasSelection = rowSelect.size() > 0;
 
     delBtn.disabled = !hasSelection;
-    delBtn.style.opacity = hasSelection ? "1" : "0.38";
 
     if (selectedEl) {
       selectedEl.textContent = hasSelection ? rowSelect.size() + " selected" : "";
@@ -420,35 +419,8 @@ var NdpPlan = (function () {
       var srcRows = result.rows;
       if (typeof COL_MAP !== "undefined") COL_MAP.resolvePositional(srcHeaders);
 
-      // 2. Enrich with OUC/PWA/TAG/Slot (same as NdpData.enrichTaskforce)
-      var oucIdx = srcHeaders.indexOf("OUC");
-      if (oucIdx === -1) { srcHeaders.push("OUC"); oucIdx = srcHeaders.length - 1; }
-      var pwaIdx = srcHeaders.indexOf("PWA");
-      if (pwaIdx === -1) { srcHeaders.push("PWA"); pwaIdx = srcHeaders.length - 1; }
-      var tagIdx = srcHeaders.indexOf("TAG");
-      if (tagIdx === -1) { srcHeaders.push("TAG"); tagIdx = srcHeaders.length - 1; }
-      var slotIdx = srcHeaders.indexOf("Appt Slot");
-      if (slotIdx === -1) { srcHeaders.push("Appt Slot"); slotIdx = srcHeaders.length - 1; }
-
-      var gcIdx = srcHeaders.indexOf("Group Code");
-      if (gcIdx === -1 && typeof COL_MAP !== "undefined") gcIdx = COL_MAP.findSourceIdx(srcHeaders, "Group Code");
-      var startByIdx = srcHeaders.indexOf("Start by");
-      if (startByIdx === -1 && typeof COL_MAP !== "undefined") startByIdx = COL_MAP.findSourceIdx(srcHeaders, "Start by");
-      var apptDateIdx = -1;
-      for (var ai = 0; ai < srcHeaders.length; ai++) {
-        if (srcHeaders[ai].toLowerCase().indexOf("appointment window start") !== -1) { apptDateIdx = ai; break; }
-      }
-
-      var ws = NdpData.state.workstack;
-      srcRows.forEach(function (row) {
-        while (row.length < srcHeaders.length) row.push("");
-        if (gcIdx !== -1 && typeof _dm !== "undefined" && !row[oucIdx]) {
-          var gc = (row[gcIdx] || "").trim().toUpperCase();
-          if (gc) { var info = _dm.lookup(ws, gc); if (info) { row[oucIdx] = info.ouc; row[pwaIdx] = info.pwa; } }
-        }
-        if (!row[tagIdx] && startByIdx !== -1 && row[startByIdx]) row[tagIdx] = NDP.deriveTag(row[startByIdx]);
-        if (!row[slotIdx] && apptDateIdx !== -1 && row[apptDateIdx]) row[slotIdx] = NDP.deriveApptSlot(row[apptDateIdx]);
-      });
+      // 2. Enrich with OUC/PWA/TAG/Slot
+      NdpData.enrichRows(srcHeaders, srcRows);
 
       // 3. Map to plan columns + deduplicate
       var outHeaders = st.headers;
@@ -473,7 +445,7 @@ var NdpPlan = (function () {
       srcRows.forEach(function (row) {
         var taskId = (row[idCol] || "").trim();
         if (!taskId || taskId.length < 4 || existingJobs[taskId]) return;
-        var mapped = mapTaskforceRowToDerisk(row, srcHeaders, outHeaders);
+        var mapped = NdpEnrich.mapRow(row, srcHeaders, outHeaders);
         if (!mapped) return;
         if (jobIdx !== -1) mapped[jobIdx] = taskId;
         var ctIdx = outHeaders.indexOf("COMMIT TYPE");

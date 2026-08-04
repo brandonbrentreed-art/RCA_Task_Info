@@ -5,10 +5,10 @@
 // Loaded before timelineEngine.js and timelineRenderer.js
 // ============================================================
 
-const Utils = (() => {
-  const SENTINEL_DATE = "31/12/9999 00:00";
+var Utils = (function () {
+  var SENTINEL_DATE = "31/12/9999 00:00";
 
-  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
   function pad2(n) { return n < 10 ? "0" + n : "" + n; }
 
@@ -28,5 +28,5 @@ const Utils = (() => {
     return pad2(dt.getHours()) + ":" + pad2(dt.getMinutes());
   }
 
-  return { MONTHS, SENTINEL_DATE, pad2, formatTime, formatDate, fmtHeaderDate, fmtHeaderTime };
+  return { MONTHS: MONTHS, SENTINEL_DATE: SENTINEL_DATE, pad2: pad2, formatTime: formatTime, formatDate: formatDate, fmtHeaderDate: fmtHeaderDate, fmtHeaderTime: fmtHeaderTime };
 })();

@@ -4,7 +4,7 @@ const Notify = (() => {
   let container = null;
 
   function getContainer() {
-    if (!container) {
+    if (!container || !document.body.contains(container)) {
       container = document.createElement("div");
       container.className = "toast-container";
       document.body.appendChild(container);
@@ -20,6 +20,10 @@ const Notify = (() => {
   };
 
   function toast(message, type = "info", duration = 4000) {
+    if (window.self !== window.top) {
+      window.parent.postMessage({ type: "notify", payload: { message, kind: type, duration } }, "*");
+      return () => {};
+    }
     const el = document.createElement("div");
     el.className = `toast toast--${type}`;
     el.innerHTML = `
@@ -52,9 +56,10 @@ const Notify = (() => {
 
 const Dialog = (() => {
   let backdrop = null;
+  let pendingDialogs = {};
 
   function getBackdrop() {
-    if (!backdrop) {
+    if (!backdrop || !document.body.contains(backdrop)) {
       backdrop = document.createElement("div");
       backdrop.className = "dialog-backdrop";
       backdrop.innerHTML = `<div class="dialog">
@@ -70,7 +75,18 @@ const Dialog = (() => {
     return backdrop;
   }
 
-  function confirm({ title = "Confirm", message = "Are you sure?", confirmText = "Confirm", cancelText = "Cancel", type = "primary" } = {}) {
+  // Handle dialog requests from iframes
+  if (window.self === window.top) {
+    window.addEventListener("message", (e) => {
+      if (!e.data || e.data.type !== "dialog-request") return;
+      const { id, options } = e.data;
+      _confirm(options).then((result) => {
+        e.source.postMessage({ type: "dialog-response", id, result }, "*");
+      });
+    });
+  }
+
+  function _confirm({ title = "Confirm", message = "Are you sure?", confirmText = "Confirm", cancelText = "Cancel", type = "primary" } = {}) {
     return new Promise((resolve) => {
       const el = getBackdrop();
       el.querySelector(".dialog-title").textContent = title;
@@ -99,6 +115,25 @@ const Dialog = (() => {
 
       requestAnimationFrame(() => el.classList.add("dialog--open"));
     });
+  }
+
+  function confirm(options = {}) {
+    if (window.self !== window.top) {
+      return new Promise((resolve) => {
+        const id = Math.random().toString(36).slice(2);
+        pendingDialogs[id] = resolve;
+        window.parent.postMessage({ type: "dialog-request", id, options }, "*");
+
+        function onResponse(e) {
+          if (!e.data || e.data.type !== "dialog-response" || e.data.id !== id) return;
+          window.removeEventListener("message", onResponse);
+          delete pendingDialogs[id];
+          resolve(e.data.result);
+        }
+        window.addEventListener("message", onResponse);
+      });
+    }
+    return _confirm(options);
   }
 
   return { confirm };

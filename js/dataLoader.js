@@ -1,30 +1,35 @@
 "use strict";
 
-const DataLoader = (() => {
-  let snapshots = [];
-  let index = null; // Map<JIN_ID, sorted rows[]>
-  let _headers = [];
+// ============================================================
+// dataLoader.js — RCA snapshot loader
+// Parses CSV snapshots, builds a JIN_ID index, supports
+// chunked async loading for large files.
+// ============================================================
+
+var DataLoader = (function () {
+  var snapshots = [];
+  var index = null; // Map<JIN_ID, sorted rows[]>
+  var _headers = [];
 
   function parseCSV(text) {
-    const len = text.length;
+    var len = text.length;
 
     // Find header line end
-    let hEnd = text.indexOf("\n");
+    var hEnd = text.indexOf("\n");
     if (hEnd === -1) hEnd = len;
-    const headerLine = text.substring(0, hEnd);
+    var headerLine = text.substring(0, hEnd);
     _headers = headerLine.split(",");
-    const hLen = _headers.length;
-    for (let i = 0; i < hLen; i++) {
+    var hLen = _headers.length;
+    for (var i = 0; i < hLen; i++) {
       _headers[i] = _headers[i].trim();
     }
 
-    // Parse rows — avoid creating substrings where possible
-    const rows = [];
-    let pos = hEnd + 1;
+    // Parse rows
+    var rows = [];
+    var pos = hEnd + 1;
 
     while (pos < len) {
-      // Find line end
-      let lineEnd = text.indexOf("\n", pos);
+      var lineEnd = text.indexOf("\n", pos);
       if (lineEnd === -1) lineEnd = len;
 
       // Skip empty lines
@@ -33,10 +38,10 @@ const DataLoader = (() => {
         continue;
       }
 
-      const line = text.substring(pos, lineEnd);
-      const values = line.split(",");
-      const row = {};
-      for (let j = 0; j < hLen; j++) {
+      var line = text.substring(pos, lineEnd);
+      var values = line.split(",");
+      var row = {};
+      for (var j = 0; j < hLen; j++) {
         row[_headers[j]] = values[j] !== undefined ? values[j].trim() : "";
       }
       rows.push(row);
@@ -48,11 +53,12 @@ const DataLoader = (() => {
 
   function parseDate(str) {
     if (!str || str === "31/12/9999 00:00") return null;
-    const d1 = str.charCodeAt(0) - 48, d2 = str.charCodeAt(1) - 48;
-    const m1 = str.charCodeAt(3) - 48, m2 = str.charCodeAt(4) - 48;
-    const y1 = str.charCodeAt(6) - 48, y2 = str.charCodeAt(7) - 48, y3 = str.charCodeAt(8) - 48, y4 = str.charCodeAt(9) - 48;
-    const h1 = str.charCodeAt(11) - 48, h2 = str.charCodeAt(12) - 48;
-    const mi1 = str.charCodeAt(14) - 48, mi2 = str.charCodeAt(15) - 48;
+    var d1 = str.charCodeAt(0) - 48, d2 = str.charCodeAt(1) - 48;
+    var m1 = str.charCodeAt(3) - 48, m2 = str.charCodeAt(4) - 48;
+    var y1 = str.charCodeAt(6) - 48, y2 = str.charCodeAt(7) - 48,
+        y3 = str.charCodeAt(8) - 48, y4 = str.charCodeAt(9) - 48;
+    var h1 = str.charCodeAt(11) - 48, h2 = str.charCodeAt(12) - 48;
+    var mi1 = str.charCodeAt(14) - 48, mi2 = str.charCodeAt(15) - 48;
     return new Date(
       y1 * 1000 + y2 * 100 + y3 * 10 + y4,
       m1 * 10 + m2 - 1,
@@ -64,21 +70,21 @@ const DataLoader = (() => {
 
   function buildIndex() {
     index = new Map();
-    const len = snapshots.length;
-    for (let i = 0; i < len; i++) {
-      const row = snapshots[i];
-      const id = (row.JIN_ID || "").toUpperCase();
+    var len = snapshots.length;
+    for (var i = 0; i < len; i++) {
+      var row = snapshots[i];
+      var id = (row.JIN_ID || "").toUpperCase();
       if (!id) continue;
-      let arr = index.get(id);
+      var arr = index.get(id);
       if (!arr) { arr = []; index.set(id, arr); }
       arr.push(row);
     }
     // Sort each group by record time
-    index.forEach((rows) => {
+    index.forEach(function (rows) {
       if (rows.length < 2) return;
-      rows.sort((a, b) => {
-        const da = parseDate(a.RECORD_TIME_BT || a.RECORD_TIME);
-        const db = parseDate(b.RECORD_TIME_BT || b.RECORD_TIME);
+      rows.sort(function (a, b) {
+        var da = parseDate(a.RECORD_TIME_BT || a.RECORD_TIME);
+        var db = parseDate(b.RECORD_TIME_BT || b.RECORD_TIME);
         if (!da || !db) return 0;
         return da - db;
       });
@@ -86,26 +92,26 @@ const DataLoader = (() => {
   }
 
   function loadFromText(text) {
-    const rows = parseCSV(text);
+    var rows = parseCSV(text);
     snapshots = snapshots.concat(rows);
     index = null;
     return rows.length;
   }
 
-  /**
-   * Async chunked load — parses in batches to keep UI responsive.
-   * Returns a Promise that resolves with row count.
-   */
+  // Async chunked load — parses in batches to keep UI responsive.
+  // Returns a Promise that resolves with row count.
   function loadFromTextAsync(text, onProgress) {
-    return new Promise((resolve) => {
-      const rows = parseCSV(text);
-      const total = rows.length;
-      const CHUNK = 8000;
-      let offset = 0;
+    // Null index at start so any mid-load query forces a full rebuild
+    index = null;
+    return new Promise(function (resolve) {
+      var rows = parseCSV(text);
+      var total = rows.length;
+      var CHUNK = 8000;
+      var offset = 0;
 
       function processChunk() {
-        const end = Math.min(offset + CHUNK, total);
-        for (let i = offset; i < end; i++) {
+        var end = Math.min(offset + CHUNK, total);
+        for (var i = offset; i < end; i++) {
           snapshots.push(rows[i]);
         }
         offset = end;
@@ -125,8 +131,10 @@ const DataLoader = (() => {
 
   function loadMultiple(texts) {
     snapshots = [];
-    let total = 0;
-    texts.forEach((t) => (total += loadFromText(t)));
+    var total = 0;
+    for (var i = 0; i < texts.length; i++) {
+      total += loadFromText(texts[i]);
+    }
     return total;
   }
 
@@ -140,10 +148,12 @@ const DataLoader = (() => {
     if (jinIds.length === 1) {
       return index.get(jinIds[0].trim().toUpperCase()) || [];
     }
-    const results = [];
-    for (let i = 0; i < jinIds.length; i++) {
-      const rows = index.get(jinIds[i].trim().toUpperCase());
-      if (rows) for (let j = 0; j < rows.length; j++) results.push(rows[j]);
+    var results = [];
+    for (var i = 0; i < jinIds.length; i++) {
+      var rows = index.get(jinIds[i].trim().toUpperCase());
+      if (rows) {
+        for (var j = 0; j < rows.length; j++) results.push(rows[j]);
+      }
     }
     return results;
   }
@@ -158,13 +168,13 @@ const DataLoader = (() => {
   }
 
   return {
-    loadFromText,
-    loadFromTextAsync,
-    loadMultiple,
-    clear,
-    queryByJinIds,
-    getSnapshots,
-    getUniqueJinIds,
-    parseDate
+    loadFromText: loadFromText,
+    loadFromTextAsync: loadFromTextAsync,
+    loadMultiple: loadMultiple,
+    clear: clear,
+    queryByJinIds: queryByJinIds,
+    getSnapshots: getSnapshots,
+    getUniqueJinIds: getUniqueJinIds,
+    parseDate: parseDate
   };
 })();

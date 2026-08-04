@@ -286,6 +286,12 @@
   min-height: 0;
   position: relative;
   border-bottom: 1px solid var(--color-divider);
+  transition: opacity 180ms ease;
+}
+
+.ndp-demand-bars.is-transitioning {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .ndp-demand-col {
@@ -325,13 +331,20 @@
   width: 100%;
   border-radius: 2px;
   min-height: 2px;
-  transition: height var(--transition-standard);
+  transition: height var(--transition-standard), opacity var(--transition-standard), max-height var(--transition-standard);
+  overflow: hidden;
 }
 
-.ndp-demand-col__seg--tail { background: var(--color-warning); }
-.ndp-demand-col__seg--due { background: var(--color-blue); }
-.ndp-demand-col__seg--future { background: var(--color-grey-300); }
-.ndp-demand-col__seg--resource { background: var(--color-green); opacity: 0.7; }
+.ndp-demand-col__seg--hidden {
+  opacity: 0;
+  max-height: 0 !important;
+  min-height: 0 !important;
+}
+
+.ndp-demand-col__seg--tail { background: var(--color-grey-300); }
+.ndp-demand-col__seg--due { background: #5488C7; }
+.ndp-demand-col__seg--future { background: var(--color-green); opacity: 0.8; }
+.ndp-demand-col__seg--resource { background: rgba(84,136,199,0.45); opacity: 1; }
 
 /* -- Pivot table override for compact display -- */
 .ndp-pivot .table th,
@@ -495,6 +508,68 @@
 
 .ndp-demand-col {
   z-index: 1;
+}
+
+/* -- Rich chart hover tooltip -- */
+.ndp-chart-tip {
+  background: var(--color-white);
+  border: 1px solid var(--color-grey-200);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(20,32,50,0.14);
+  padding: var(--spacing-3) var(--spacing-4);
+  min-width: 160px;
+  font-family: var(--font-family);
+  font-size: var(--text-caption);
+}
+
+.ndp-chart-tip__title {
+  font-size: var(--text-body2);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+  margin-bottom: var(--spacing-2);
+  white-space: nowrap;
+}
+
+.ndp-chart-tip__ratio {
+  color: var(--color-grey);
+  font-weight: normal;
+}
+
+.ndp-chart-tip__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ndp-chart-tip__row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  color: var(--color-grey);
+}
+
+.ndp-chart-tip__row--diff {
+  padding-top: 2px;
+}
+
+.ndp-chart-tip__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ndp-chart-tip__val {
+  margin-left: auto;
+  font-weight: var(--font-weight-medium);
+  color: var(--color-navy);
+  padding-left: var(--spacing-4);
+}
+
+.ndp-chart-tip__divider {
+  height: 1px;
+  background: var(--color-grey-200);
+  margin: var(--spacing-1) 0;
 }
 
 /* -- PWA filter buttons (drilldown modal) -- */

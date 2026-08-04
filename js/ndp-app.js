@@ -5,21 +5,20 @@
 // Handles: tab switching, loader dialog, toolbar state
 // ============================================================
 
-// Safe DOM-based loader overlay (avoids insertAdjacentHTML with strings)
-function createLoaderOverlay(text) {
-  var overlay = document.createElement("div");
-  overlay.className = "loader-overlay";
-  var spinner = document.createElement("div");
-  spinner.className = "loader-spinner";
-  var span = document.createElement("span");
-  span.className = "loader-text";
-  span.textContent = text || "Loading...";
-  overlay.appendChild(spinner);
-  overlay.appendChild(span);
-  return overlay;
-}
-
 document.addEventListener("DOMContentLoaded", function () {
+  // Safe DOM-based loader overlay (avoids insertAdjacentHTML with strings)
+  function createLoaderOverlay(text) {
+    var overlay = document.createElement("div");
+    overlay.className = "loader-overlay";
+    var spinner = document.createElement("div");
+    spinner.className = "loader-spinner";
+    var span = document.createElement("span");
+    span.className = "loader-text";
+    span.textContent = text || "Loading...";
+    overlay.appendChild(spinner);
+    overlay.appendChild(span);
+    return overlay;
+  }
   // --- Tab switching ---
   var tabs = document.querySelectorAll(".tabs__tab");
   var panels = document.querySelectorAll(".tab-panel");
@@ -138,9 +137,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   function checkReady() {
     state.ws = currentWs;
-    var ready = state.techs && state.taskforce;
-    loaderGo.disabled = !ready;
-    loaderGo.style.opacity = ready ? "1" : "0.38";
+    loaderGo.disabled = !(state.techs && state.taskforce);
   }
 
   // --- Tech sheet upload ---
@@ -194,8 +191,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- Load Plan action ---
   loaderGo.addEventListener("click", function () {
-    if (loaderGo.disabled) return;
-
     // Show loading spinner
     hideEmptyStates();
     document.querySelectorAll(".tab-panel").forEach(function (p) {
@@ -226,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
     var outRows = [];
 
     tfRows.forEach(function (row) {
-      var mapped = mapTaskforceRowToDerisk(row, tfHeaders, outHeaders);
+      var mapped = NdpEnrich.mapRow(row, tfHeaders, outHeaders);
       if (!mapped) return;
       var srcIdx = outHeaders.indexOf("SOURCE");
       if (srcIdx !== -1 && !mapped[srcIdx]) mapped[srcIdx] = "All";
@@ -279,7 +274,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // --- Export button (page-aware — exports active tab's table) ---
   exportBtn.addEventListener("click", function () {
-    if (exportBtn.disabled) return;
     if (typeof XLSX === "undefined") return;
 
     var activeTab = document.querySelector(".tabs__tab.is-active");
@@ -317,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ]);
       });
       var ws1 = XLSX.utils.aoa_to_sheet(s1);
-      ws1["!cols"] = [{ wch: 16 }, { wch: 12 }];
+      ws1["!cols"] = autoFitCols(s1);
       styleSheet(ws1, hdrS, cellS);
       XLSX.utils.book_append_sheet(wb, ws1, "Assignments");
 
@@ -351,7 +345,7 @@ document.addEventListener("DOMContentLoaded", function () {
         s2.push(r);
       });
       var ws2 = XLSX.utils.aoa_to_sheet(s2);
-      ws2["!cols"] = RISK_COLS.map(function (h) { return { wch: Math.max(h.length + 3, 10) }; });
+      ws2["!cols"] = autoFitCols(s2);
       styleSheet(ws2, hdrS, cellS);
       XLSX.utils.book_append_sheet(wb, ws2, "Risk Summary");
 
@@ -363,18 +357,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!headers || !rows || !rows.length) return;
 
+    var d = new Date().toISOString().slice(0, 10);
     var border = { top: { style: "thin" }, bottom: { style: "thin" }, left: { style: "thin" }, right: { style: "thin" } };
-    var hdrS = { font: { bold: true, color: { rgb: "FFFFFF" } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: "142032" } } };
+    var hdrS = { font: { bold: true, color: { rgb: NDP.EXPORT.textRgb } }, alignment: { horizontal: "center", vertical: "center" }, border: border, fill: { fgColor: { rgb: NDP.EXPORT.headerRgb } } };
     var cellS = { alignment: { horizontal: "center", vertical: "center" }, border: border };
 
     var data = [headers];
     rows.forEach(function (row) { data.push(row); });
     var ws = XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"] = headers.map(function (h) { return { wch: Math.max((h || "").length + 2, 10) }; });
+    ws["!cols"] = autoFitCols(data);
     styleSheet(ws, hdrS, cellS);
     XLSX.utils.book_append_sheet(wb, ws, sheetName);
 
-    var d = new Date().toISOString().slice(0, 10);
     XLSX.writeFile(wb, "NDP_" + sheetName + "_" + d + ".xlsx");
     Notify.success(sheetName + " exported", 2000);
   });
@@ -388,25 +382,30 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     }
   }
+
+  function autoFitCols(data) {
+    if (!data || !data.length) return [];
+    var numCols = data[0].length;
+    var widths = new Array(numCols).fill(0);
+    data.forEach(function (row) {
+      row.forEach(function (cell, c) {
+        var len = String(cell == null ? "" : cell).length;
+        if (len > widths[c]) widths[c] = len;
+      });
+    });
+    return widths.map(function (w) { return { wch: Math.min(Math.max(w + 2, 8), 80) }; });
+  }
   function activateToolbar() {
     clearBtn.disabled = false;
-    clearBtn.style.opacity = "1";
     exportBtn.disabled = false;
-    exportBtn.style.opacity = "1";
     searchToggle.disabled = false;
-    searchToggle.style.opacity = "1";
-    searchToggle.style.pointerEvents = "auto";
     hideEmptyStates();
   }
 
   function deactivateToolbar() {
     clearBtn.disabled = true;
-    clearBtn.style.opacity = "0.38";
     exportBtn.disabled = true;
-    exportBtn.style.opacity = "0.38";
     searchToggle.disabled = true;
-    searchToggle.style.opacity = "0.38";
-    searchToggle.style.pointerEvents = "none";
   }
 
   function hideEmptyStates() {

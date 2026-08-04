@@ -44,9 +44,11 @@
 }
 .btn-text:hover { background: var(--hover-primary); }
 
-.btn:disabled {
+.btn:disabled,
+.icon-btn:disabled {
   opacity: 0.38;
   cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* -- Card -- */

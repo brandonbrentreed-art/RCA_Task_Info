@@ -16,10 +16,13 @@
   <link rel="stylesheet" href="shared-ui/responsive.css?v=1">
   <link rel="stylesheet" href="shared-components/nav.css?v=24">
   <link rel="stylesheet" href="shared-components/tooltip.css?v=6">
+  <link rel="stylesheet" href="shared-components/notify.css">
   <style>
     html, body {
       margin: 0;
       height: 100%;
+    }
+    body {
       overflow: hidden;
     }
 
@@ -93,6 +96,7 @@
 
   <script src="js/icons.js"></script>
   <script src="shared-components/tooltip.js?v=8"></script>
+  <script src="shared-components/notify.js"></script>
   <script>
     (function () {
       "use strict";
@@ -171,9 +175,14 @@
         a.addEventListener("click", () => showPage(a.dataset.page));
       });
 
-      // listen for navigation messages from iframes (e.g. home page cards)
+      // listen for messages from iframes
       window.addEventListener("message", e => {
-        if (e.data && e.data.type === "navigate") showPage(e.data.page);
+        if (!e.data) return;
+        if (e.data.type === "navigate") showPage(e.data.page);
+        if (e.data.type === "notify") {
+          const { message, kind, duration } = e.data.payload;
+          if (Notify[kind]) Notify[kind](message, duration);
+        }
       });
 
       // restore last active page or default to home

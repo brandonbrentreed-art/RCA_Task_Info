@@ -36,7 +36,7 @@
 /* Size variants */
 .modal-sm { max-width: var(--size-modal-sm); }
 .modal-lg { max-width: var(--size-modal-lg); }
-.modal-full { max-width: 90vw; }
+.modal-full { max-width: 90vw; height: 85vh; }
 
 .modal-header {
   display: flex;

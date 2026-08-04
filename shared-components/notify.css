@@ -51,8 +51,8 @@
 
 .toast-dismiss {
   flex-shrink: 0;
-  width: var(--size-icon-sm);
-  height: var(--size-icon-sm);
+  width: var(--size-btn-xs);
+  height: var(--size-btn-xs);
   background: none;
   border: none;
   color: var(--toast-dismiss);
@@ -64,7 +64,7 @@
   transition: color var(--transition-fast);
 }
 .toast-dismiss:hover { color: var(--toast-text); }
-.toast-dismiss svg { width: var(--size-icon-xs); height: var(--size-icon-xs); }
+.toast-dismiss svg { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 
 /* ===== Confirm Dialog ===== */
 

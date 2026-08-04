@@ -114,9 +114,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.aoa_to_sheet(data);
-    ws["!cols"] = HEADERS.map((_, c) => ({
-      wch: Math.min(80, Math.max(...data.map(row => String(row[c] ?? "").length)) + 2)
+    const numCols = data[0].length;
+    const widths = new Array(numCols).fill(0);
+    data.forEach(row => row.forEach((cell, c) => {
+      const len = String(cell ?? "").length;
+      if (len > widths[c]) widths[c] = len;
     }));
+    ws["!cols"] = widths.map(w => ({ wch: Math.min(Math.max(w + 2, 8), 80) }));
     const range = XLSX.utils.decode_range(ws["!ref"]);
     for (let R = range.s.r; R <= range.e.r; R++) {
       for (let C = range.s.c; C <= range.e.c; C++) {
