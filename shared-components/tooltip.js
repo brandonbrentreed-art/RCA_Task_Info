@@ -51,10 +51,13 @@
     tip.style.display = "none";
   }
 
-  // Use mouseover/mouseout for delegation (they bubble unlike mouseenter/mouseleave)
+  // Use mouseover/mouseout for delegation — scoped to direct interactive elements only
   document.addEventListener("mouseover", function(e) {
     var el = e.target.closest("[data-tooltip]") || null;
-    if (el && el !== currentEl) showTip(el);
+    if (!el || el === currentEl) return;
+    // Guard: the matched element must be directly interactive, not a distant ancestor
+    if (!el.matches("button, a, input, label, [role='button'], [role='tooltip']")) return;
+    showTip(el);
   });
 
   document.addEventListener("mouseout", function(e) {

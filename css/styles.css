@@ -49,7 +49,6 @@ body {
   color: var(--color-navy);
   background: var(--color-page-bg);
   padding: var(--spacing-6);
-  padding-top: var(--spacing-20);
   opacity: 1;
 }
 

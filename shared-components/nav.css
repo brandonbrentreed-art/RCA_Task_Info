@@ -1,24 +1,53 @@
+/* ===== AppBar ===== */
+.app-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--size-app-bar);
+  background: var(--appbar-bg);
+  color: var(--appbar-text);
+  display: flex;
+  align-items: center;
+  z-index: 150;
+  box-shadow: var(--shadow-2);
+  padding: 0 var(--spacing-2);
+  overflow: hidden;
+}
+
+.app-bar .nav-home-logo {
+  margin-left: var(--spacing-1);
+  color: var(--appbar-text);
+}
+
+.app-bar .theme-toggle {
+  margin-left: auto;
+  color: var(--appbar-text);
+}
+
+.app-bar .nav-trigger {
+  color: var(--appbar-text);
+}
+
 /* ===== Navigation / Sidebar ===== */
 
-/* Hamburger trigger - always visible */
+/* Hamburger trigger */
 .nav-trigger {
-  position: fixed;
-  top: var(--spacing-4);
-  left: var(--spacing-4);
-  z-index: 150;
   width: var(--size-btn-touch);
   height: var(--size-btn-touch);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--color-navy);
+  color: var(--nav-text);
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  flex-shrink: 0;
   transition: background var(--transition-fast);
 }
-.nav-trigger:hover { background: var(--hover-overlay); }
+.nav-trigger:hover { background: var(--nav-hover); }
+.app-bar .nav-trigger:hover { background: var(--appbar-hover); }
 
 .nav-trigger svg {
   width: var(--size-icon-md);
@@ -59,6 +88,7 @@
   transform: translateX(-100%);
   transition: transform var(--transition-standard);
   will-change: transform;
+  box-shadow: var(--shadow-3);
 }
 .nav-sidebar.open { transform: translateX(0); }
 
@@ -162,32 +192,55 @@
   margin-top: auto;
   font-size: var(--text-body2);
   font-weight: var(--font-weight-regular);
-  line-height: 1.66;
-  letter-spacing: 0.03333em;
+  line-height: var(--line-height);
+  letter-spacing: var(--letter-spacing);
   color: var(--nav-text-muted);
   cursor: default;
   text-align: center;
 }
 
-/* Theme toggle — fixed top-right (MUI AppBar pattern) */
+/* Home logo button */
+.nav-home-logo {
+  height: var(--size-btn-touch);
+  padding: 0 var(--spacing-2);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--nav-text);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border-radius: var(--radius);
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+.nav-home-logo:hover { background: var(--nav-hover); }
+.app-bar .nav-home-logo:hover { background: var(--appbar-hover); }
+.nav-home-logo svg {
+  display: block;
+  height: var(--size-icon-sm);
+  width: 160px;
+}
+
+/* Theme toggle */
 .theme-toggle {
-  position: fixed;
-  top: var(--spacing-4);
-  right: var(--spacing-4);
-  z-index: 150;
+  position: relative;
   width: var(--size-btn-touch);
   height: var(--size-btn-touch);
   display: flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  color: var(--color-navy);
+  color: var(--nav-text);
   border: none;
   border-radius: 50%;
   cursor: pointer;
+  flex-shrink: 0;
+  overflow: hidden;
   transition: background var(--transition-fast);
 }
-.theme-toggle:hover { background: var(--hover-overlay); }
+.theme-toggle:hover { background: var(--nav-hover); }
+.app-bar .theme-toggle:hover { background: var(--appbar-hover); }
 .theme-toggle svg {
   width: var(--size-icon-md);
   height: var(--size-icon-md);

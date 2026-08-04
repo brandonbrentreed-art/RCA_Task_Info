@@ -6,7 +6,7 @@
   <title>Home</title>
   <link rel="icon" href="assets/favicon-light.svg">
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light')</script>
-  <link rel="stylesheet" href="shared-ui/theme.css?v=7">
+  <link rel="stylesheet" href="shared-ui/theme.css?v=11">
   <link rel="stylesheet" href="shared-ui/typography.css?v=7">
   <link rel="stylesheet" href="shared-ui/components.css?v=7">
   <link rel="stylesheet" href="shared-ui/layout.css?v=7">
@@ -24,7 +24,6 @@
       color: var(--color-navy);
       background: var(--color-page-bg);
       padding: var(--spacing-6);
-      padding-top: var(--spacing-20);
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
@@ -61,7 +60,7 @@
       font-size: var(--text-h1);
       font-weight: var(--font-weight-bold);
       margin: 0 0 var(--spacing-3);
-      color: #FFFFFF;
+      color: var(--color-white-fixed);
       cursor: default;
     }
     .home-hero p {
@@ -69,7 +68,7 @@
       max-width: var(--size-hero-text-max);
       margin: 0;
       line-height: var(--line-height);
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--color-white-fixed);
       cursor: default;
     }
 

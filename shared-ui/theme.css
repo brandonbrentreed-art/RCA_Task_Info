@@ -1,6 +1,7 @@
 :root {
   /* ===== Brand Palette ===== */
   --color-white: #FFFFFF;
+  --color-white-fixed: #FFFFFF;
   --color-navy: #142032;
   --color-green: #43B072;
   --color-blue: #5488C7;
@@ -111,6 +112,7 @@
   /* Navigation */
   --size-nav-width: 260px;    /* drawer width (MUI standard 240–320) */
   --size-nav-logo: 40px;      /* brand mark max-height */
+  --size-app-bar: 64px;       /* top AppBar height (MUI default) */
 
   /* Surfaces — max-width constraints */
   --size-modal-sm: 360px;     /* confirmation dialogs */
@@ -138,13 +140,18 @@
   /* Misc */
   --size-avatar: 40px;        /* user avatar (MUI default) */
 
-  /* ===== Nav (fixed dark panel) ===== */
-  --nav-bg: #142032;
-  --nav-text: #FFFFFF;
-  --nav-text-muted: rgba(255, 255, 255, 0.7);
-  --nav-hover: rgba(255, 255, 255, 0.08);
-  --nav-active: rgba(84, 136, 199, 0.2);
-  --nav-border: rgba(255, 255, 255, 0.1);
+  /* ===== Nav (white drawer) ===== */
+  --nav-bg: var(--color-white);
+  --nav-text: var(--color-navy);
+  --nav-text-muted: var(--color-grey);
+  --nav-hover: rgba(20, 32, 50, 0.06);
+  --nav-active: rgba(84, 136, 199, 0.12);
+  --nav-border: var(--color-divider);
+
+  /* ===== AppBar (always navy) ===== */
+  --appbar-bg: var(--color-navy);
+  --appbar-text: var(--color-white-fixed);
+  --appbar-hover: rgba(255, 255, 255, 0.08);
 
   /* ===== Toast / Dialog ===== */
   --toast-bg: #142032;
@@ -178,8 +185,18 @@
   --hover-row-alt: rgba(125, 168, 217, 0.08);
   --highlight-change: rgba(237, 108, 2, 0.1);
 
+  /* ===== Nav (dark mode drawer) ===== */
+  --nav-bg: var(--color-white);
+  --nav-text: var(--color-navy);
+  --nav-text-muted: var(--color-grey);
+  --nav-hover: rgba(255, 255, 255, 0.06);
+  --nav-active: rgba(125, 168, 217, 0.15);
+  --nav-border: var(--color-divider);
+  --appbar-bg: #0d1821;
+  --appbar-text: #FFFFFF;
+  --appbar-hover: rgba(255, 255, 255, 0.08);
+
   /* ===== Toast / Dialog (dark) ===== */
-  --toast-bg: #2a2a2a;
   --toast-text: #e8eaed;
   --toast-dismiss: rgba(232, 234, 237, 0.6);
   --dialog-bg: #2a2a2a;
